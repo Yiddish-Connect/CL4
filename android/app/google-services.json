@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "447187951174",
+    "project_id": "ydapp-830fe",
+    "storage_bucket": "ydapp-830fe.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:447187951174:android:8f4a43b5257dba6ff9b447",
+        "android_client_info": {
+          "package_name": "com.example.ydtind"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBA6cONKgiSYXLaVSU0pABzO-vPQ5_4zX0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
