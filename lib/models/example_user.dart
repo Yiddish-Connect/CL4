@@ -1,0 +1,1 @@
+// Define a class representing a user here
