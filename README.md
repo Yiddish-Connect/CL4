@@ -23,24 +23,26 @@ samples, guidance on mobile development, and a full API reference.
 
 # Firebase Service
 ## Flutterfire - Quick Start
-- ***Important (done but pls read):*** To set up Firebase in a new Flutter project, follow the tutorial here: \
+1. Turn the developer mode on in your local computer. For Windows user: \
+    Search for `Developer mode` in Windows settings.
+   
+3. (Done but please read) To set up Firebase in a new Flutter project, follow the tutorial here: \
     https://firebase.google.com/docs/flutter/setup?authuser=0&platform=ios
 
-- ***Important:*** To manage Firebase service in your local computer, follow the tutorial here to install Firebase CLI: \
+4. To manage Firebase service in your local computer, follow the tutorial here to install Firebase CLI: \
     https://firebase.google.com/docs/cli?hl=en&authuser=0\
     - If you have Node.js installed, the easiest way is to run `npm install -g firebase-tools`.
     - Make sure that you can run `flutterfire` command in the terminal
 
-- ***Important:***  you need to re-run the following command any time that you:
+5. You need to re-run the following command any time that you:
     1. Start supporting a new platform in your Flutter app.
     2. Start using a new Firebase service or product in your Flutter app, especially if you start using sign-in with Google, Crashlytics, Performance Monitoring, or Realtime Database.
     3. Re-running the command ensures that your Flutter app's Firebase configuration is up-to-date and (for Android) automatically adds any required Gradle plugins to your app.
-    
-```bash
-    firebase login
-    flutterfire configure --project=ydapp-830fe
-```
-
+    ```bash
+        # Run this
+        firebase login
+        flutterfire configure --project=ydapp-830fe
+    ```
 ## Supported Platforms
 - android
 - ios
@@ -49,5 +51,5 @@ samples, guidance on mobile development, and a full API reference.
 - windows
 
 **To add/delete platforms**: 
-- Modify `./lib/firebase_options.dart` 
-- Alternatively, use Firebase CLI commands
+- Run `flutterfire configure`
+- Alternatively, manually modify `./lib/firebase_options.dart` 
