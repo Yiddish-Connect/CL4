@@ -5,6 +5,10 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:ydapp/screens/signupPage.dart';
 import 'firebase_options.dart';
 import 'screens/loginPage.dart';
+import 'dart:math';
+import 'loading_screen1.dart';
+import 'loading_screen2.dart';
+import 'loading_screen3.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,7 +31,7 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
         ),
-        home: MyHomePage(),
+        home: RandomLoadingScreen(),
       ),
     );
   }
@@ -35,6 +39,40 @@ class MyApp extends StatelessWidget {
 
 class MyAppState extends ChangeNotifier {
   var current = WordPair.random();
+}
+
+class RandomLoadingScreen extends StatefulWidget {
+  @override
+  _RandomLoadingScreenState createState() => _RandomLoadingScreenState();
+}
+
+class _RandomLoadingScreenState extends State<RandomLoadingScreen> {
+  @override
+  void initState() {
+    super.initState();
+    print("RandomLoadingScreen initState");
+    Future.delayed(Duration(seconds: 12), () {
+      print("RandomLoadingScreen delay complete");
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => MyHomePage()),
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final loadingScreens = [
+      LoadingScreen1(),
+      LoadingScreen2(),
+      LoadingScreen3(),
+    ];
+
+    final randomIndex = Random().nextInt(loadingScreens.length);
+
+    print("RandomLoadingScreen displaying screen $randomIndex");
+    return loadingScreens[randomIndex];
+  }
 }
 
 class MyHomePage extends StatelessWidget {
@@ -64,7 +102,7 @@ class MyHomePage extends StatelessWidget {
               );
             },
             child: Text("Click me to Signup"),
-          )
+          ),
         ],
       ),
     );
