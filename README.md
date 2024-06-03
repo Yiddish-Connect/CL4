@@ -4,7 +4,6 @@ A new Flutter project.
 - ios
 - web
 - macos
-- windows
 
 ## Getting Started
 
@@ -41,14 +40,13 @@ samples, guidance on mobile development, and a full API reference.
     ```bash
         # Run this
         firebase login
-        flutterfire configure --project=ydapp-830fe
+        flutterfire configure
     ```
 ## Supported Platforms
 - android
 - ios
 - web
 - macos
-- windows
 
 **To add/delete platforms**: 
 - Run `flutterfire configure`
