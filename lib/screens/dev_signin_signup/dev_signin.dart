@@ -36,8 +36,7 @@ class _DevSignInPageState extends State<DevSignInPage> {
               onPressed: () async {
                 String email = _emailController.text;
                 String password = _passwordController.text;
-                dynamic result =
-                await _auth.signInWithEmailAndPassword(email, password);
+                dynamic result = await _auth.signInWithEmailAndPassword(email, password);
                 if (result != null) {
                   print('logged in');
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
