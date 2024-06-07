@@ -9,7 +9,7 @@ class OnboardingScreen extends StatelessWidget {
 
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.all(50.0),
+        padding: const EdgeInsets.fromLTRB(20, 100, 20, 20),
         child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -32,9 +32,16 @@ class OnboardingScreen extends StatelessWidget {
               Container(
                 // The text
                 margin: const EdgeInsets.all(20.0),
-                height: 100,
+                constraints: BoxConstraints(minHeight: 100),
                 child: Center(
-                  child: Text("Make friends with people like you"),
+                  child: Text(
+                    "Make friends with people like you",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        fontFamily: "Poppins",
+                        fontSize: 25,
+                        fontWeight: FontWeight.w700),
+                  ),
                 ),
               ),
               Container(
