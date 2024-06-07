@@ -25,8 +25,20 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           useMaterial3: true,
           colorScheme: ColorScheme.fromSeed(seedColor: Color(0xfff3dbab)), // Same to https://yiddishlandcalifornia.org/
+          textTheme: TextTheme(
+            titleLarge: TextStyle(
+                fontFamily: "Poppins",
+                fontSize: 25,
+                fontWeight: FontWeight.w700,
+            ),
+            labelMedium: TextStyle(
+              fontFamily: "Poppins",
+              fontSize: 15,
+              fontWeight: FontWeight.w300,
+            )
+            // TODO: Define more text theme here, such as titleMedium, titleSmall
+          )
         ),
-
         home: OnboardingScreen(),
       ),
     );
