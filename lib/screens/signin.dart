@@ -38,7 +38,7 @@ class SignInScreen extends StatelessWidget {
                   child: Text(
                     "Let's meeting new people around you",
                     textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.titleLarge,
+                    style: Theme.of(context).textTheme.headlineLarge,
                   ),
                 ),
               ),
@@ -47,39 +47,55 @@ class SignInScreen extends StatelessWidget {
                 margin: const EdgeInsets.all(20.0),
                 child: Column(
                   children: [
-                    // The 'Login with Email' button
                     Padding(
-                      padding: const EdgeInsets.all(2.0),
-                      child: ElevatedButton(
-                          // Continue => Anonymous mode (TODO)
-                          onPressed: () {
-                            toast(context, "Login with Email");
-                          },
-                          child: Text("Login with Email")),
+                      padding: const EdgeInsets.all(5.0),
+                      child: SizedBox(
+                        width: double.infinity,
+                        height: 50,
+                        child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    Theme.of(context).colorScheme.primary,
+                                foregroundColor:
+                                    Theme.of(context).colorScheme.onPrimary),
+                            onPressed: () {
+                              toast(context, "TODO: Login with Email");
+                            },
+                            child: Text("Login with Email")),
+                        // Don't need to specify the style here.
+                        // The default style here is inherited from ElevatedButton, which will automatically looks for labelMedium
+                      ),
                     ),
-                    // The 'Login with Google' button
                     Padding(
-                      padding: const EdgeInsets.all(2.0),
-                      child: ElevatedButton(
-                        // Sign in => SignInPage
-                        onPressed: () {
-                          toast(context, "Login with Google");
-                        },
-                        child: Text("Login with Google"),
+                      padding: const EdgeInsets.all(5.0),
+                      child: SizedBox(
+                        width: double.infinity,
+                        height: 50,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor:
+                                  Theme.of(context).colorScheme.surface,
+                              foregroundColor:
+                                  Theme.of(context).colorScheme.onSurface),
+                          onPressed: () {
+                            toast(context, "TODO: Login with Google");
+                          },
+                          child: Text("Login with Google"),
+                          // Don't need to specify the style here.
+                          // The default style here is inherited from ElevatedButton, which will automatically looks for labelMedium
+                        ),
                       ),
                     ),
                     // The 'Don't have an account? Sign Up'
                     Padding(
-                        padding: const EdgeInsets.all(2.0),
+                        padding: const EdgeInsets.all(15.0),
                         child: RichText(
                           text: TextSpan(
-                              style: TextStyle(
-                                  fontSize: 16.0, color: Colors.black),
+                              style: Theme.of(context).textTheme.labelSmall,
                               text: "Don't have an account?",
                               children: [
                                 TextSpan(
-                                    style: TextStyle(
-                                        fontSize: 16.0, color: Colors.black),
+                                    style: Theme.of(context).textTheme.labelMedium,
                                     text: "Sign Up",
                                     recognizer: TapGestureRecognizer()
                                       ..onTap = () {
