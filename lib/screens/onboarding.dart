@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ydtind/utils/helpers.dart';
 import 'signin.dart';
 
 class OnboardingScreen extends StatelessWidget {
@@ -46,10 +47,7 @@ class OnboardingScreen extends StatelessWidget {
                       child: ElevatedButton(
                           // Continue => Anonymous mode (TODO)
                           onPressed: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => SignInScreen()));
+                            toast(context, "TODO: main screen");
                           },
                           child: Text("Continue")),
                     ),

@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:ydtind/screens/signup.dart';
+import 'package:ydtind/utils/helpers.dart';
 
 class SignInScreen extends StatelessWidget {
   const SignInScreen({super.key});
@@ -48,7 +49,7 @@ class SignInScreen extends StatelessWidget {
                       child: ElevatedButton(
                           // Continue => Anonymous mode (TODO)
                           onPressed: () {
-                            // TODO
+                            toast(context, "Login with Email");
                           },
                           child: Text("Login with Email")),
                     ),
@@ -58,7 +59,7 @@ class SignInScreen extends StatelessWidget {
                       child: ElevatedButton(
                         // Sign in => SignInPage
                         onPressed: () {
-                          // TODO
+                          toast(context, "Login with Google");
                         },
                         child: Text("Login with Google"),
                       ),
