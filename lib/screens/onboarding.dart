@@ -9,12 +9,12 @@ class OnboardingScreen extends StatelessWidget {
 
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 100, 20, 20),
+        padding: const EdgeInsets.fromLTRB(20, 100, 20, 50),
         child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Container(
-                // The avatar
+                // The avatar (TODO)
                 constraints: BoxConstraints(minHeight: 200),
                 margin: EdgeInsets.all(20),
                 child: Center(
@@ -34,15 +34,11 @@ class OnboardingScreen extends StatelessWidget {
                 margin: const EdgeInsets.all(20.0),
                 constraints: BoxConstraints(minHeight: 100),
                 child: Center(
-                  child: Text(
-                    "Make friends with people like you",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontFamily: "Poppins",
-                        fontSize: 25,
-                        fontWeight: FontWeight.w700),
-                  ),
-                ),
+                    child: Text(
+                  "Make friends with people like you",
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.titleLarge,
+                )),
               ),
               Container(
                 // The 2 buttons

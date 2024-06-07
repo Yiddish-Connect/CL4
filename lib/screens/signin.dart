@@ -10,12 +10,12 @@ class SignInScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 100, 20, 20),
+        padding: const EdgeInsets.fromLTRB(20, 100, 20, 50),
         child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Container(
-                // The avatar
+                // The avatar (TODO)
                 margin: EdgeInsets.all(20),
                 constraints: BoxConstraints(minHeight: 200),
                 child: Center(
@@ -35,12 +35,11 @@ class SignInScreen extends StatelessWidget {
                 margin: const EdgeInsets.all(20.0),
                 constraints: BoxConstraints(minHeight: 100),
                 child: Center(
-                  child: Text("Let's meeting new people around you",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                          fontFamily: "Poppins",
-                          fontSize: 25,
-                          fontWeight: FontWeight.w700)),
+                  child: Text(
+                    "Let's meeting new people around you",
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
                 ),
               ),
               Container(
