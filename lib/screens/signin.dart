@@ -1,5 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:ydtind/screens/dev_signin_signup/dev_signin.dart';
+import 'package:ydtind/screens/dev_signin_signup/dev_signup.dart';
 import 'package:ydtind/screens/signup.dart';
 import 'package:ydtind/utils/helpers.dart';
 
@@ -59,7 +61,12 @@ class SignInScreen extends StatelessWidget {
                                 foregroundColor:
                                     Theme.of(context).colorScheme.onPrimary),
                             onPressed: () {
-                              toast(context, "TODO: Login with Email");
+                              // TODO: Email sign-in page
+                              // Below is a demo sign-in page for development
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => DevSignInPage()));
                             },
                             child: Text("Login with Email")),
                         // Don't need to specify the style here.
@@ -95,11 +102,17 @@ class SignInScreen extends StatelessWidget {
                               text: "Don't have an account?",
                               children: [
                                 TextSpan(
-                                    style: Theme.of(context).textTheme.labelMedium,
+                                    style:
+                                        Theme.of(context).textTheme.labelMedium,
                                     text: "Sign Up",
                                     recognizer: TapGestureRecognizer()
                                       ..onTap = () {
-                                        // TODO
+                                        // TODO: Email sign-up (multiple screens)
+                                        // Below is a demo sign-in page for development
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) => DevSignUpPage()));
                                       })
                               ]),
                         ))
@@ -109,6 +122,5 @@ class SignInScreen extends StatelessWidget {
             ]),
       ),
     );
-    ;
   }
 }

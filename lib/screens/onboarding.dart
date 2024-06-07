@@ -60,7 +60,7 @@ class OnboardingScreen extends StatelessWidget {
                                       Theme.of(context).colorScheme.onPrimary),
                               // Continue => Anonymous mode (TODO)
                               onPressed: () {
-                                toast(context, "TODO: main screen");
+                                toast(context, "TODO: anonymous mode???");
                               },
                               child: Text("Continue")
                               // Don't need to specify the style here.

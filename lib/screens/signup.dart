@@ -5,6 +5,7 @@ class SignUpScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // TODO: Email sign up (Multiple screens)
     return Text("Sign up here (TODO)");
   }
 }
