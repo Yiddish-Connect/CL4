@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ydtind/utils/helpers.dart';
+import 'package:yiddishconnect/utils/helpers.dart';
 import 'signin.dart';
 
 class OnboardingScreen extends StatelessWidget {

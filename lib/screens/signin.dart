@@ -1,9 +1,9 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:ydtind/screens/dev_signin_signup/dev_signin.dart';
-import 'package:ydtind/screens/dev_signin_signup/dev_signup.dart';
-import 'package:ydtind/screens/signup.dart';
-import 'package:ydtind/utils/helpers.dart';
+import 'package:yiddishconnect/screens/dev_signin_signup/dev_signin.dart';
+import 'package:yiddishconnect/screens/dev_signin_signup/dev_signup.dart';
+import 'package:yiddishconnect/screens/signup.dart';
+import 'package:yiddishconnect/utils/helpers.dart';
 
 class SignInScreen extends StatelessWidget {
   const SignInScreen({super.key});
