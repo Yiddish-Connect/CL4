@@ -8,8 +8,8 @@ var actionCodeSettings = ActionCodeSettings(
     url: 'https://www.google.com',
     // This must be true
     handleCodeInApp: true,
-    iOSBundleId: 'com.example.ios',
-    androidPackageName: 'com.example.android',
+    iOSBundleId: 'com.yiddishland.ios',
+    androidPackageName: 'com.yiddishland.android',
     // installIfNotAvailable
     androidInstallApp: true,
     // minimumVersion

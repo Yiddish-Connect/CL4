@@ -7,12 +7,17 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:447187951174:android:8f4a43b5257dba6ff9b447",
+        "mobilesdk_app_id": "1:447187951174:android:61d56137bbc9eb00f9b447",
         "android_client_info": {
-          "package_name": "com.example.ydtind"
+          "package_name": "com.yiddishland.yiddishconnect"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "447187951174-j5nr9bgpirei16hktcqg7o68flgqigto.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBA6cONKgiSYXLaVSU0pABzO-vPQ5_4zX0"
@@ -20,7 +25,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "447187951174-j5nr9bgpirei16hktcqg7o68flgqigto.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "447187951174-o9o81octjhjhebodtk6nqctu5ehmukrr.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.yiddishland.yiddishconnect"
+              }
+            }
+          ]
         }
       }
     }

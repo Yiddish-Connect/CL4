@@ -1,4 +1,4 @@
-package com.example.ydtind
+package com.yiddishland.yiddishconnect
 
 import io.flutter.embedding.android.FlutterActivity
 
