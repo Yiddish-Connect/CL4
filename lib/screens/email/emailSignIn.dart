@@ -2,7 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
 import '../../services/auth.dart';
-import 'emalVerify.dart';
 
 class EmailSignInScreen extends StatefulWidget {
   @override
@@ -66,9 +65,7 @@ class _EmailSignInScreenState extends State<EmailSignInScreen> {
                           String password = _passwordController.text;
                           User? user = await _auth.registerWithEmailAndPassword(email, password);
                           if (user != null) {
-                            await user.sendEmailVerification();
-                            toast(context, "A verification email has been sent to your address");
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => EmailVerifyScreen()));
+                            toast(context, "Successfully signed in");
                           } else {
                             toast(context, "Something went wrong");
                           }
