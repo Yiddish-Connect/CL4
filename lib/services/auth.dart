@@ -19,6 +19,10 @@ var actionCodeSettings = ActionCodeSettings(
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
+  User? getUser() {
+    return _auth.currentUser;
+  }
+
   // Sign in with email and password
   Future<User?> signInWithEmailAndPassword(String email, String password) async {
     try {
