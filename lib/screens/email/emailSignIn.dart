@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
 import '../../services/auth.dart';
@@ -17,10 +18,10 @@ class _EmailSignInScreenState extends State<EmailSignInScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Sign up'),
+        title: Text('Sign in'),
       ),
       body: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(32.0), // 16 + 16
         child: Center(
           child: Container(
             constraints: BoxConstraints(maxWidth: 600),
@@ -29,7 +30,7 @@ class _EmailSignInScreenState extends State<EmailSignInScreen> {
               children: [
                 Container(
                   padding: EdgeInsets.all(30),
-                  child: Text("Register with Email & password", style: Theme.of(context).textTheme.titleLarge),
+                  child: Text("Enter your Email & password", style: Theme.of(context).textTheme.titleLarge),
                 ),
                 Container(
                   padding: EdgeInsets.all(5),
@@ -53,6 +54,22 @@ class _EmailSignInScreenState extends State<EmailSignInScreen> {
                   ),
                 ),
                 Container(
+                    padding: EdgeInsets.all(5),
+                    child: RichText(text: TextSpan(
+                        text: "Forget the password?",
+                        style: Theme.of(context).textTheme.labelMedium,
+                        children: [
+                          TextSpan(
+                              text: "Reset",
+                              style: Theme.of(context).textTheme.labelMedium,
+                              recognizer: TapGestureRecognizer()..onTap = () {
+                                toast(context, "We have sent a password recovery link");
+                              }
+                          )
+                        ]
+                    ))
+                ),
+                Container(
                   padding: EdgeInsets.all(30),
                   child: SizedBox(
                     height: 50,
@@ -63,14 +80,14 @@ class _EmailSignInScreenState extends State<EmailSignInScreen> {
                         onPressed: () async {
                           String email = _emailController.text;
                           String password = _passwordController.text;
-                          User? user = await _auth.registerWithEmailAndPassword(email, password);
+                          User? user = await _auth.signInWithEmailAndPassword(email, password);
                           if (user != null) {
                             toast(context, "Successfully signed in");
                           } else {
                             toast(context, "Something went wrong");
                           }
                         },
-                        child: Text('Register'),
+                        child: Text('Sign in'),
                       ),
                     ),
                   ),
