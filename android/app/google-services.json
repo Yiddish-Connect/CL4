@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "447187951174-mrapaotni2njecicm30m2s5tf06rvlij.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.yiddishland.yiddishconnect",
+            "certificate_hash": "0dae5f465d49b8a900cdccef587b78b93a7604e2"
+          }
+        },
+        {
           "client_id": "447187951174-j5nr9bgpirei16hktcqg7o68flgqigto.apps.googleusercontent.com",
           "client_type": 3
         }
