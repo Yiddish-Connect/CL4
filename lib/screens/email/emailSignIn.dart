@@ -3,6 +3,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
 import '../../services/auth.dart';
+import '../dev_signin_signup/dev_home.dart';
 
 class EmailSignInScreen extends StatefulWidget {
   @override
@@ -90,6 +91,7 @@ class _EmailSignInScreenState extends State<EmailSignInScreen> {
                           User? user = await _auth.signInWithEmailAndPassword(email, password);
                           if (user != null) {
                             toast(context, "Successfully signed in");
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => DevHome()));
                           } else {
                             toast(context, "Something went wrong");
                           }

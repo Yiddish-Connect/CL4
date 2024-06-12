@@ -9,6 +9,8 @@ import 'package:yiddishconnect/screens/signUp.dart';
 import 'package:yiddishconnect/services/auth.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
 
+import 'dev_signin_signup/dev_home.dart';
+
 class SignInScreen extends StatelessWidget {
   AuthService _auth = AuthService();
 
@@ -115,10 +117,10 @@ class SignInScreen extends StatelessWidget {
         style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.surface, foregroundColor: Theme.of(context).colorScheme.onSurface),
         onPressed: () async {
           // TODO: Google Login
-          toast(context, "Login with Google");
           User? user = await _auth.signInWithGoogle();
           if (user != null) {
             toast(context, "Successful!");
+            Navigator.push(context, MaterialPageRoute(builder: (context) => DevHome()));
           } else {
             toast(context, "Something went wrong!");
           }
