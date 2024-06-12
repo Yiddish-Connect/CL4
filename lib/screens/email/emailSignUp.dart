@@ -3,6 +3,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
 import '../../services/auth.dart';
+import '../dev_signin_signup/dev_home.dart';
 
 class AuthFlow extends StatefulWidget {
   const AuthFlow({super.key});
@@ -206,9 +207,11 @@ class EmailSignUpVerification extends StatelessWidget {
                   child: ElevatedButton(
                       style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary, foregroundColor: Theme.of(context).colorScheme.onPrimary),
                       onPressed: () {
+                        // TODO: Check verification
                         toast(context, "TODO");
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => DevHome()));
                       },
-                      child: Text("Verify")),
+                      child: Text("I have verified my Email")),
                 ),
               )
           )
