@@ -6,13 +6,20 @@ import '../../services/auth.dart';
 
 class EmailSignInScreen extends StatefulWidget {
   @override
-  _EmailSignInScreenState createState() => _EmailSignInScreenState();
+  State<EmailSignInScreen> createState() => _EmailSignInScreenState();
 }
 
 class _EmailSignInScreenState extends State<EmailSignInScreen> {
   final AuthService _auth = AuthService();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

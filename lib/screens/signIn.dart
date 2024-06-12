@@ -95,7 +95,7 @@ class SignInScreen extends StatelessWidget {
                       text: TextSpan(style: Theme.of(context).textTheme.labelSmall, text: "Don't have an account?", children: [
                         TextSpan(
                             style: Theme.of(context).textTheme.labelMedium,
-                            text: "Sign Up",
+                            text: "Sign up with Email",
                             recognizer: TapGestureRecognizer()
                               ..onTap = () {
                                 // TODO: Email sign-up (multiple screens)
