@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
-import 'signin.dart';
+import 'signIn.dart';
 
 class OnboardingScreen extends StatelessWidget {
   @override
