@@ -54,14 +54,17 @@ class SignInScreen extends StatelessWidget {
                   child: SizedBox(
                     width: double.infinity,
                     height: 50,
-                    child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary, foregroundColor: Theme.of(context).colorScheme.onPrimary),
-                        onPressed: () {
-                          // TODO: Email sign-in page
-                          // Below is a demo sign-in page for development
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => EmailSignInScreen()));
-                        },
-                        child: Text("Login with Email")),
+                    child: FractionallySizedBox(
+                      widthFactor: 0.6,
+                      child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary, foregroundColor: Theme.of(context).colorScheme.onPrimary),
+                          onPressed: () {
+                            // TODO: Email sign-in page
+                            // Below is a demo sign-in page for development
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => EmailSignInScreen()));
+                          },
+                          child: Text("Login with Email")),
+                    ),
                     // Don't need to specify the style here.
                     // The default style here is inherited from ElevatedButton, which will automatically looks for labelMedium
                   ),
@@ -71,14 +74,17 @@ class SignInScreen extends StatelessWidget {
                   child: SizedBox(
                     width: double.infinity,
                     height: 50,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.surface, foregroundColor: Theme.of(context).colorScheme.onSurface),
-                      onPressed: () {
-                        toast(context, "TODO: Login with Google");
-                      },
-                      child: Text("Login with Google"),
-                      // Don't need to specify the style here.
-                      // The default style here is inherited from ElevatedButton, which will automatically looks for labelMedium
+                    child: FractionallySizedBox(
+                      widthFactor: 0.6,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.surface, foregroundColor: Theme.of(context).colorScheme.onSurface),
+                        onPressed: () {
+                          toast(context, "TODO: Login with Google");
+                        },
+                        child: Text("Login with Google"),
+                        // Don't need to specify the style here.
+                        // The default style here is inherited from ElevatedButton, which will automatically looks for labelMedium
+                      ),
                     ),
                   ),
                 ),
