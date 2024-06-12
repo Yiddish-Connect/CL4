@@ -2,6 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:yiddishconnect/screens/dev_signin_signup/dev_signin.dart';
 import 'package:yiddishconnect/screens/dev_signin_signup/dev_signup.dart';
+import 'package:yiddishconnect/screens/email/emailSignIn.dart';
 import 'package:yiddishconnect/screens/email/emailSignUp.dart';
 import 'package:yiddishconnect/screens/signUp.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
@@ -37,7 +38,7 @@ class SignInScreen extends StatelessWidget {
             constraints: BoxConstraints(minHeight: 100),
             child: Center(
               child: Text(
-                "Let's meeting new people around you",
+                "Let's meet new people around you",
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.headlineLarge,
               ),
@@ -58,7 +59,7 @@ class SignInScreen extends StatelessWidget {
                         onPressed: () {
                           // TODO: Email sign-in page
                           // Below is a demo sign-in page for development
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => DevSignInPage()));
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => EmailSignInScreen()));
                         },
                         child: Text("Login with Email")),
                     // Don't need to specify the style here.
