@@ -50,16 +50,19 @@ class OnboardingScreen extends StatelessWidget {
                     child: SizedBox(
                       width: double.infinity,
                       height: 50,
-                      child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary, foregroundColor: Theme.of(context).colorScheme.onPrimary),
-                          // Continue => Anonymous mode (TODO)
-                          onPressed: () {
-                            toast(context, "TODO: anonymous mode???");
-                          },
-                          child: Text("Continue")
-                          // Don't need to specify the style here.
-                          // The default style here is inherited from ElevatedButton, which will automatically looks for labelMedium
-                          ),
+                      child: FractionallySizedBox(
+                        widthFactor: 0.6,
+                        child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary, foregroundColor: Theme.of(context).colorScheme.onPrimary),
+                            // Continue => Anonymous mode (TODO)
+                            onPressed: () {
+                              toast(context, "TODO: anonymous mode???");
+                            },
+                            child: Text("Continue")
+                            // Don't need to specify the style here.
+                            // The default style here is inherited from ElevatedButton, which will automatically looks for labelMedium
+                            ),
+                      ),
                     ),
                   ),
                   Padding(
@@ -67,15 +70,18 @@ class OnboardingScreen extends StatelessWidget {
                     child: SizedBox(
                       width: double.infinity,
                       height: 50,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.surface, foregroundColor: Theme.of(context).colorScheme.onSurface),
-                        // Sign in => SignInPage
-                        onPressed: () {
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => SignInScreen()));
-                        },
-                        child: Text("Sign in"),
-                        // Don't need to specify the style here.
-                        // The default style here is inherited from ElevatedButton, which will automatically looks for labelMedium
+                      child: FractionallySizedBox(
+                        widthFactor: 0.6,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.surface, foregroundColor: Theme.of(context).colorScheme.onSurface),
+                          // Sign in => SignInPage
+                          onPressed: () {
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => SignInScreen()));
+                          },
+                          child: Text("Sign in"),
+                          // Don't need to specify the style here.
+                          // The default style here is inherited from ElevatedButton, which will automatically looks for labelMedium
+                        ),
                       ),
                     ),
                   )
