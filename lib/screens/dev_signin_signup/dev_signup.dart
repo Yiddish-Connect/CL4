@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../services/auth.dart';
@@ -36,7 +37,7 @@ class _DevSignUpPageState extends State<DevSignUpPage> {
               onPressed: () async {
                 String email = _emailController.text;
                 String password = _passwordController.text;
-                dynamic result = await _auth.registerWithEmailAndPassword(email, password);
+                User? result = await _auth.registerWithEmailAndPassword(email, password);
                 if (result != null) {
                   print('Signed up');
                   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(

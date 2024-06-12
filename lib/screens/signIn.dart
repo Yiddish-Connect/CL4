@@ -2,7 +2,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:yiddishconnect/screens/dev_signin_signup/dev_signin.dart';
 import 'package:yiddishconnect/screens/dev_signin_signup/dev_signup.dart';
-import 'package:yiddishconnect/screens/signup.dart';
+import 'package:yiddishconnect/screens/email/emailSignUp.dart';
+import 'package:yiddishconnect/screens/signUp.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
 
 class SignInScreen extends StatelessWidget {
@@ -92,7 +93,7 @@ class SignInScreen extends StatelessWidget {
                               ..onTap = () {
                                 // TODO: Email sign-up (multiple screens)
                                 // Below is a demo sign-in page for development
-                                Navigator.push(context, MaterialPageRoute(builder: (context) => DevSignUpPage()));
+                                Navigator.push(context, MaterialPageRoute(builder: (context) => AuthFlow()));
                               })
                       ]),
                     ))
