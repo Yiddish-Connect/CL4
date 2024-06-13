@@ -141,14 +141,18 @@ class EmailSignUpInput extends StatelessWidget {
                   onPressed: () async {
                     String email = _emailController.text;
                     String password = _passwordController.text;
-                    User? user = await _auth.registerWithEmailAndPassword(email, password);
-                    if (user != null) {
-                      await user.sendEmailVerification();
-                      toast(context, "A verification email has been sent to your address");
-                      next();
-                    } else {
-                      toast(context, "Something went wrong");
-                      next();
+                    try {
+                      User? user = await _auth.registerWithEmailAndPassword(email, password);
+                      if (user != null) {
+                        await user.sendEmailVerification();
+                        toast(context, "A verification email has been sent to your address");
+                        next();
+                      } else {
+                        toast(context, "Something went wrong (null)");
+                      }
+                    } catch (e) {
+                      toast(context, e.toString());
+                      next(); // This is for debug purpose. TODO: delete this
                     }
                   },
                   child: Text('Register'),

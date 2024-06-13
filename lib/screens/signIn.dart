@@ -116,13 +116,16 @@ class SignInScreen extends StatelessWidget {
     return ElevatedButton(
         style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.surface, foregroundColor: Theme.of(context).colorScheme.onSurface),
         onPressed: () async {
-          // TODO: Google Login
-          User? user = await _auth.signInWithGoogle();
-          if (user != null) {
-            toast(context, "Successful!");
-            Navigator.push(context, MaterialPageRoute(builder: (context) => DevHome()));
-          } else {
-            toast(context, "Something went wrong!");
+          try {
+            User? user = await _auth.signInWithGoogle();
+            if (user != null) {
+              toast(context, "Successfully signed in with Google");
+              Navigator.push(context, MaterialPageRoute(builder: (context) => DevHome()));
+            } else {
+              toast(context, "Something went wrong (null)");
+            }
+          } catch (e) {
+            toast(context, e.toString());
           }
         },
         child: Text("Login with Google")

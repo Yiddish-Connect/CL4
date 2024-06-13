@@ -1,4 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:yiddishconnect/utils/helpers.dart';
 
 import '../../services/auth.dart';
 
@@ -43,15 +45,17 @@ class _DevSignInPageState extends State<DevSignInPage> {
               onPressed: () async {
                 String email = _emailController.text;
                 String password = _passwordController.text;
-                dynamic result = await _auth.signInWithEmailAndPassword(email, password);
-                if (result != null) {
-                  print('logged in');
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                    content: Text("Login Successful!!!"),
-                  ));
-                } else {
-                  print('Error logging in');
-                  print(result);
+                try {
+                  User? user = await _auth.signInWithEmailAndPassword(email, password);
+                  if (user != null) {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                      content: Text("Login Successful!!!"),
+                    ));
+                  } else {
+                    toast(context, 'Something went wrong (null)');
+                  }
+                } catch (e) {
+                  toast(context, e.toString());
                 }
               },
               child: Text('Login'),
