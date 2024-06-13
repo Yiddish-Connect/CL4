@@ -64,14 +64,16 @@ class _EmailSignInScreenState extends State<EmailSignInScreen> {
                 Container(
                     padding: EdgeInsets.all(5),
                     child: RichText(text: TextSpan(
-                        text: "Forget the password?",
+                        text: "Forget your password?",
                         style: Theme.of(context).textTheme.labelMedium,
                         children: [
                           TextSpan(
-                              text: "Reset",
+                              text: "Reset password",
                               style: Theme.of(context).textTheme.labelMedium,
                               recognizer: TapGestureRecognizer()..onTap = () {
-                                toast(context, "We have sent a password recovery link");
+                                String email = _emailController.text;
+                                _auth.sendPasswordResetEmailTo(email);
+                                toast(context, "We have sent a password recovery link to $email");
                               }
                           )
                         ]
