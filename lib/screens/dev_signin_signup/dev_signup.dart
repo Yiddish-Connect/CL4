@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../services/auth.dart';
+import '../../utils/helpers.dart';
 
 class DevSignUpPage extends StatefulWidget {
   @override
@@ -44,15 +45,17 @@ class _DevSignUpPageState extends State<DevSignUpPage> {
               onPressed: () async {
                 String email = _emailController.text;
                 String password = _passwordController.text;
-                User? result = await _auth.registerWithEmailAndPassword(email, password);
-                if (result != null) {
-                  print('Signed up');
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                    content: Text("Signup Successful!!!"),
-                  ));
-                } else {
-                  print('Error signing up');
-                  print(result);
+                try {
+                  User? user = await _auth.registerWithEmailAndPassword(email, password);
+                  if (user != null) {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                      content: Text("Successfully signed up (dev)"),
+                    ));
+                  } else {
+                    toast(context, 'Something went wrong (null)');
+                  }
+                } catch (e) {
+                  toast(context, e.toString());
                 }
               },
               child: Text('Signup'),

@@ -88,12 +88,16 @@ class _EmailSignInScreenState extends State<EmailSignInScreen> {
                         onPressed: () async {
                           String email = _emailController.text;
                           String password = _passwordController.text;
-                          User? user = await _auth.signInWithEmailAndPassword(email, password);
-                          if (user != null) {
-                            toast(context, "Successfully signed in");
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => DevHome()));
-                          } else {
-                            toast(context, "Something went wrong");
+                          try {
+                            User? user = await _auth.signInWithEmailAndPassword(email, password);
+                            if (user != null) {
+                              toast(context, "Successfully signed in with Email");
+                              Navigator.push(context, MaterialPageRoute(builder: (context) => DevHome()));
+                            } else {
+                              toast(context, "Something went wrong (null)");
+                            }
+                          } catch (e) {
+                            toast(context, e.toString());
                           }
                         },
                         child: Text('Sign in'),

@@ -35,17 +35,18 @@ class AuthService {
       return result.user;
     } catch (e) {
       print('Error signing in with email and password: $e');
-      return null;
+      rethrow;
     }
   }
 
   // Sign in with email link (password-less)
-  void signInWithEmailLink(String email) async {
+  Future<void> signInWithEmailLink(String email) async {
     try {
       await _auth.sendSignInLinkToEmail(email: email, actionCodeSettings: actionCodeSettings);
       print('Successfully sent email verification');
     } catch (e) {
       print('Error sending email verification: $e');
+      rethrow;
     }
   }
 
@@ -72,7 +73,7 @@ class AuthService {
         return result.user;
       } catch (e) {
         print('Error signing in with Google: $e');
-        return null;
+        rethrow;
       }
     } else if (Platform.isAndroid) {
       try {
@@ -94,10 +95,10 @@ class AuthService {
         return result.user;
       } catch (e) {
         print('Error signing in with Google: $e');
-        return null;
+        rethrow;
       }
     } else {
-      throw PlatformException(code: "123", message: "signInWithGoogle() only supports Android and Web. Where did you call this function?");
+      throw PlatformException(code: "0613", message: "signInWithGoogle() only supports Android and Web. Where did you call this function?");
     }
     
   }
@@ -110,17 +111,29 @@ class AuthService {
       return result.user;
     } catch (e) {
       print('Error registering: $e');
-      return null;
+      rethrow;
+    }
+  }
+
+
+  Future<void> sendPasswordResetEmailTo(String email) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+      print("Successfully sent password reset Email to $email");
+    } catch (e) {
+      print("Error sending password reset Email: $e");
+      rethrow;
     }
   }
 
   // Sign out
-  Future signOut() async {
+  Future<void> signOut() async {
     try {
-      return await _auth.signOut();
+      await _auth.signOut();
+      print("Successfully signed out");
     } catch (e) {
-      print(e.toString());
-      return null;
+      print("Error signing out: $e");
+      rethrow;
     }
   }
 }
