@@ -22,7 +22,6 @@ var actionCodeSettings = ActionCodeSettings(
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   User? getUser() {
     return _auth.currentUser;
@@ -78,7 +77,7 @@ class AuthService {
     } else if (Platform.isAndroid) {
       try {
         // Trigger the authentication flow
-        final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+        final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
 
         // Obtain the auth details from the request
         final GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
