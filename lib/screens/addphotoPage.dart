@@ -1,21 +1,31 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:ydtind/services/storage/storage_repo.dart';
+import 'package:ydtind/utils/image_helper.dart';
 import '../services/auth.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 
 class AddPhoto extends StatefulWidget {
-  const AddPhoto({super.key});
+  const AddPhoto({
+    super.key,
+    //required this.initials,
+  });
+
+  //final String initials;
 
   @override
   State<AddPhoto> createState() => _AddPhotoState();
 }
 
+final imageHelper = ImageHelper();
+
 class _AddPhotoState extends State<AddPhoto>{
-  List<String> images = [];
+  List<File?> _images = List<File?>.filled(6, null);
 
   @override
   Widget build(BuildContext context) {
@@ -62,7 +72,6 @@ class _AddPhotoState extends State<AddPhoto>{
                 SizedBox(height: 20),
                 Padding( 
                   padding:EdgeInsets.all(10.0),
-
                   child: StaggeredGrid.count(
                     crossAxisCount: 3,
                     mainAxisSpacing: 3,
@@ -71,65 +80,42 @@ class _AddPhotoState extends State<AddPhoto>{
                       StaggeredGridTile.count(
                         crossAxisCellCount: 2,
                         mainAxisCellCount: 2,
-
                         child: Container(
                           margin: EdgeInsets.all(2.5),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(25),
                             color: Colors.grey[200],
                           ),
-                          child: Center(
-                            child: ElevatedButton(
-                              onPressed: () async {
-                                final ImagePicker picker = ImagePicker();
-                                final XFile? image = await picker.pickImage(
-                                  source: ImageSource.gallery,
-                                  imageQuality: 50,
-                                );
-
-                                if (image == null && mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('No image was selected.')));
-                                }
-
-
-                                if (image != null && mounted) {
-
-                                  CroppedFile? croppedFile = await ImageCropper().cropImage(
-                                    sourcePath: image.path,
-                                    aspectRatio: const CropAspectRatio(
-                                      ratioX: 9,
-                                      ratioY: 16
-                                    ),
-                                    // aspectRatioPresets: [],
-                                    uiSettings: [
-                                      AndroidUiSettings(
-                                        toolbarTitle: 'Cropper',
-                                        initAspectRatio: CropAspectRatioPreset.original,
-                                        lockAspectRatio: false
-                                      ),
-
-                                    ]
-                                  );
-                                  // print('Uploading ...');
-                                  // StorageRepo().uploadImage(image.path);
-                                  if (croppedFile != null && mounted) {
-                                    setState(() {
-                                      images.add(croppedFile.path);
-                                    });
-                                    await Future.delayed((Duration(milliseconds: 100)));
-                                    if (mounted){
-                                      Navigator.pop(context, images);
+                          child: Stack(
+                            children: [
+                              if (_images[0] != null)
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(25),
+                                  child: Image.file(
+                                    _images[0]!,
+                                    fit: BoxFit.cover,
+                                    width: double.infinity,
+                                    height: double.infinity,
+                                  ),
+                                ),
+                              Center(
+                                child: ElevatedButton(
+                                  onPressed: () async {
+                                    final files = await imageHelper.pickImage();
+                                    if (files.isNotEmpty) {
+                                      final croppedFile = await imageHelper.crop(
+                                        file: files.first,
+                                      );
+                                      if (croppedFile != null) {
+                                        setState(() => _images[0] = File(croppedFile.path));
+                                      }
                                     }
-                                  }
-                                  
-                                  
-                                }
-                              },
-                              child: Text('Change Picture'),
-                            ),
+                                  },
+                                  child: Text('Add'),
+                                ),
+                              ),
+                            ],
                           ),
-
                         ),
                       ),
 
@@ -142,15 +128,36 @@ class _AddPhotoState extends State<AddPhoto>{
                             borderRadius: BorderRadius.circular(25),
                             color: Colors.grey[200],
                           ),
-                          child: Center(
-                            child: ElevatedButton(
-                              onPressed: () {
-                              
-                              },
-                              child: Text('Add'),
-                            ),
+                          child: Stack(
+                            children: [
+                              if (_images[1] != null)
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(25),
+                                  child: Image.file(
+                                    _images[1]!,
+                                    fit: BoxFit.cover,
+                                    width: double.infinity,
+                                    height: double.infinity,
+                                  ),
+                                ),
+                              Center(
+                                child: ElevatedButton(
+                                  onPressed: () async {
+                                    final files = await imageHelper.pickImage();
+                                    if (files.isNotEmpty) {
+                                      final croppedFile = await imageHelper.crop(
+                                        file: files.first,
+                                      );
+                                      if (croppedFile != null) {
+                                        setState(() => _images[1] = File(croppedFile.path));
+                                      }
+                                    }
+                                  },
+                                  child: Text('Add'),
+                                ),
+                              ),
+                            ],
                           ),
-
                         ),
                       ),
                       StaggeredGridTile.count(
@@ -162,15 +169,36 @@ class _AddPhotoState extends State<AddPhoto>{
                             borderRadius: BorderRadius.circular(25),
                             color: Colors.grey[200],
                           ),
-                          child: Center(
-                            child: ElevatedButton(
-                              onPressed: () {
-                              
-                              },
-                              child: Text('Add'),
-                            ),
+                          child: Stack(
+                            children: [
+                              if (_images[2] != null)
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(25),
+                                  child: Image.file(
+                                    _images[2]!,
+                                    fit: BoxFit.cover,
+                                    width: double.infinity,
+                                    height: double.infinity,
+                                  ),
+                                ),
+                              Center(
+                                child: ElevatedButton(
+                                  onPressed: () async {
+                                    final files = await imageHelper.pickImage();
+                                    if (files.isNotEmpty) {
+                                      final croppedFile = await imageHelper.crop(
+                                        file: files.first,
+                                      );
+                                      if (croppedFile != null) {
+                                        setState(() => _images[2] = File(croppedFile.path));
+                                      }
+                                    }
+                                  },
+                                  child: Text('Add'),
+                                ),
+                              ),
+                            ],
                           ),
-
                         ),
                       ),
                       StaggeredGridTile.count(
@@ -182,15 +210,36 @@ class _AddPhotoState extends State<AddPhoto>{
                             borderRadius: BorderRadius.circular(25),
                             color: Colors.grey[200],
                           ),
-                          child: Center(
-                            child: ElevatedButton(
-                              onPressed: () {
-                              
-                              },
-                              child: Text('Add'),
-                            ),
+                          child: Stack(
+                            children: [
+                              if (_images[3] != null)
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(25),
+                                  child: Image.file(
+                                    _images[3]!,
+                                    fit: BoxFit.cover,
+                                    width: double.infinity,
+                                    height: double.infinity,
+                                  ),
+                                ),
+                              Center(
+                                child: ElevatedButton(
+                                  onPressed: () async {
+                                    final files = await imageHelper.pickImage();
+                                    if (files.isNotEmpty) {
+                                      final croppedFile = await imageHelper.crop(
+                                        file: files.first,
+                                      );
+                                      if (croppedFile != null) {
+                                        setState(() => _images[3] = File(croppedFile.path));
+                                      }
+                                    }
+                                  },
+                                  child: Text('Add'),
+                                ),
+                              ),
+                            ],
                           ),
-
                         ),
                       ),
                       StaggeredGridTile.count(
@@ -202,15 +251,36 @@ class _AddPhotoState extends State<AddPhoto>{
                             borderRadius: BorderRadius.circular(25),
                             color: Colors.grey[200],
                           ),
-                          child: Center(
-                            child: ElevatedButton(
-                              onPressed: () {
-                              
-                              },
-                              child: Text('Add'),
-                            ),
+                          child: Stack(
+                            children: [
+                              if (_images[4] != null)
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(25),
+                                  child: Image.file(
+                                    _images[4]!,
+                                    fit: BoxFit.cover,
+                                    width: double.infinity,
+                                    height: double.infinity,
+                                  ),
+                                ),
+                              Center(
+                                child: ElevatedButton(
+                                  onPressed: () async {
+                                    final files = await imageHelper.pickImage();
+                                    if (files.isNotEmpty) {
+                                      final croppedFile = await imageHelper.crop(
+                                        file: files.first,
+                                      );
+                                      if (croppedFile != null) {
+                                        setState(() => _images[4] = File(croppedFile.path));
+                                      }
+                                    }
+                                  },
+                                  child: Text('Add'),
+                                ),
+                              ),
+                            ],
                           ),
-
                         ),
                       ),
                       StaggeredGridTile.count(
@@ -220,23 +290,42 @@ class _AddPhotoState extends State<AddPhoto>{
                           margin: EdgeInsets.all(2.5),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(25),
-                            color: Colors.white,
+                            color: Colors.grey[200],
                           ),
-                          child: Center(
-                            child: ElevatedButton(
-                              onPressed: () {
-                              
-                              },
-                              child: Text('Add'),
-                            ),
+                          child: Stack(
+                            children: [
+                              if (_images[5] != null)
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(25),
+                                  child: Image.file(
+                                    _images[5]!,
+                                    fit: BoxFit.cover,
+                                    width: double.infinity,
+                                    height: double.infinity,
+                                  ),
+                                ),
+                              Center(
+                                child: ElevatedButton(
+                                  onPressed: () async {
+                                    final files = await imageHelper.pickImage();
+                                    if (files.isNotEmpty) {
+                                      final croppedFile = await imageHelper.crop(
+                                        file: files.first,
+                                      );
+                                      if (croppedFile != null) {
+                                        setState(() => _images[5] = File(croppedFile.path));
+                                      }
+                                    }
+                                  },
+                                  child: Text('Add'),
+                                ),
+                              ),
+                            ],
                           ),
-
                         ),
                       ),
-
                     ],
                   ),
-
                 ),  
                 SizedBox(height: 30),
 
