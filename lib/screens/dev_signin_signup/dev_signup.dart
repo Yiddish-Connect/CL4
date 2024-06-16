@@ -1,21 +1,31 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import '../services/auth.dart';
 
-class LoginPage extends StatefulWidget {
+import '../../services/auth.dart';
+import '../../utils/helpers.dart';
+
+class DevSignUpPage extends StatefulWidget {
   @override
-  _LoginPageState createState() => _LoginPageState();
+  _DevSignUpPageState createState() => _DevSignUpPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _DevSignUpPageState extends State<DevSignUpPage> {
   final AuthService _auth = AuthService();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Login'),
+        title: Text('Sign up'),
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
@@ -35,19 +45,20 @@ class _LoginPageState extends State<LoginPage> {
               onPressed: () async {
                 String email = _emailController.text;
                 String password = _passwordController.text;
-                dynamic result =
-                    await _auth.signInWithEmailAndPassword(email, password);
-                if (result != null) {
-                  print('logged in');
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                    content: Text("Login Successful!!!"),
-                  ));
-                } else {
-                  print('Error logging in');
-                  print(result);
+                try {
+                  User? user = await _auth.registerWithEmailAndPassword(email, password);
+                  if (user != null) {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                      content: Text("Successfully signed up (dev)"),
+                    ));
+                  } else {
+                    toast(context, 'Something went wrong (null)');
+                  }
+                } catch (e) {
+                  toast(context, e.toString());
                 }
               },
-              child: Text('Login'),
+              child: Text('Signup'),
             ),
           ],
         ),

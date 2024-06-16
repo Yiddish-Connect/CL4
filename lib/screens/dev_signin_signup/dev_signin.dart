@@ -1,15 +1,25 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import '../services/auth.dart';
+import 'package:yiddishconnect/utils/helpers.dart';
 
-class SignupPage extends StatefulWidget {
+import '../../services/auth.dart';
+
+class DevSignInPage extends StatefulWidget {
   @override
-  _SignupPageState createState() => _SignupPageState();
+  _DevSignInPageState createState() => _DevSignInPageState();
 }
 
-class _SignupPageState extends State<SignupPage> {
+class _DevSignInPageState extends State<DevSignInPage> {
   final AuthService _auth = AuthService();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,19 +45,20 @@ class _SignupPageState extends State<SignupPage> {
               onPressed: () async {
                 String email = _emailController.text;
                 String password = _passwordController.text;
-                dynamic result =
-                    await _auth.registerWithEmailAndPassword(email, password);
-                if (result != null) {
-                  print('Signed up');
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text("Signup Successful!!!"),
-                  ));
-                } else {
-                  print('Error signing up');
-                  print(result);
+                try {
+                  User? user = await _auth.signInWithEmailAndPassword(email, password);
+                  if (user != null) {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                      content: Text("Login Successful!!!"),
+                    ));
+                  } else {
+                    toast(context, 'Something went wrong (null)');
+                  }
+                } catch (e) {
+                  toast(context, e.toString());
                 }
               },
-              child: Text('Signup'),
+              child: Text('Login'),
             ),
           ],
         ),
