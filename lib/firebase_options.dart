@@ -45,7 +45,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions web = FirebaseOptions(
     apiKey: 'AIzaSyCYg35X-5ocVDYFNSZuH5IoR_NVeUIBcuc',
-    appId: '1:447187951174:web:c6044dd0b05f7477f9b447',
+    appId: '1:447187951174:web:87f8416583c6a578f9b447',
     messagingSenderId: '447187951174',
     projectId: 'ydapp-830fe',
     authDomain: 'ydapp-830fe.firebaseapp.com',
@@ -54,7 +54,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyBA6cONKgiSYXLaVSU0pABzO-vPQ5_4zX0',
-    appId: '1:447187951174:android:8f4a43b5257dba6ff9b447',
+    appId: '1:447187951174:android:61d56137bbc9eb00f9b447',
     messagingSenderId: '447187951174',
     projectId: 'ydapp-830fe',
     storageBucket: 'ydapp-830fe.appspot.com',
@@ -62,19 +62,22 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyCxtYC4xI3m5ZCle-HYLbOXrbjNzsfh46I',
-    appId: '1:447187951174:ios:91f48f6e25a7aba5f9b447',
+    appId: '1:447187951174:ios:c1f9145802338ff7f9b447',
     messagingSenderId: '447187951174',
     projectId: 'ydapp-830fe',
     storageBucket: 'ydapp-830fe.appspot.com',
-    iosBundleId: 'com.example.ydtind',
+    iosClientId: '447187951174-isl6gichoftovpct8jcpcahddfdujd00.apps.googleusercontent.com',
+    iosBundleId: 'com.yiddishland.yiddishconnect',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
     apiKey: 'AIzaSyCxtYC4xI3m5ZCle-HYLbOXrbjNzsfh46I',
-    appId: '1:447187951174:ios:91f48f6e25a7aba5f9b447',
+    appId: '1:447187951174:ios:c1f9145802338ff7f9b447',
     messagingSenderId: '447187951174',
     projectId: 'ydapp-830fe',
     storageBucket: 'ydapp-830fe.appspot.com',
-    iosBundleId: 'com.example.ydtind',
+    iosClientId: '447187951174-isl6gichoftovpct8jcpcahddfdujd00.apps.googleusercontent.com',
+    iosBundleId: 'com.yiddishland.yiddishconnect',
   );
+
 }

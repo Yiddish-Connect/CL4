@@ -1,6 +1,6 @@
 {
-    "name": "ydtind",
-    "short_name": "ydtind",
+    "name": "yiddishconnect",
+    "short_name": "ydconnect",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

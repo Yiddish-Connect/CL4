@@ -1,4 +1,4 @@
-# ydtind
+# Yiddish Connect
 A new Flutter project.
 - android
 - ios
