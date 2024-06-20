@@ -13,11 +13,11 @@ class EmailSignUpScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiSteps(
       steps: [
-        StepInfo(
+        OneStep(
           title: "Step 1: Create account with your Email and password",
           builder: (callback) => _Step1(action: callback),
         ),
-        StepInfo(
+        OneStep(
           title: "Step 2: Verify your Email address",
           builder: (callback) => _Step2(action: callback),
         ),

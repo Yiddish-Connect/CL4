@@ -9,14 +9,24 @@ import '../services/auth.dart';
 ///   @param title: name of the step
 ///   @param builder: lambda function like (callback) => MyWidget(callback). How to build the ActionWidget using a callback function.
 ///   *Note*: By default the callback is always 'MultiStep._next'
-class StepInfo {
+class OneStep {
   final String title;
   final ActionWidget Function(void Function() callback) builder;
-  StepInfo({required this.title, required this.builder});
+  OneStep({required this.title, required this.builder});
 }
 
+/// Example: Widget build(BuildContext context) {
+///     return MultiSteps(
+///       steps: [
+///         StepInfo(title: "Enter your phone number (+1)", builder: (callback) => _Step1(action: callback)),
+///         StepInfo(title: "Are you a real human?", builder: (callback) => _Step1(action: callback)),
+///         StepInfo(title: "Verify login", builder: (callback) => _Step1(action: callback)),
+///       ],
+///     );
+///
+/// Note: MultiSteps doesn't support custom state. Consider using a provider or a InheritedWidget.
 class MultiSteps extends StatefulWidget {
-  final List<StepInfo> steps;
+  final List<OneStep> steps;
   const MultiSteps({super.key, required this.steps});
 
   @override

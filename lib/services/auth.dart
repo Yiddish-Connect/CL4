@@ -1,7 +1,7 @@
 // Put firebase authentication here
+import 'dart:async';
 import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -23,6 +23,8 @@ var actionCodeSettings = ActionCodeSettings(
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
+  FirebaseAuth get auth => _auth;
+
   User? getUser() {
     return _auth.currentUser;
   }
@@ -39,7 +41,7 @@ class AuthService {
     }
   }
 
-  // Sign in with email link (password-less)
+  // TODO: Sign in with email link (password-less)
   Future<void> signInWithEmailLink(String email) async {
     try {
       await _auth.sendSignInLinkToEmail(email: email, actionCodeSettings: actionCodeSettings);
@@ -47,6 +49,91 @@ class AuthService {
     } catch (e) {
       print('Error sending email verification: $e');
       rethrow;
+    }
+  }
+
+  // Sign in with phone number
+  Future<PhoneAuthTokenCrossPlatform> sendCodeToPhoneNumber(String phoneNumber) async {
+    Completer<PhoneAuthTokenCrossPlatform> completer = Completer();
+    // Web
+    if (kIsWeb) {
+      // Wait for the user to complete the reCAPTCHA & for an SMS code to be sent.
+      ConfirmationResult confirmationResult = await _auth.signInWithPhoneNumber(phoneNumber);
+      completer.complete(PhoneAuthTokenWeb(confirmationResult: confirmationResult));
+    } else if (Platform.isAndroid || Platform.isIOS || Platform.isMacOS) {
+      await _auth.verifyPhoneNumber(
+        phoneNumber: phoneNumber,
+        // Doc: https://firebase.flutter.dev/docs/auth/phone
+        verificationCompleted: (PhoneAuthCredential credential) async {
+          // ANDROID ONLY!
+          // This handler will only be called on Android devices which support automatic SMS code resolution.
+          // Sign the user in (or link) with the auto-generated credential
+          completer.complete(PhoneAuthTokenNative(phoneAuthCredential: credential, verificationId: null));
+        },
+        verificationFailed: (FirebaseAuthException e) {
+          // If Firebase returns an error,
+          // for example for an incorrect phone number or if the SMS quota for the project has exceeded, a FirebaseAuthException will be sent to this handler.
+          completer.completeError(e);
+        },
+        codeSent: (String verificationId, int? resendToken) {
+          // When Firebase sends an SMS code to the device, this handler is triggered with a verificationId and resendToken
+          completer.complete(PhoneAuthTokenNative(phoneAuthCredential: null, verificationId: verificationId));
+        },
+        codeAutoRetrievalTimeout: (String verificationId) {
+          print("codeAutoRetrievalTimeout! Now using normal login method instead");
+          completer.complete(PhoneAuthTokenNative(phoneAuthCredential: null, verificationId: verificationId));
+        },
+      );
+    } else {
+      throw PlatformException(code: "invalid-platform", details: "signInWithPhoneNumber() only supports Web, Android, IOS, and MacOS");
+    }
+    return completer.future;
+  }
+
+  Future<User?> signInWithSMSCode(PhoneAuthTokenCrossPlatform token, String smsCode) async {
+    if (kIsWeb) {
+      if (token is! PhoneAuthTokenWeb) {
+        throw PlatformException(code: "invalid-token", details: "PhoneAuthTokenCrossPlatform token should be PhoneAuthTokenWeb on Web");
+      }
+      try {
+        UserCredential userCredential = await token.confirmationResult.confirm(smsCode);
+        return userCredential.user;
+      } catch (e) {
+        rethrow;
+      }
+    } else if (Platform.isAndroid) {
+      if (token is! PhoneAuthTokenNative) {
+        throw PlatformException(code: "invalid-token", details: "PhoneAuthTokenCrossPlatform token should be PhoneAuthTokenNative on Native");
+      }
+      try {
+        if (token.phoneAuthCredential != null) {
+          _auth.signInWithCredential(token.phoneAuthCredential!);
+          return _auth.currentUser;
+        } else if (token.verificationId != null) {
+          PhoneAuthCredential credential = PhoneAuthProvider.credential(verificationId: token.verificationId!, smsCode: smsCode);
+        } else {
+          // This is impossible
+          throw Exception("PhoneAuthTokenNative.verificationId and PhoneAuthTokenNative.phoneAuthTokenNative shouldn't both be null");
+        }
+      } catch (e) {
+        rethrow;
+      }
+    } else if (Platform.isIOS || Platform.isMacOS) {
+      if (token is! PhoneAuthTokenNative) {
+        throw PlatformException(code: "invalid-token", details: "PhoneAuthTokenCrossPlatform token should be PhoneAuthTokenNative on Native");
+      }
+      try {
+        if (token.verificationId != null) {
+          PhoneAuthCredential credential = PhoneAuthProvider.credential(verificationId: token.verificationId!, smsCode: smsCode);
+        } else {
+          // This is impossible
+          throw Exception("PhoneAuthTokenNative.verificationId shouldn't both be null on Apple");
+        }
+      } catch (e) {
+        rethrow;
+      }
+    } else {
+      throw PlatformException(code: "invalid-platform", details: "signInWithSMSCode() only supports Web, Android, IOS, and MacOS");
     }
   }
 
@@ -115,7 +202,6 @@ class AuthService {
     }
   }
 
-
   Future<void> sendPasswordResetEmailTo(String email) async {
     try {
       await _auth.sendPasswordResetEmail(email: email);
@@ -137,3 +223,25 @@ class AuthService {
     }
   }
 }
+
+
+abstract class PhoneAuthTokenCrossPlatform {}
+
+class PhoneAuthTokenWeb extends PhoneAuthTokenCrossPlatform {
+  final ConfirmationResult confirmationResult;
+  PhoneAuthTokenWeb({required this.confirmationResult});
+}
+
+class PhoneAuthTokenNative extends PhoneAuthTokenCrossPlatform {
+  final PhoneAuthCredential? phoneAuthCredential; // Nullable
+  final String? verificationId; // Nullable
+
+  PhoneAuthTokenNative({
+    this.phoneAuthCredential,
+    this.verificationId,
+  }) : assert(
+    (phoneAuthCredential != null) != (verificationId != null),
+    'Either phoneAuthCredential or verificationId must be provided, but not both.',
+  );
+}
+
