@@ -15,25 +15,24 @@ class EmailSignUpScreen extends StatelessWidget {
       steps: [
         StepInfo(
           title: "Step 1: Create account with your Email and password",
-          builder: (callback) => EmailSignUpInput(action: callback)
-          ,
+          builder: (callback) => _Step1(action: callback),
         ),
         StepInfo(
           title: "Step 2: Verify your Email address",
-          builder: (callback) => EmailSignUpVerification(action: callback),
+          builder: (callback) => _Step2(action: callback),
         ),
       ],
     );
   }
 }
 
-// Widget for AuthStep 01: Ask user for email & password
-class EmailSignUpInput extends ActionWidget {
+// Step 1: Ask user for email & password
+class _Step1 extends ActionWidget {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final AuthService _auth = AuthService();
 
-  EmailSignUpInput({super.key, required super.action});
+  _Step1({super.key, required super.action});
 
   @override
   Widget build(BuildContext context) {
@@ -101,9 +100,9 @@ class EmailSignUpInput extends ActionWidget {
   }
 }
 
-// Widget for AuthStep 02: Ask user to click verification link
-class EmailSignUpVerification extends ActionWidget {
-  const EmailSignUpVerification({super.key, required super.action});
+// Step 2: Ask user to click verification link
+class _Step2 extends ActionWidget {
+  const _Step2({super.key, required super.action});
 
   @override
   Widget build(BuildContext context) {
