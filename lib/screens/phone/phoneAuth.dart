@@ -4,8 +4,8 @@ import 'package:yiddishconnect/widgets/yd_multi_steps.dart';
 
 import '../../utils/helpers.dart';
 
-class PhoneAuth extends StatelessWidget {
-  const PhoneAuth({super.key});
+class PhoneAuthScreen extends StatelessWidget {
+  const PhoneAuthScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

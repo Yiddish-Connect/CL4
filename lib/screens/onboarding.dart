@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
-import 'signIn.dart';
+import 'authentication.dart';
 
 class OnboardingScreen extends StatelessWidget {
   @override
@@ -76,7 +76,7 @@ class OnboardingScreen extends StatelessWidget {
                           style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.surface, foregroundColor: Theme.of(context).colorScheme.onSurface),
                           // Sign in => SignInPage
                           onPressed: () {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => SignInScreen()));
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => AuthScreen()));
                           },
                           child: Text("Sign in"),
                           // Don't need to specify the style here.

@@ -5,16 +5,15 @@ import 'package:yiddishconnect/screens/dev_signin_signup/dev_signin.dart';
 import 'package:yiddishconnect/screens/dev_signin_signup/dev_signup.dart';
 import 'package:yiddishconnect/screens/email/emailSignIn.dart';
 import 'package:yiddishconnect/screens/email/emailSignUp.dart';
-import 'package:yiddishconnect/screens/signUp.dart';
+import 'package:yiddishconnect/screens/phone/phoneAuth.dart';
 import 'package:yiddishconnect/services/auth.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
-
 import 'dev_signin_signup/dev_home.dart';
 
-class SignInScreen extends StatelessWidget {
-  AuthService _auth = AuthService();
+class AuthScreen extends StatelessWidget {
+  final AuthService _auth = AuthService();
 
-  SignInScreen({super.key});
+  AuthScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -66,11 +65,29 @@ class SignInScreen extends StatelessWidget {
                       child: ElevatedButton(
                           style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary, foregroundColor: Theme.of(context).colorScheme.onPrimary),
                           onPressed: () {
-                            // TODO: Email sign-in page
-                            // Below is a demo sign-in page for development
                             Navigator.push(context, MaterialPageRoute(builder: (context) => EmailSignInScreen()));
                           },
                           child: Text("Login with Email")
+                        // Don't need to specify the style here.
+                        // The default style here is inherited from ElevatedButton, which will automatically looks for labelMedium
+                      ),
+                    ),
+                  ),
+                ),
+                // Phone Sign-in
+                Padding(
+                  padding: const EdgeInsets.all(5.0),
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: FractionallySizedBox(
+                      widthFactor: 0.6,
+                      child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.secondary, foregroundColor: Theme.of(context).colorScheme.onSecondary),
+                          onPressed: () {
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => PhoneAuthScreen()));
+                          },
+                          child: Text("Login with Phone")
                         // Don't need to specify the style here.
                         // The default style here is inherited from ElevatedButton, which will automatically looks for labelMedium
                       ),
@@ -96,10 +113,9 @@ class SignInScreen extends StatelessWidget {
                       text: TextSpan(style: Theme.of(context).textTheme.labelSmall, text: "Don't have an account?", children: [
                         TextSpan(
                             style: Theme.of(context).textTheme.labelMedium,
-                            text: "Sign up with Email",
+                            text: "Create one with Email",
                             recognizer: TapGestureRecognizer()
                               ..onTap = () {
-                                // TODO: Email sign-up (multiple screens)
                                 Navigator.push(context, MaterialPageRoute(
                                     builder: (context) => EmailSignUpScreen()
                                 ));
