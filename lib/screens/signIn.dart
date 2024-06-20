@@ -100,7 +100,9 @@ class SignInScreen extends StatelessWidget {
                             recognizer: TapGestureRecognizer()
                               ..onTap = () {
                                 // TODO: Email sign-up (multiple screens)
-                                Navigator.push(context, MaterialPageRoute(builder: (context) => AuthFlow()));
+                                Navigator.push(context, MaterialPageRoute(
+                                    builder: (context) => EmailSignUpScreen()
+                                ));
                               })
                       ]),
                     ))
