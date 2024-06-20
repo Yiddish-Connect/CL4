@@ -1,0 +1,118 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
+import 'package:yiddishconnect/utils/helpers.dart';
+import '../screens/dev_signin_signup/dev_home.dart';
+import '../services/auth.dart';
+
+/// Each step needs the following info:
+///   @param title: name of the step
+///   @param builder: lambda function like (callback) => MyWidget(callback). How to build the ActionWidget using a callback function.
+///   *Note*: By default the callback is always 'MultiStep._next'
+class StepInfo {
+  final String title;
+  final ActionWidget Function(void Function() callback) builder;
+  StepInfo({required this.title, required this.builder});
+}
+
+class MultiSteps extends StatefulWidget {
+  final List<StepInfo> steps;
+  const MultiSteps({super.key, required this.steps});
+
+  @override
+  State<MultiSteps> createState() => _MultiStepsState();
+}
+
+class _MultiStepsState extends State<MultiSteps> {
+  final PageController _pageController = PageController();
+  int _page = 0;
+  int _size = 2;
+  Duration _duration = Duration(milliseconds: 300);
+
+  void _next() {
+    if (_page < _size - 1 && _page > -1) {
+      _pageController.animateToPage(_page + 1, duration: _duration, curve: Curves.easeInOut);
+      _page ++;
+    }
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Sign Up"),
+      ),
+      body: PageView(
+        controller: _pageController,
+        onPageChanged: (index) {
+          setState(() {
+            _page = index;
+          });
+        },
+        children: widget.steps.map((step) => stepBuilder(context, step.title, step.builder)).toList(),
+      )
+    );
+  }
+
+  /// @param builder: a lambda function that takes a callback function and create the ActionWidget accordingly.
+  ///   *Extensibility* In MultiSteps, the callback function will always be _next(), which is navigating to next step.
+  ///   But the action that those ActionWidgets will take can be changed.
+  ///
+  /// Example: stepBuilder(context, "Step No.1", (callback) => EmailSignInPage(callback))
+  Widget stepBuilder(BuildContext context, String title, ActionWidget Function(void Function() callback) builder) {
+    return Container(
+      padding: EdgeInsets.all(16),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: EdgeInsets.all(30),
+              child: Text(title, style: Theme.of(context).textTheme.headlineMedium),
+            ),
+            Container(
+                child: builder(_next) // *Extensibility* Replace the _next, if you want each ActionWidget to do something different.
+            )
+          ],
+        )
+    );
+  }
+}
+
+abstract class ActionWidget extends StatelessWidget {
+  final void Function() action;
+
+  const ActionWidget({super.key, required this.action});
+}
+
+
+// class Parent extends StatelessWidget {
+//   final int a = 19;
+//   const Parent({super.key});
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Padding(
+//       padding: const EdgeInsets.all(8.0),
+//       child: Center(child: Sub(num: a)),
+//     );
+//   }
+// }
+//
+// class Sub extends StatelessWidget {
+//   Sub({super.key, required this.num});
+//   int num;
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Text(num.toString());
+//   }
+// }
+//
+//
+

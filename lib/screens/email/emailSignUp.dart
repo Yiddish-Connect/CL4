@@ -3,102 +3,37 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
 import '../../services/auth.dart';
+import '../../widgets/yd_multi_steps.dart';
 import '../dev_signin_signup/dev_home.dart';
 
-class AuthFlow extends StatefulWidget {
-  const AuthFlow({super.key});
-
-  @override
-  State<AuthFlow> createState() => _AuthFlowState();
-}
-
-class _AuthFlowState extends State<AuthFlow> {
-  final PageController _pageController = PageController();
-  int _page = 0;
-  int _size = 2;
-  Duration _duration = Duration(milliseconds: 300);
-
-  void _next() {
-    if (_page < _size - 1 && _page > -1) {
-      _pageController.animateToPage(_page + 1, duration: _duration, curve: Curves.easeInOut);
-      _page ++;
-    }
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
+class EmailSignUpScreen extends StatelessWidget {
+  const EmailSignUpScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Sign Up"),
-      ),
-      body: PageView(
-        controller: _pageController,
-        onPageChanged: (index) {
-          setState(() {
-            _page = index;
-          });
-        },
-        children: [
-          AuthStep(
-            title: "Step 1: Enter your Email and password",
-            child: EmailSignUpInput(next: _next,),
-            onNext: _next,
-          ),
-          AuthStep(
-            title: "Step 2: Verify your email",
-            child: EmailSignUpVerification(),
-            onNext: _next,
-          ),
-        ],
-      )
-    );
-  }
-}
-
-class AuthStep extends StatelessWidget {
-  final String title;
-  final Widget child;
-  final void Function() onNext;
-
-  const AuthStep({super.key, required this.title, required this.child, required this.onNext});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(16),
-      child: Container(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: EdgeInsets.all(30),
-              child: Text(title, style: Theme.of(context).textTheme.headlineMedium),
-            ),
-            Container(
-              child: child
-            )
-          ],
-        )
-      ),
-
+    return MultiSteps(
+      steps: [
+        StepInfo(
+          title: "Step 1: Create account with your Email and password",
+          builder: (callback) => EmailSignUpInput(action: callback)
+          ,
+        ),
+        StepInfo(
+          title: "Step 2: Verify your Email address",
+          builder: (callback) => EmailSignUpVerification(action: callback),
+        ),
+      ],
     );
   }
 }
 
 // Widget for AuthStep 01: Ask user for email & password
-class EmailSignUpInput extends StatelessWidget {
-  final void Function() next;
+class EmailSignUpInput extends ActionWidget {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final AuthService _auth = AuthService();
 
-  EmailSignUpInput({super.key, required this.next});
+  EmailSignUpInput({super.key, required super.action});
 
   @override
   Widget build(BuildContext context) {
@@ -146,13 +81,13 @@ class EmailSignUpInput extends StatelessWidget {
                       if (user != null) {
                         await user.sendEmailVerification();
                         toast(context, "A verification email has been sent to your address");
-                        next();
+                        action();
                       } else {
                         toast(context, "Something went wrong (null)");
                       }
                     } catch (e) {
                       toast(context, e.toString());
-                      next(); // This is for debug purpose. TODO: delete this
+                      action(); // This is for debug purpose. TODO: delete this
                     }
                   },
                   child: Text('Register'),
@@ -167,8 +102,8 @@ class EmailSignUpInput extends StatelessWidget {
 }
 
 // Widget for AuthStep 02: Ask user to click verification link
-class EmailSignUpVerification extends StatelessWidget {
-  const EmailSignUpVerification({super.key});
+class EmailSignUpVerification extends ActionWidget {
+  const EmailSignUpVerification({super.key, required super.action});
 
   @override
   Widget build(BuildContext context) {
@@ -203,7 +138,7 @@ class EmailSignUpVerification extends StatelessWidget {
               ))
           ),
           Container(
-            padding: EdgeInsets.only(top: 50),
+              padding: EdgeInsets.only(top: 50),
               child: SizedBox(
                 height: 50,
                 child: FractionallySizedBox(
@@ -224,5 +159,3 @@ class EmailSignUpVerification extends StatelessWidget {
     );
   }
 }
-
-
