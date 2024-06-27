@@ -18,9 +18,9 @@ class OneStep {
 /// Example: Widget build(BuildContext context) {
 ///     return MultiSteps(
 ///       steps: [
-///         StepInfo(title: "Enter your phone number (+1)", builder: (callback) => _Step1(action: callback)),
-///         StepInfo(title: "Are you a real human?", builder: (callback) => _Step1(action: callback)),
-///         StepInfo(title: "Verify login", builder: (callback) => _Step1(action: callback)),
+///         OneStep(title: "Enter your phone number (+1)", builder: (callback) => _Step1(action: callback)),
+///         OneStep(title: "Are you a real human?", builder: (callback) => _Step1(action: callback)),
+///         OneStep(title: "Verify login", builder: (callback) => _Step1(action: callback)),
 ///       ],
 ///     );
 ///
@@ -49,14 +49,16 @@ class _MultiStepsState extends State<MultiSteps> {
   @override
   void dispose() {
     _pageController.dispose();
+    print("MultiSteps disposed...");
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    print("MultiSteps built...");
     return Scaffold(
       appBar: AppBar(
-        title: Text("Sign Up"),
+        title: Text("Register"),
       ),
       body: PageView(
         controller: _pageController,
@@ -65,7 +67,7 @@ class _MultiStepsState extends State<MultiSteps> {
             _page = index;
           });
         },
-        children: widget.steps.map((step) => stepBuilder(context, step.title, step.builder)).toList(),
+        children: widget.steps.asMap().entries.map((stepEntry) => stepBuilder(context, stepEntry.value.title, stepEntry.value.builder, stepEntry.key)).toList(),
       )
     );
   }
@@ -75,8 +77,10 @@ class _MultiStepsState extends State<MultiSteps> {
   ///   But the action that those ActionWidgets will take can be changed.
   ///
   /// Example: stepBuilder(context, "Step No.1", (callback) => EmailSignInPage(callback))
-  Widget stepBuilder(BuildContext context, String title, ActionWidget Function(void Function() callback) builder) {
+  Widget stepBuilder(BuildContext context, String title, ActionWidget Function(void Function() callback) builder, int pageIndex) {
+    print("stepBuilder of $title ...");
     return Container(
+      key: PageStorageKey<String>('page_$pageIndex'),
       padding: EdgeInsets.all(16),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

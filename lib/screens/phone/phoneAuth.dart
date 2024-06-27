@@ -22,6 +22,7 @@ class PhoneAuthScreen extends StatelessWidget {
         steps: [
           OneStep(title: "Enter your phone number (+1)", builder: (callback) => _Step1(action: callback)),
           OneStep(title: "Enter 4-digits code", builder: (callback) => _Step2(action: callback)),
+          OneStep(title: "testing", builder: (callback) => _Step3(action: callback)),
         ],
       ),
     );
@@ -30,17 +31,29 @@ class PhoneAuthScreen extends StatelessWidget {
 
 class PhoneProvider extends ChangeNotifier {
   String _phoneNumber = "";
-  PhoneAuthTokenCrossPlatform? _token;
+  ConfirmationResult? _confirmationResult; // Web only.
+  PhoneAuthCredential? _phoneAuthCredential; // Android Auto-Resolution. phoneAuthCredential != null <=> Android auto complete successful.
+  String? _verificationId; // Native only.
 
   String get phoneNumber => _phoneNumber;
-  PhoneAuthTokenCrossPlatform? get token => _token;
+  ConfirmationResult? get confirmationResult => _confirmationResult;
+  PhoneAuthCredential? get phoneAuthCredential => _phoneAuthCredential;
+  String? get verificationId => _verificationId;
 
   set phoneNumber (String newPhoneNumber) {
     _phoneNumber = newPhoneNumber;
     notifyListeners();
   }
-  set token (PhoneAuthTokenCrossPlatform? newToken) {
-    _token = newToken;
+  set confirmationResult (ConfirmationResult? newConfirmationResult) {
+    _confirmationResult = newConfirmationResult;
+    notifyListeners();
+  }
+  set phoneAuthCredential (PhoneAuthCredential? newPhoneAuthCredential) {
+    _phoneAuthCredential = newPhoneAuthCredential;
+    notifyListeners();
+  }
+  set verificationId (String? newVerificationId) {
+    _verificationId = newVerificationId;
     notifyListeners();
   }
 }
@@ -54,6 +67,7 @@ class _Step1 extends ActionWidget {
 
   @override
   Widget build(BuildContext context) {
+    print("_Step1 built...");
     return Container(
       padding: EdgeInsets.all(30),
       constraints: BoxConstraints(maxWidth: 600),
@@ -83,25 +97,38 @@ class _Step1 extends ActionWidget {
                   child: ElevatedButton(
                       style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary, foregroundColor: Theme.of(context).colorScheme.onPrimary),
                       onPressed: () async {
+                        print("onPressed() called...");
                         try {
                           String phoneNumber = context.read<PhoneProvider>().phoneNumber;
                           // Might take some time in Android. Because Firebase will first try to do auto-complete first before codeAutoRetrievalTimeout() happens.
                           toast(context, "SMS code sent to $phoneNumber");
-                          PhoneAuthTokenCrossPlatform token = await _auth.sendCodeToPhoneNumber(phoneNumber);
-                          // if (Platform.isAndroid && token is PhoneAuthTokenNative && token.phoneAuthCredential != null) {
-                          //   toast(context, "Successfully auto-fill SMS code");
-                          //   await _auth.auth.signInWithCredential(token.phoneAuthCredential!);
-                          //   Navigator.push(context, MaterialPageRoute(builder: (context) => DevHome()));
-                          // }
-                          // // else go through the normal 'enter sms code' process
-                          Provider.of<PhoneProvider>(context, listen: false).token = token;
-
-                          action();
+                          void onConfirmationResult (ConfirmationResult confirmationResult) {
+                            Provider.of<PhoneProvider>(context, listen: false).confirmationResult = confirmationResult;
+                          }
+                          void onCodeSent (String verificationId) {
+                            print("onCodeSent() called...");
+                            if (!context.mounted) {
+                              throw Exception("onCodeSent(): context.mounted is false!!");
+                              return;
+                            }
+                            Provider.of<PhoneProvider>(context, listen: false).verificationId = verificationId;
+                            action(); // go to next page
+                          }
+                          void onAutoResolution (PhoneAuthCredential credential) {
+                            Provider.of<PhoneProvider>(context, listen: false).phoneAuthCredential = credential;
+                            print("onAutoResolution() called...");
+                            if (!context.mounted) {
+                              throw Exception("onCodeSent(): context.mounted is false!!");
+                              return;
+                            }
+                          }
+                          await _auth.sendCodeToPhoneNumber(phoneNumber, onConfirmationResult, onCodeSent, onAutoResolution);
                         } catch (e) {
                           toast(context, e.toString());
                         }
                       },
-                      child: Text("Send SMS code")),
+                      child: Text("Send SMS code")
+                  ),
                 ),
               )
           )
@@ -120,6 +147,7 @@ class _Step2 extends ActionWidget {
 
   @override
   Widget build(BuildContext context) {
+    print("_Step2 built...");
     return Container(
       padding: EdgeInsets.all(30),
       constraints: BoxConstraints(maxWidth: 600),
@@ -144,8 +172,7 @@ class _Step2 extends ActionWidget {
                 controller: _codeController,
                 keyboardType: TextInputType.phone,
                 decoration: InputDecoration(
-                  labelText: '4-digits code',
-                  hintText: '0000',
+                  labelText: '6-digits code',
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.phone),
                 ),
@@ -162,12 +189,12 @@ class _Step2 extends ActionWidget {
                       onPressed: () async {
                         try {
                           String smsCode = _codeController.text;
-                          if (context.read<PhoneProvider>().token == null) {
-                            throw Exception("token is still null on _Step2");
-                          }
-                          PhoneAuthTokenCrossPlatform token = context.read<PhoneProvider>().token!;
-
-                          User? user = await _auth.signInWithSMSCode(token, smsCode);
+                          User? user = await _auth.signInWithSMSCode(
+                            smsCode: smsCode,
+                            verificationId: context.read<PhoneProvider>().verificationId,
+                            phoneAuthCredential: context.read<PhoneProvider>().phoneAuthCredential,
+                            confirmationResult: context.read<PhoneProvider>().confirmationResult
+                          );
                           if (user != null) {
                             Navigator.push(context, MaterialPageRoute(builder: (context) => DevHome()));
                           } else {
@@ -192,6 +219,7 @@ class _Step3 extends ActionWidget {
 
   @override
   Widget build(BuildContext context) {
+    print("_Step3 built");
     return const Placeholder();
   }
 }
