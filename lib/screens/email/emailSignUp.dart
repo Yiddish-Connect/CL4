@@ -80,26 +80,18 @@ class _Step1 extends ActionWidget {
             ),
           ),
           Container(
-            padding: EdgeInsets.only(top: 50),
+            padding: EdgeInsets.only(top: 40),
             child: SizedBox(
               height: 50,
               child: FractionallySizedBox(
                 widthFactor: 0.6,
                 child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: Theme
-                      .of(context)
-                      .colorScheme
-                      .primary, foregroundColor: Theme
-                      .of(context)
-                      .colorScheme
-                      .onPrimary),
+                  style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary, foregroundColor: Theme.of(context).colorScheme.onPrimary),
                   onPressed: () async {
                     String email = _emailController.text;
                     String password = _passwordController.text;
                     try {
-                      Provider
-                          .of<EmailProvider>(context, listen: false)
-                          .email = email; // store the email in EmailProvider
+                      Provider.of<EmailProvider>(context, listen: false).email = email; // store the email in EmailProvider
                       User? user = await _auth.registerWithEmailAndPassword(email, password);
                       if (user != null) {
                         await user.sendEmailVerification();
@@ -144,50 +136,34 @@ class _Step2 extends ActionWidget {
                 child: Text(
                   "A verification Email has been sent to ${emailProvider.email}",
                   textAlign: TextAlign.center,
-                  style: Theme
-                      .of(context)
-                      .textTheme
-                      .titleLarge,
+                  style: Theme.of(context).textTheme.titleLarge,
                 ),
               ),
               Container(
                   padding: EdgeInsets.all(5),
                   child: RichText(
-                      text: TextSpan(text: "Didn't receive the email?", style: Theme
-                          .of(context)
-                          .textTheme
-                          .labelMedium, children: [
-                        TextSpan(
-                            text: "Resend",
-                            style: Theme
-                                .of(context)
-                                .textTheme
-                                .labelMedium,
-                            recognizer: TapGestureRecognizer()
-                              ..onTap = () async {
-                                try {
-                                  await _auth.getUser()?.sendEmailVerification();
-                                  toast(context, "We have resent another verification email to ${emailProvider.email}");
-                                }
-                                catch (e) {
-                                  toast(context, e.toString());
-                                }
-                              })
-                      ]))),
+                      text: TextSpan(text: "Didn't receive the email?", style: Theme.of(context).textTheme.labelMedium, children: [
+                    TextSpan(
+                        text: "Resend",
+                        style: Theme.of(context).textTheme.labelMedium,
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () async {
+                            try {
+                              await _auth.getUser()?.sendEmailVerification();
+                              toast(context, "We have resent another verification email to ${emailProvider.email}");
+                            } catch (e) {
+                              toast(context, e.toString());
+                            }
+                          })
+                  ]))),
               Container(
-                  padding: EdgeInsets.only(top: 50),
+                  padding: EdgeInsets.only(top: 40),
                   child: SizedBox(
                     height: 50,
                     child: FractionallySizedBox(
                       widthFactor: 0.6,
                       child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(backgroundColor: Theme
-                              .of(context)
-                              .colorScheme
-                              .primary, foregroundColor: Theme
-                              .of(context)
-                              .colorScheme
-                              .onPrimary),
+                          style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary, foregroundColor: Theme.of(context).colorScheme.onPrimary),
                           onPressed: () {
                             if (_auth.getUser() == null) {
                               toast(context, "Verification Failed");

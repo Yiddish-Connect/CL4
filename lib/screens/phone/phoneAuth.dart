@@ -20,9 +20,9 @@ class PhoneAuthScreen extends StatelessWidget {
       create: (context) => PhoneProvider(),
       child: MultiSteps(
         steps: [
-          OneStep(title: "Enter your phone number (+1)", builder: (callback) => _Step1(action: callback)),
-          OneStep(title: "Enter 4-digits code", builder: (callback) => _Step2(action: callback)),
-          OneStep(title: "testing", builder: (callback) => _Step3(action: callback)),
+          OneStep(title: "Step 1: Enter your phone number (+1)", builder: (callback) => _Step1(action: callback)),
+          OneStep(title: "Step 2: Enter 6-digits code", builder: (callback) => _Step2(action: callback)),
+          // OneStep(title: "testing", builder: (callback) => _Step3(action: callback)),
         ],
       ),
     );
@@ -89,7 +89,7 @@ class _Step1 extends ActionWidget {
             )
           ),
           Container(
-              padding: EdgeInsets.only(top: 50),
+              padding: EdgeInsets.only(top: 40),
               child: SizedBox(
                 height: 50,
                 child: FractionallySizedBox(
@@ -173,13 +173,14 @@ class _Step2 extends ActionWidget {
                 keyboardType: TextInputType.phone,
                 decoration: InputDecoration(
                   labelText: '6-digits code',
+                  hintText: "123456",
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.phone),
                 ),
               )
           ),
           Container(
-              padding: EdgeInsets.only(top: 50),
+              padding: EdgeInsets.only(top: 40),
               child: SizedBox(
                 height: 50,
                 child: FractionallySizedBox(

@@ -86,8 +86,8 @@ class _MultiStepsState extends State<MultiSteps> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: EdgeInsets.all(30),
-              child: Text(title, style: Theme.of(context).textTheme.headlineMedium),
+              padding: EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+              child: Text(title, textAlign: TextAlign.center, style: Theme.of(context).textTheme.headlineMedium),
             ),
             Container(
                 child: builder(_next) // *Extensibility* Replace the _next, if you want each ActionWidget to do something different.
