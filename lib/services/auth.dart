@@ -63,6 +63,7 @@ class AuthService {
     if (kIsWeb) {
       // Wait for the user to complete the reCAPTCHA & for an SMS code to be sent.
       ConfirmationResult confirmationResult = await _auth.signInWithPhoneNumber(phoneNumber);
+      onConfirmationResult(confirmationResult);
     } else if (Platform.isAndroid || Platform.isIOS || Platform.isMacOS) {
       await _auth.verifyPhoneNumber(
         phoneNumber: phoneNumber,
@@ -107,11 +108,11 @@ class AuthService {
         rethrow;
       }
     } else if (Platform.isAndroid || Platform.isIOS || Platform.isMacOS) {
-      if (verificationId == null) {
-        throw Exception("signInWithSMSCode: verificationId is null in Native");
+      if (verificationId == null && phoneAuthCredential == null) {
+        throw Exception("signInWithSMSCode: verificationId & phoneAuthCredential are both null in Native");
       }
       try {
-        PhoneAuthCredential credential = PhoneAuthProvider.credential(verificationId: verificationId, smsCode: smsCode);
+        PhoneAuthCredential credential = phoneAuthCredential ?? PhoneAuthProvider.credential(verificationId: verificationId!, smsCode: smsCode);
         UserCredential userCredential = await _auth.signInWithCredential(credential);
         return userCredential.user;
       } catch (e) {
