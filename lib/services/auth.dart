@@ -53,82 +53,67 @@ class AuthService {
   }
 
   // Sign in with phone number
-  Future<PhoneAuthTokenCrossPlatform> sendCodeToPhoneNumber(String phoneNumber) async {
-    Completer<PhoneAuthTokenCrossPlatform> completer = Completer();
+  Future<void> sendCodeToPhoneNumber(
+      String phoneNumber,
+      void Function (ConfirmationResult confirmationResult) onConfirmationResult, // Web only
+      void Function(String verificationId) onCodeSent, // Native only
+      void Function(PhoneAuthCredential credential) onAutoResolution // Android only
+      ) async {
     // Web
     if (kIsWeb) {
       // Wait for the user to complete the reCAPTCHA & for an SMS code to be sent.
       ConfirmationResult confirmationResult = await _auth.signInWithPhoneNumber(phoneNumber);
-      completer.complete(PhoneAuthTokenWeb(confirmationResult: confirmationResult));
     } else if (Platform.isAndroid || Platform.isIOS || Platform.isMacOS) {
       await _auth.verifyPhoneNumber(
         phoneNumber: phoneNumber,
         // Doc: https://firebase.flutter.dev/docs/auth/phone
-        verificationCompleted: (PhoneAuthCredential credential) async {
+        verificationCompleted: (PhoneAuthCredential credential) {
           // ANDROID ONLY!
           // This handler will only be called on Android devices which support automatic SMS code resolution.
           // Sign the user in (or link) with the auto-generated credential
-          completer.complete(PhoneAuthTokenNative(phoneAuthCredential: credential, verificationId: null));
+          print("verificationCompleted...");
+          onAutoResolution(credential);
         },
         verificationFailed: (FirebaseAuthException e) {
           // If Firebase returns an error,
           // for example for an incorrect phone number or if the SMS quota for the project has exceeded, a FirebaseAuthException will be sent to this handler.
-          completer.completeError(e);
+          print("verificationFailed...");
+          throw (e);
         },
-        codeSent: (String verificationId, int? resendToken) {
+        codeSent: (String verificationId, int? resendToken) async {
           // When Firebase sends an SMS code to the device, this handler is triggered with a verificationId and resendToken
-          completer.complete(PhoneAuthTokenNative(phoneAuthCredential: null, verificationId: verificationId));
+          // (A resendToken is only supported on Android devices, iOS devices will always return a null value).
+          print("codeSent...");
+          onCodeSent(verificationId);
         },
         codeAutoRetrievalTimeout: (String verificationId) {
           print("codeAutoRetrievalTimeout! Now using normal login method instead");
-          completer.complete(PhoneAuthTokenNative(phoneAuthCredential: null, verificationId: verificationId));
         },
       );
     } else {
       throw PlatformException(code: "invalid-platform", details: "signInWithPhoneNumber() only supports Web, Android, IOS, and MacOS");
     }
-    return completer.future;
   }
 
-  Future<User?> signInWithSMSCode(PhoneAuthTokenCrossPlatform token, String smsCode) async {
+  Future<User?> signInWithSMSCode({required String smsCode, ConfirmationResult? confirmationResult, PhoneAuthCredential? phoneAuthCredential, String? verificationId}) async {
     if (kIsWeb) {
-      if (token is! PhoneAuthTokenWeb) {
-        throw PlatformException(code: "invalid-token", details: "PhoneAuthTokenCrossPlatform token should be PhoneAuthTokenWeb on Web");
+      if (confirmationResult == null) {
+        throw Exception("signInWithSMSCode: confirmationResult is null in Web");
       }
       try {
-        UserCredential userCredential = await token.confirmationResult.confirm(smsCode);
+        UserCredential userCredential = await confirmationResult.confirm(smsCode);
         return userCredential.user;
       } catch (e) {
         rethrow;
       }
-    } else if (Platform.isAndroid) {
-      if (token is! PhoneAuthTokenNative) {
-        throw PlatformException(code: "invalid-token", details: "PhoneAuthTokenCrossPlatform token should be PhoneAuthTokenNative on Native");
+    } else if (Platform.isAndroid || Platform.isIOS || Platform.isMacOS) {
+      if (verificationId == null) {
+        throw Exception("signInWithSMSCode: verificationId is null in Native");
       }
       try {
-        if (token.phoneAuthCredential != null) {
-          _auth.signInWithCredential(token.phoneAuthCredential!);
-          return _auth.currentUser;
-        } else if (token.verificationId != null) {
-          PhoneAuthCredential credential = PhoneAuthProvider.credential(verificationId: token.verificationId!, smsCode: smsCode);
-        } else {
-          // This is impossible
-          throw Exception("PhoneAuthTokenNative.verificationId and PhoneAuthTokenNative.phoneAuthTokenNative shouldn't both be null");
-        }
-      } catch (e) {
-        rethrow;
-      }
-    } else if (Platform.isIOS || Platform.isMacOS) {
-      if (token is! PhoneAuthTokenNative) {
-        throw PlatformException(code: "invalid-token", details: "PhoneAuthTokenCrossPlatform token should be PhoneAuthTokenNative on Native");
-      }
-      try {
-        if (token.verificationId != null) {
-          PhoneAuthCredential credential = PhoneAuthProvider.credential(verificationId: token.verificationId!, smsCode: smsCode);
-        } else {
-          // This is impossible
-          throw Exception("PhoneAuthTokenNative.verificationId shouldn't both be null on Apple");
-        }
+        PhoneAuthCredential credential = PhoneAuthProvider.credential(verificationId: verificationId, smsCode: smsCode);
+        UserCredential userCredential = await _auth.signInWithCredential(credential);
+        return userCredential.user;
       } catch (e) {
         rethrow;
       }
@@ -225,23 +210,4 @@ class AuthService {
 }
 
 
-abstract class PhoneAuthTokenCrossPlatform {}
-
-class PhoneAuthTokenWeb extends PhoneAuthTokenCrossPlatform {
-  final ConfirmationResult confirmationResult;
-  PhoneAuthTokenWeb({required this.confirmationResult});
-}
-
-class PhoneAuthTokenNative extends PhoneAuthTokenCrossPlatform {
-  final PhoneAuthCredential? phoneAuthCredential; // Nullable
-  final String? verificationId; // Nullable
-
-  PhoneAuthTokenNative({
-    this.phoneAuthCredential,
-    this.verificationId,
-  }) : assert(
-    (phoneAuthCredential != null) != (verificationId != null),
-    'Either phoneAuthCredential or verificationId must be provided, but not both.',
-  );
-}
 

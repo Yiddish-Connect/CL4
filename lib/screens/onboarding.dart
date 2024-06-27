@@ -78,7 +78,7 @@ class OnboardingScreen extends StatelessWidget {
                           onPressed: () {
                             Navigator.push(context, MaterialPageRoute(builder: (context) => AuthScreen()));
                           },
-                          child: Text("Sign in"),
+                          child: Text("Login"),
                           // Don't need to specify the style here.
                           // The default style here is inherited from ElevatedButton, which will automatically looks for labelMedium
                         ),

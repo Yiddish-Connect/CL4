@@ -14,7 +14,7 @@ class EmailSignUpScreen extends StatelessWidget {
     return MultiSteps(
       steps: [
         OneStep(
-          title: "Step 1: Create account with your Email and password",
+          title: "Step 1: Enter your Email and password",
           builder: (callback) => _Step1(action: callback),
         ),
         OneStep(

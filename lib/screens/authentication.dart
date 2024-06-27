@@ -106,11 +106,11 @@ class AuthScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                // The 'Don't have an account? Sign Up'
+                // The 'Don't have an account? Create one with Email'
                 Padding(
                     padding: const EdgeInsets.all(15.0),
                     child: RichText(
-                      text: TextSpan(style: Theme.of(context).textTheme.labelSmall, text: "Don't have an account?", children: [
+                      text: TextSpan(style: Theme.of(context).textTheme.labelSmall, text: "Don't have an account? ", children: [
                         TextSpan(
                             style: Theme.of(context).textTheme.labelMedium,
                             text: "Create one with Email",
