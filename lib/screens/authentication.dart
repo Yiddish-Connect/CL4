@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:yiddishconnect/screens/dev_signin_signup/dev_signin.dart';
 import 'package:yiddishconnect/screens/dev_signin_signup/dev_signup.dart';
 import 'package:yiddishconnect/screens/email/emailSignIn.dart';
@@ -65,7 +66,7 @@ class AuthScreen extends StatelessWidget {
                       child: ElevatedButton(
                           style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary, foregroundColor: Theme.of(context).colorScheme.onPrimary),
                           onPressed: () {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => EmailSignInScreen()));
+                            context.go("/auth/email/sign-in");
                           },
                           child: Row(
                             mainAxisSize: MainAxisSize.max,
@@ -97,7 +98,7 @@ class AuthScreen extends StatelessWidget {
                       child: ElevatedButton(
                           style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.secondary, foregroundColor: Theme.of(context).colorScheme.onSecondary),
                           onPressed: () {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => PhoneAuthScreen()));
+                            context.go("/auth/phone");
                           },
                           child: Row(
                             mainAxisSize: MainAxisSize.max,
@@ -140,9 +141,7 @@ class AuthScreen extends StatelessWidget {
                             text: "Create one with Email",
                             recognizer: TapGestureRecognizer()
                               ..onTap = () {
-                                Navigator.push(context, MaterialPageRoute(
-                                    builder: (context) => EmailSignUpScreen()
-                                ));
+                                context.go("/auth/email/sign-up");
                               })
                       ]),
                     ))
@@ -158,11 +157,14 @@ class AuthScreen extends StatelessWidget {
     return ElevatedButton(
         style: ElevatedButton.styleFrom(backgroundColor: Color(0xFFF2F2F2), foregroundColor: Color(0xFF1F1F1F)),
         onPressed: () async {
+          if (!context.mounted) {
+            throw Exception("Google Login Button: context is not mounted!!");
+          }
           try {
             User? user = await _auth.signInWithGoogle();
             if (user != null) {
               toast(context, "Successfully signed in with Google");
-              Navigator.push(context, MaterialPageRoute(builder: (context) => DevHome()));
+              context.go("/home");
             } else {
               toast(context, "Something went wrong (null)");
             }

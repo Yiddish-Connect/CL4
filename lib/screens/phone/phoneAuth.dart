@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:yiddishconnect/widgets/yd_multi_steps.dart';
 import 'dart:io';
@@ -227,6 +228,9 @@ class _Step2 extends ActionWidget {
                                 .colorScheme
                                 .onPrimary),
                             onPressed: () async {
+                              if (!context.mounted) {
+                                throw Exception("Verify Button: context.mounted is false!!");
+                              }
                               try {
                                 String smsCode = codeController.text;
                                 User? user = await _auth.signInWithSMSCode(
@@ -242,7 +246,7 @@ class _Step2 extends ActionWidget {
                                         .confirmationResult
                                 );
                                 if (user != null) {
-                                  Navigator.push(context, MaterialPageRoute(builder: (context) => DevHome()));
+                                  context.go("/home");
                                 } else {
                                   toast(context, "Something went wrong (null)");
                                 }

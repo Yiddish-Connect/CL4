@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
 import '../../services/auth.dart';
 import '../dev_signin_signup/dev_home.dart';
@@ -94,7 +95,7 @@ class _EmailSignInScreenState extends State<EmailSignInScreen> {
                             User? user = await _auth.signInWithEmailAndPassword(email, password);
                             if (user != null) {
                               toast(context, "Successfully signed in with Email");
-                              Navigator.push(context, MaterialPageRoute(builder: (context) => DevHome()));
+                              context.go("/home");
                             } else {
                               toast(context, "Something went wrong (null)");
                             }

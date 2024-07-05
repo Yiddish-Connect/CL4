@@ -1,8 +1,14 @@
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:yiddishconnect/screens/authentication.dart';
+import 'package:yiddishconnect/screens/dev_signin_signup/dev_home.dart';
+import 'package:yiddishconnect/screens/email/emailSignIn.dart';
+import 'package:yiddishconnect/screens/email/emailSignUp.dart';
 import 'package:yiddishconnect/screens/onboarding.dart';
+import 'package:yiddishconnect/screens/phone/phoneAuth.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -20,7 +26,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (context) => MyAppState(),
-      child: MaterialApp(
+      child: MaterialApp.router(
         title: 'Yiddish Connect',
         theme: ThemeData(
           useMaterial3: true,
@@ -43,7 +49,7 @@ class MyApp extends StatelessWidget {
             labelSmall: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w500, fontSize: 11.0),
           ),
         ),
-        home: OnboardingScreen(),
+        routerConfig: _router,
       ),
     );
   }
@@ -52,4 +58,35 @@ class MyApp extends StatelessWidget {
 class MyAppState extends ChangeNotifier {
   var current = WordPair.random(); // a random word
 }
+
+final _router = GoRouter(
+  routes: [
+    GoRoute(
+      path: '/',
+      builder: (context, state) => const OnboardingScreen(),
+    ),
+    GoRoute(
+      path: '/auth',
+      builder: (context, state) => AuthScreen(),
+      routes: [
+        GoRoute(
+          path: 'phone',
+          builder: (context, state) => PhoneAuthScreen(),
+        ),
+        GoRoute(
+          path: 'email/sign-in',
+          builder: (context, state) => EmailSignInScreen(),
+        ),
+        GoRoute(
+          path: 'email/sign-up',
+          builder: (context, state) => EmailSignUpScreen(),
+        ),
+      ]
+    ),
+    GoRoute(
+      path: '/home',
+      builder: (context, state) => DevHome(),
+    ),
+  ],
+);
 
