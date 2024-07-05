@@ -36,8 +36,14 @@ class MultiSteps extends StatefulWidget {
 class _MultiStepsState extends State<MultiSteps> {
   final PageController _pageController = PageController();
   int _page = 0;
-  int _size = 2;
+  late int _size;
   Duration _duration = Duration(milliseconds: 300);
+
+  @override
+  void initState() {
+    super.initState();
+    _size = widget.steps.length;
+  }
 
   void _next() {
     if (_page < _size - 1 && _page > -1) {
@@ -49,13 +55,13 @@ class _MultiStepsState extends State<MultiSteps> {
   @override
   void dispose() {
     _pageController.dispose();
-    print("MultiSteps disposed...");
+    // print("MultiSteps disposed...");
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    print("MultiSteps built...");
+    // print("MultiSteps built...");
     return Scaffold(
       appBar: AppBar(
         title: Text("Register"),
@@ -78,7 +84,7 @@ class _MultiStepsState extends State<MultiSteps> {
   ///
   /// Example: stepBuilder(context, "Step No.1", (callback) => EmailSignInPage(callback))
   Widget stepBuilder(BuildContext context, String title, ActionWidget Function(void Function() callback) builder, int pageIndex) {
-    print("stepBuilder of $title ...");
+    // print("stepBuilder of $title ...");
     return Container(
       key: PageStorageKey<String>('page_$pageIndex'),
       padding: EdgeInsets.all(16),

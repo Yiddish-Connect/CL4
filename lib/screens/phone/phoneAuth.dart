@@ -75,7 +75,7 @@ class _Step1 extends ActionWidget {
 
   @override
   Widget build(BuildContext context) {
-    print("_Step1 built...");
+    // print("_Step1 built...");
     return Container(
       padding: EdgeInsets.all(30),
       constraints: BoxConstraints(maxWidth: 600),
@@ -117,7 +117,7 @@ class _Step1 extends ActionWidget {
                           .colorScheme
                           .onPrimary),
                       onPressed: () async {
-                        print("onPressed() called...");
+                        // print("onPressed() called...");
                         try {
                           String phoneNumber = context
                               .read<PhoneProvider>()
@@ -179,7 +179,7 @@ class _Step2 extends ActionWidget {
 
   @override
   Widget build(BuildContext context) {
-    print("_Step2 built...");
+    // print("_Step2 built...");
     return Consumer<PhoneProvider>(
         builder: (context, phoneNumberProvider, child) {
           final TextEditingController codeController = TextEditingController(text: phoneNumberProvider.phoneAuthCredential != null ? phoneNumberProvider.phoneAuthCredential?.smsCode ?? "" : "");
@@ -271,7 +271,7 @@ class _Step3 extends ActionWidget {
 
   @override
   Widget build(BuildContext context) {
-  print("_Step3 built");
+  // print("_Step3 built");
   return const Placeholder();
   }
 }
