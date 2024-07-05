@@ -21,6 +21,7 @@ class PhoneAuthScreen extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (context) => PhoneProvider(),
       child: MultiSteps(
+        title: "Phone Login",
         steps: [
           OneStep(title: "Step 1: Enter your phone number (+1)", builder: (callback) => _Step1(action: callback)),
           OneStep(title: "Step 2: Enter 6-digits code", builder: (callback) => _Step2(action: callback)),

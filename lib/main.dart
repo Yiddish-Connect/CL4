@@ -9,6 +9,7 @@ import 'package:yiddishconnect/screens/email/emailSignIn.dart';
 import 'package:yiddishconnect/screens/email/emailSignUp.dart';
 import 'package:yiddishconnect/screens/onboarding.dart';
 import 'package:yiddishconnect/screens/phone/phoneAuth.dart';
+import 'package:yiddishconnect/screens/preference/preference.dart';
 import 'package:yiddishconnect/services/auth.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
 import 'firebase_options.dart';
@@ -94,6 +95,11 @@ final _router = GoRouter(
       name: "homeScreen",
       path: '/home',
       builder: (context, state) => DevHomeScreen(),
+    ),
+    GoRoute(
+      name: "preferenceScreen",
+      path: '/preference',
+      builder: (context, state) => PreferenceScreen(),
     ),
   ],
 

@@ -16,6 +16,7 @@ class EmailSignUpScreen extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (context) => EmailProvider(),
       child: MultiSteps(
+        title: "Email Register",
         steps: [
           OneStep(
             title: "Step 1: Enter your Email and password",

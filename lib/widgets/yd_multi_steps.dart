@@ -5,29 +5,33 @@ import 'package:yiddishconnect/utils/helpers.dart';
 import '../screens/dev_signin_signup/dev_home.dart';
 import '../services/auth.dart';
 
-/// Each step needs the following info:
-///   @param title: name of the step
-///   @param builder: lambda function like (callback) => MyWidget(callback). How to build the ActionWidget using a callback function.
-///   *Note*: By default the callback is always 'MultiStep._next'
 class OneStep {
   final String title;
   final ActionWidget Function(void Function() callback) builder;
+/// Each step needs the following info:
+///   @param title: name of the step
+///   @param builder: lambda function like (callback) => MyWidget(callback). How to build the ActionWidget using a callback function.
+///   Example:
+  ///   OneStep(title: "Verify login", builder: (callback) => _Step1(action: callback)),
+///   *Note*: By default the callback is always 'MultiStep._next
+///   *Note* But you can use whatever action you want.
   OneStep({required this.title, required this.builder});
 }
 
-/// Example: Widget build(BuildContext context) {
-///     return MultiSteps(
-///       steps: [
-///         OneStep(title: "Enter your phone number (+1)", builder: (callback) => _Step1(action: callback)),
-///         OneStep(title: "Are you a real human?", builder: (callback) => _Step1(action: callback)),
-///         OneStep(title: "Verify login", builder: (callback) => _Step1(action: callback)),
-///       ],
-///     );
-///
-/// Note: MultiSteps doesn't support custom state. Consider using a provider or a InheritedWidget.
 class MultiSteps extends StatefulWidget {
   final List<OneStep> steps;
-  const MultiSteps({super.key, required this.steps});
+  final String title;
+  /// Example: Widget build(BuildContext context) {
+  ///     return MultiSteps(
+  ///       steps: [
+  ///         OneStep(title: "Enter your phone number (+1)", builder: (callback) => _Step1(action: callback)),
+  ///         OneStep(title: "Are you a real human?", builder: (callback) => _Step1(action: callback)),
+  ///         OneStep(title: "Verify login", builder: (callback) => _Step1(action: callback)),
+  ///       ],
+  ///     );
+  ///
+  /// Note: MultiSteps doesn't support custom state. Consider using a provider or a InheritedWidget.
+  const MultiSteps({super.key, required this.steps, required this.title});
 
   @override
   State<MultiSteps> createState() => _MultiStepsState();
@@ -64,7 +68,7 @@ class _MultiStepsState extends State<MultiSteps> {
     // print("MultiSteps built...");
     return Scaffold(
       appBar: AppBar(
-        title: Text("Register"),
+        title: Text(widget.title),
       ),
       body: PageView(
         controller: _pageController,
@@ -87,14 +91,17 @@ class _MultiStepsState extends State<MultiSteps> {
     // print("stepBuilder of $title ...");
     return Container(
       key: PageStorageKey<String>('page_$pageIndex'),
+      color: Colors.blue,
       padding: EdgeInsets.all(16),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            // _Step title
             Container(
               padding: EdgeInsets.symmetric(horizontal: 30, vertical: 12),
               child: Text(title, textAlign: TextAlign.center, style: Theme.of(context).textTheme.headlineMedium),
             ),
+            // _Step widget content
             Container(
                 child: builder(_next) // *Extensibility* Replace the _next, if you want each ActionWidget to do something different.
             )

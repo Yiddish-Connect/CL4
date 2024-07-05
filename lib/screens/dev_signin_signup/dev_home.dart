@@ -38,6 +38,15 @@ class DevHomeScreen extends StatelessWidget {
                 }
                 context.go("/");
               },
+          ),
+          ElevatedButton(
+              child: Text("Select Preference"),
+              onPressed: () async {
+                if (!context.mounted) {
+                  throw Exception("DevHome - Preference Button: context.mounted is false!!");
+                }
+                context.go("/preference");
+              },
           )
         ],
       ),
