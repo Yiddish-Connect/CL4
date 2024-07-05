@@ -103,8 +103,7 @@ final _router = GoRouter(
     final loggedIn = AuthService().getUser() != null;
     final loggingIn = state.matchedLocation.startsWith('/auth')|| state.matchedLocation == "/";
 
-    print( "loggedIn: $loggedIn  loggingIn: $loggingIn");
-    print(state.matchedLocation);
+    print("\x1B[32m Route: ${state.matchedLocation} \x1B[0m   \x1B[34m User.uid: ${AuthService().getUser()?.uid} \x1B[0m");
     if (!loggedIn) return loggingIn ? null : '/';
 
     // if the user is logged in but still on the login page, send them to
