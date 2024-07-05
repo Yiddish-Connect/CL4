@@ -20,13 +20,48 @@ var actionCodeSettings = ActionCodeSettings(
     androidMinimumVersion: '12'
 );
 
+/// Singleton Pattern
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-
+  StreamSubscription<User?>? _subscription;
   FirebaseAuth get auth => _auth;
+
+  // named constructor
+  AuthService._privateConstructor() {
+    // init subscription
+     _subscription = _auth
+        .authStateChanges()
+        .listen((User? user) {
+      if (user == null) {
+        print('\x1B[34m authStateChanges listener: User is currently signed out! \x1B[0m');
+      } else {
+        print('\x1B[34m authStateChanges listener: User is signed in! \x1B[0m');
+      }
+    });
+  }
+
+  // Singleton instance
+  static final AuthService _singleton = AuthService._privateConstructor();
+
+  factory AuthService() {
+    return _singleton;
+  }
+
+  void dispose() {
+    _subscription?.cancel();
+  }
+
+  /*
+   Below are the auth methods. Beware that most are async functions.
+  */
+
 
   User? getUser() {
     return _auth.currentUser;
+  }
+
+  bool isSignedIn() {
+    return _auth.currentUser != null;
   }
 
   // Sign in with email and password
