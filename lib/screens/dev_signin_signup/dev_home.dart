@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:yiddishconnect/services/auth.dart';
+import 'package:yiddishconnect/utils/helpers.dart';
 
-class DevHome extends StatelessWidget {
-  AuthService _auth = AuthService();
+class DevHomeScreen extends StatelessWidget {
+  final AuthService _auth = AuthService();
 
-  DevHome({super.key});
+  DevHomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +21,24 @@ class DevHome extends StatelessWidget {
           SizedBox(width: 100, height: 100, ),
           Text("displayName: ${_auth.getUser()?.displayName}"),
           Text("email: ${_auth.getUser()?.email}"),
-          Text("emailVerified?? ${_auth.getUser()?.emailVerified}")
+          Text("emailVerified?? ${_auth.getUser()?.emailVerified}"),
+          ElevatedButton(
+              child: Text("Log out"),
+              onPressed: () async {
+                try {
+                  await AuthService().signOut();
+                } catch (e) {
+                  if (!context.mounted) {
+                    throw Exception("DevHome - Log Out Button: context.mounted is false!!");
+                  }
+                  toast(context, e.toString());
+                }
+                if (!context.mounted) {
+                  throw Exception("DevHome - Log Out Button: context.mounted is false!!");
+                }
+                context.go("/");
+              },
+          )
         ],
       ),
     );
