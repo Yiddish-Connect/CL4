@@ -9,6 +9,8 @@ import 'package:yiddishconnect/screens/email/emailSignIn.dart';
 import 'package:yiddishconnect/screens/email/emailSignUp.dart';
 import 'package:yiddishconnect/screens/onboarding.dart';
 import 'package:yiddishconnect/screens/phone/phoneAuth.dart';
+import 'package:yiddishconnect/services/auth.dart';
+import 'package:yiddishconnect/utils/helpers.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -62,31 +64,55 @@ class MyAppState extends ChangeNotifier {
 final _router = GoRouter(
   routes: [
     GoRoute(
+      name: "onboardingScreen",
       path: '/',
       builder: (context, state) => const OnboardingScreen(),
     ),
     GoRoute(
+      name: "authScreen",
       path: '/auth',
       builder: (context, state) => AuthScreen(),
       routes: [
         GoRoute(
+          name: "phoneAuthScreen",
           path: 'phone',
           builder: (context, state) => PhoneAuthScreen(),
         ),
         GoRoute(
+          name: "emailSignInScreen",
           path: 'email/sign-in',
           builder: (context, state) => EmailSignInScreen(),
         ),
         GoRoute(
+          name: "emailSignUpScreen",
           path: 'email/sign-up',
           builder: (context, state) => EmailSignUpScreen(),
         ),
       ]
     ),
     GoRoute(
+      name: "homeScreen",
       path: '/home',
       builder: (context, state) => DevHome(),
     ),
   ],
+
+  // redirect to the login page if the user is not logged in
+  redirect: (context, state) {
+    // if the user is not logged in, they need to login
+    final loggedIn = AuthService().getUser() != null;
+    final loggingIn = state.matchedLocation.startsWith('/auth')|| state.matchedLocation == "/";
+
+    print( "loggedIn: $loggedIn  loggingIn: $loggingIn");
+    print(state.matchedLocation);
+    if (!loggedIn) return loggingIn ? null : '/';
+
+    // if the user is logged in but still on the login page, send them to
+    // the home page
+    if (loggedIn && loggingIn) return '/home';
+
+    // no need to redirect at all
+    return null;
+  },
 );
 
