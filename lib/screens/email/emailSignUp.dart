@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
 import '../../services/auth.dart';
@@ -168,7 +169,7 @@ class _Step2 extends ActionWidget {
                             if (_auth.getUser() == null) {
                               toast(context, "Verification Failed");
                             } else {
-                              Navigator.push(context, MaterialPageRoute(builder: (context) => DevHome()));
+                              context.go("/home");
                             }
                           },
                           child: Text("I have verified my Email")),
