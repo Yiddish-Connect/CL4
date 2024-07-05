@@ -93,7 +93,7 @@ final _router = GoRouter(
     GoRoute(
       name: "homeScreen",
       path: '/home',
-      builder: (context, state) => DevHome(),
+      builder: (context, state) => DevHomeScreen(),
     ),
   ],
 
