@@ -46,45 +46,40 @@ The link to our [Firebase console](https://console.firebase.google.com/u/0/proje
     - Then add your **SHA1** and your **SHA256** under [Project settings - General - my apps](https://console.firebase.google.com/u/0/project/ydapp-830fe/settings/general/android:com.yiddishland.yiddishconnect)
 
 ## Firebase Authentication
-### Implemented
+### lib/services/auth.dart
+`AuthService` is a singleton class defining methods related to authentication.
+
+### Login Methods
 1. Phone OTP login.
-    - Please always use the following phone number and OTP code for testing purpose: **(314) 159-2653**, **202406**
-    - You can try a real number on Web, or by launching the app on your own Anroid device.
-    - But it will never work in Android emulator.
+    - For testing purpose, use the **test phone number** `(314) 159-2653` and **test OTP code** `202406`
+    - Supported features
+        - Web:  **test phone number**, any **real phone number**
+        - Android (Emulator):  **test phone number** only
+        - Android (Real Device):  **test phone number**, any **real phone number**, ***auto SMS resolution***
+        - IOS / MacOS:  **test phone number**, any **real phone number**
 2. Google login. (Android/Web only)
-    - **SHA1** and **SHA256** required
-4. Apple login. (IOS/MacOS only)
-    - Need testing
-6. Email register/login. (All platforms)
+    - **SHA1** and **SHA256** required for Android
+3. Apple login. (IOS/MacOS only)
+    - Testing needed
+4. Email register / login. (Android/IOS/Web/MacOS)
+5. Anonymous login. (Android/IOS/Web/MacOS)
+    - Account linking not implemented yet
 
+### User Management & Middlewares
+We are currently using 2 ways to manage user authentication state:
+1. `_router.redirection`: By adding redirection rules to go_router.
+2. `AuthService()._subscription = _auth.authStateChanges().listen((User? user) {...}`: A publish-subscription model offered by Firebase.
 
+To add/remove login methods, or to manually manage current users, visit our [Firebase console](https://console.firebase.google.com/u/0/project/ydapp-830fe/overview):
 # Development
 ## Packages
 ### go_router ^14.2.0
-Used for navigating between pages. Please read the [documentation here](https://pub.dev/documentation/go_router/latest/topics/Get%20started-topic.html) or tutotrials.
+Please read the [documentation here](https://pub.dev/documentation/go_router/latest/topics/Get%20started-topic.html).
 
-- Example: 
-```dart
-TextButton(
-    onPressed: () => context.go('/users/123'),
-  );
-```
+The `_router` config is defined in `main.dart`
+
 ### provider ^6.1.2
-Used for managing states. Please read the [documentation here](https://pub.dev/packages/provider) or tutorials.
-
-- Example:
-```dart
-Provider.of<EmailProvider>(context, listen: false).email = "abc@gmail.com";
-...
-...
-Container(
-    child: Consumer<EmailProvider>(
-            builder: (context, emailProvider, child) {
-              return Text(emailProvider.email)
-            }
-    )
-)
-```
+Please read the [documentation here](https://pub.dev/packages/provider).
 
 ### Firebase related packages
 - firebase_core: ^2.31.1
@@ -124,31 +119,20 @@ CL4/
 └── README.md     // You are currently reading
 ```
 
-## Theme
-We have defined a set of TextTheme and ColorScheme to share colors and font styles. Please read the [tutorial here](https://docs.flutter.dev/cookbook/design/themes)
-```dart
-// Wrong:
-Container(
-    color: Color(0xFF001122),
-    child:Text(  
-            "Hello World! This is a Text Widget.",  
-            style: TextStyle(  
-                fontSize: 35,  
-                color: Colors.purple,  
-                fontWeight: FontWeight.w700,  
-                fontStyle: FontStyle.italic,  
-                letterSpacing: 8,  
-                wordSpacing: 20
-            )
-    )
-)
-// Correct:
-Container(
-    color: Theme.of(context).ColorScheme.Primary,
-    child:Text(  
-            "Hello World! This is a Text Widget.",  
-            style: Theme.of(context).TextTheme.BodyLarge.copywith(color: Theme.of(context).ColorScheme.Secondary)
-    )
-)
+# UI
+## UI Related Packages
 
+## Custom Widgets
+1. `MultiSteps` defined in `yd_multi_steps.dart`
+2. `AnimatedProgressBar` defined in `yd_multi_steps.dart`
+
+## Theme
+We have a set of TextTheme and ColorScheme to share colors and font styles. See `main.dart`
+
+Usage: 
+```dart
+color: Theme.of(context).ColorScheme.primary,
+style: Theme.of(context).TextTheme.bodyLarge
 ```
+
+For more information, please read the [documentation here](https://docs.flutter.dev/cookbook/design/themes)
