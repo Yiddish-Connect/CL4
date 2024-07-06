@@ -38,15 +38,14 @@ class PreferenceScreen extends StatelessWidget {
         title: "Preference",
         hasButton: true,
         hasProgress: true,
+        onComplete: () {
+          context.go("/home");
+        },
         steps: [
           OneStep(title: "What's your name?", builder: (callback) => _Step1(action: callback)),
           OneStep(title: "Location", builder: (callback) => _Step2(action: callback)),
           OneStep(title: "Select up to 5 interests", builder: (callback) => _Step3(action: callback)),
-          OneStep(title: "Upload your photos", builder: (callback) => _Step4(action: () {
-            // TODO: Show a 'you are Verified' modal instead
-            toast(context, "You are verified");
-            context.go("/home");
-          })),
+          OneStep(title: "Upload your photos", builder: (callback) => _Step4(action: callback)),
         ],
       ),
     );

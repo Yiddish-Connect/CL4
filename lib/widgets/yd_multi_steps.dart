@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
@@ -24,6 +25,7 @@ class MultiSteps extends StatefulWidget {
   final String title;
   final bool hasProgress;
   final bool hasButton;
+  final void Function()? onComplete;
   /// @param steps: An array of OneStep()
   /// @param title: Title in Appbar
   /// @param hasProgress: Whether enables the progress bar
@@ -39,7 +41,7 @@ class MultiSteps extends StatefulWidget {
   ///     );
   ///
   /// *Note*: MultiSteps doesn't support custom state. Consider using a provider or a InheritedWidget.
-  const MultiSteps({super.key, required this.steps, required this.title, this.hasProgress = false, this.hasButton = false});
+  const MultiSteps({super.key, required this.steps, required this.title, this.hasProgress = false, this.hasButton = false, this.onComplete = null });
 
   @override
   State<MultiSteps> createState() => _MultiStepsState();
@@ -52,7 +54,8 @@ class _MultiStepsState extends State<MultiSteps> with TickerProviderStateMixin {
   late AnimationController _animationController;
   Animation<Color?>? _colorAnimation;
   Animation<double>? _progressAnimation;
-  Duration _duration = Duration(milliseconds: 300); // switching between steps
+  Duration _switchDuration = Duration(milliseconds: 300); // switching between steps
+  Duration _animationDuration = Duration(seconds: 1);
   final Color? _startColor = Colors.red[200];
   final Color? _endColor = Colors.green[200];
 
@@ -64,7 +67,7 @@ class _MultiStepsState extends State<MultiSteps> with TickerProviderStateMixin {
       /// [AnimationController]s can be created with `vsync: this` because of
       /// [TickerProviderStateMixin].
       vsync: this,
-      duration: const Duration(seconds: 1),
+      duration: _animationDuration,
     )..addListener(() {
       // setState(() {});
     });
@@ -75,7 +78,7 @@ class _MultiStepsState extends State<MultiSteps> with TickerProviderStateMixin {
       if (_page >= _size) {
         return;
       } else if (_page < _size - 1) {
-        _pageController.animateToPage(_page + 1, duration: _duration, curve: Curves.easeInOut);
+        _pageController.animateToPage(_page + 1, duration: _switchDuration, curve: Curves.easeInOut);
       } else if (_page == _size - 1) {
         // When you click next in last step
         int oldIndex = _size - 1;
@@ -90,7 +93,34 @@ class _MultiStepsState extends State<MultiSteps> with TickerProviderStateMixin {
         _colorAnimation = ColorTween(begin: oldColor, end: newColor).animate(CurvedAnimation(parent: _animationController, curve: Curves.easeInOut));
         _progressAnimation = Tween<double>(begin: oldProgress, end: newProgress).animate(CurvedAnimation(parent: _animationController, curve: Curves.easeInOut));
         _animationController.forward(from: 0.0);
-        toast(context, "TODO: do something like navigating");
+
+        Future.delayed(_animationDuration, () {
+          widget.onComplete?.call();
+        });
+      }
+    });
+  }
+
+  void _prev() {
+    setState(() {
+      if (_page <= 0) {
+        return;
+      } else if (_page == _size) {
+        // When you click prev in last step
+        int oldIndex = _size;
+        int newIndex = _size - 1;
+        _page --;
+
+        // Create & play new animations. Old: _page  New: _page + 1
+        double oldProgress = oldIndex / _size;
+        double newProgress = newIndex / _size;
+        Color? oldColor = Color.lerp(_startColor, _endColor, oldIndex / _size); // interpolation
+        Color? newColor = Color.lerp(_startColor, _endColor, newIndex / _size); // interpolation
+        _colorAnimation = ColorTween(begin: oldColor, end: newColor).animate(CurvedAnimation(parent: _animationController, curve: Curves.easeInOut));
+        _progressAnimation = Tween<double>(begin: oldProgress, end: newProgress).animate(CurvedAnimation(parent: _animationController, curve: Curves.easeInOut));
+        _animationController.forward(from: 0.0);
+      } else if (_page > 0 && _page < _size) {
+        _pageController.animateToPage(_page - 1, duration: _switchDuration, curve: Curves.easeInOut);
       }
     });
   }
@@ -142,16 +172,49 @@ class _MultiStepsState extends State<MultiSteps> with TickerProviderStateMixin {
                     alignment: Alignment.bottomLeft,
                     child: Padding(
                       padding: const EdgeInsets.all(24.0),
-                      child: Text("$_page/$_size Done    DEBUG: ${_animationController.value}", style: Theme.of(context).textTheme.titleLarge,),
+                      child: Text("$_page/$_size Done", style: Theme.of(context).textTheme.titleLarge,),
                     ),
                   ),
-                  if (widget.hasButton) Align(
+                  if (widget.hasButton && kIsWeb) Align(
                     alignment: Alignment.bottomRight,
                     child: Padding(
-                      padding: const EdgeInsets.all(24.0),
-                      child: FloatingActionButton(
-                        onPressed: _next, // Change this for extensibility
-                        child: Icon(Icons.navigate_next),
+                      padding: const EdgeInsets.all(16.0),
+                      child: Container(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: SizedBox(
+                                width: 75,
+                                height: 75,
+                                child: FloatingActionButton(
+                                  heroTag: "prev",
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30.0), // set the desired border radius
+                                  ),
+                                  onPressed: _prev,
+                                  child: Icon(Icons.navigate_before),
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: SizedBox(
+                                width: 75,
+                                height: 75,
+                                child: FloatingActionButton(
+                                  heroTag: "next",
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30.0), // set the desired border radius
+                                  ),
+                                  onPressed: _next, // Change this for extensibility
+                                  child: Icon(Icons.navigate_next),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   )
