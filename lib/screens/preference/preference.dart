@@ -182,8 +182,6 @@ class _Step1 extends StatelessWidget {
     );
   }
 }
-// abcd
-// abcd
 
 // Location
 class _Step2 extends StatelessWidget {
@@ -256,7 +254,7 @@ class _Step3 extends StatelessWidget {
           ),
           SizedBox(height: 20),
           Text(
-            "${Provider.of<PreferenceProvider>(context, listen: false).selectedInterests.length}/5 selected",
+            "${Provider.of<PreferenceProvider>(context, listen: true).selectedInterests.length}/5 selected",
             style: TextStyle(color: Colors.purple, fontSize: 16),
           ),
         ],
