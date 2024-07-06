@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
@@ -21,6 +22,8 @@ class OneStep {
 class MultiSteps extends StatefulWidget {
   final List<OneStep> steps;
   final String title;
+  final bool hasProgress;
+  final bool hasButton;
   /// Example: Widget build(BuildContext context) {
   ///     return MultiSteps(
   ///       steps: [
@@ -31,26 +34,53 @@ class MultiSteps extends StatefulWidget {
   ///     );
   ///
   /// Note: MultiSteps doesn't support custom state. Consider using a provider or a InheritedWidget.
-  const MultiSteps({super.key, required this.steps, required this.title});
+  const MultiSteps({super.key, required this.steps, required this.title, this.hasProgress = false, this.hasButton = false});
 
   @override
   State<MultiSteps> createState() => _MultiStepsState();
 }
 
-class _MultiStepsState extends State<MultiSteps> {
-  final PageController _pageController = PageController();
-  int _page = 0;
+class _MultiStepsState extends State<MultiSteps> with TickerProviderStateMixin {
+  late PageController _pageController;
+  late AnimationController _animationController;
+  late Animation<Color?> _colorAnimation;
+  late Animation<double> _progressAnimation;
+  int _page = 0; // 0 <= _page <= _size. After the user click proceeds in the last step, _page becomes _size
   late int _size;
-  Duration _duration = Duration(milliseconds: 300);
+  Duration _duration = Duration(milliseconds: 300); // switching between steps
+  final Color? _startColor = Colors.red[200];
+  final Color? _endColor = Colors.green[200];
 
   @override
   void initState() {
     super.initState();
     _size = widget.steps.length;
+    _pageController = PageController();
+    _animationController = AnimationController(
+      /// [AnimationController]s can be created with `vsync: this` because of
+      /// [TickerProviderStateMixin].
+      vsync: this,
+      duration: const Duration(seconds: 1),
+    )..addListener(() {
+      setState(() {});
+    });
   }
 
   void _next() {
-    if (_page < _size - 1 && _page > -1) {
+    if (_page >= _size) return;
+    // Create & play new animations. Old: _page  New: _page + 1
+    double oldProgress = _page / _size;
+    double newProgress = (_page + 1) / _size;
+    Color? oldColor = Color.lerp(_startColor, _endColor, _page / _size); // interpolation
+    Color? newColor = Color.lerp(_startColor, _endColor, (_page + 1) / _size); // interpolation
+    _colorAnimation = ColorTween(begin: oldColor, end: newColor)
+        .animate(CurvedAnimation(parent: _animationController, curve: Curves.easeInOut));
+    _progressAnimation = Tween<double>(begin: oldProgress, end: newProgress)
+        .animate(CurvedAnimation(parent: _animationController, curve: Curves.easeInOut));
+    _animationController.forward(from: 0.0);
+
+    // Update _page
+    if (_page < _size && _page > -1) {
       _pageController.animateToPage(_page + 1, duration: _duration, curve: Curves.easeInOut);
       _page ++;
     }
@@ -59,6 +89,7 @@ class _MultiStepsState extends State<MultiSteps> {
   @override
   void dispose() {
     _pageController.dispose();
+    _animationController.dispose();
     // print("MultiSteps disposed...");
     super.dispose();
   }
@@ -70,15 +101,69 @@ class _MultiStepsState extends State<MultiSteps> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: PageView(
-        controller: _pageController,
-        onPageChanged: (index) {
-          setState(() {
-            _page = index;
-          });
-        },
-        children: widget.steps.asMap().entries.map((stepEntry) => stepBuilder(context, stepEntry.value.title, stepEntry.value.builder, stepEntry.key)).toList(),
-      )
+      body: Column(
+          children: [
+            Expanded(
+              child: Stack(
+                children: [
+                  PageView(
+                    controller: _pageController,
+                    onPageChanged: (index) {
+                      setState(() {
+                        _page = index;
+                      });
+                    },
+                    children: widget.steps.asMap().entries.map((stepEntry) => stepBuilder(context, stepEntry.value.title, stepEntry.value.builder, stepEntry.key)).toList(),
+                  ),
+                  if (widget.hasProgress) Align(
+                    alignment: Alignment.bottomLeft,
+                    child: Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Text("$_page/$_size Done    DEBUG: ${_animationController.value}", style: Theme.of(context).textTheme.titleLarge,),
+                    ),
+                  ),
+                  if (widget.hasButton) Align(
+                    alignment: Alignment.bottomRight,
+                    child: Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: FloatingActionButton(
+                        onPressed: _next, // Change this for extensibility
+                        child: Icon(Icons.navigate_next),
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
+            if (widget.hasProgress) Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                alignment: Alignment.center,
+                padding: EdgeInsets.only(bottom: 30),
+                // color: Colors.amberAccent,
+                child: FractionallySizedBox(
+                  alignment: Alignment.center,
+                  widthFactor: 0.9,
+                    child: Container(
+                      alignment: Alignment.center,
+                      child: AnimatedBuilder(
+                        animation: _animationController,
+                        builder: (context, child) {
+                          return LinearProgressIndicator(
+                            value: _page == 0 ? 0 : _progressAnimation.value,
+                            valueColor: _page == 0 ? null : _colorAnimation,
+                            backgroundColor: Colors.grey[300],
+                            minHeight: 30,
+                            borderRadius: BorderRadius.all(Radius.circular(15))
+                          );
+                        },
+                      )
+                    )
+                ),
+              ),
+            )
+          ],
+      ),
     );
   }
 
@@ -89,9 +174,9 @@ class _MultiStepsState extends State<MultiSteps> {
   /// Example: stepBuilder(context, "Step No.1", (callback) => EmailSignInPage(callback))
   Widget stepBuilder(BuildContext context, String title, ActionWidget Function(void Function() callback) builder, int pageIndex) {
     // print("stepBuilder of $title ...");
+
     return Container(
       key: PageStorageKey<String>('page_$pageIndex'),
-      color: Colors.blue,
       padding: EdgeInsets.all(16),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -106,7 +191,7 @@ class _MultiStepsState extends State<MultiSteps> {
                 child: builder(_next) // *Extensibility* Replace the _next, if you want each ActionWidget to do something different.
             )
           ],
-        )
+        ),
     );
   }
 }

@@ -12,6 +12,8 @@ class PreferenceScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiSteps(
       title: "Preference",
+      hasButton: true,
+      hasProgress: true,
       steps: [
         OneStep(title: "What's your name?", builder: (callback) => _Step1(action: callback)),
         OneStep(title: "Location", builder: (callback) => _Step2(action: callback)),
@@ -27,7 +29,7 @@ class PreferenceScreen extends StatelessWidget {
 }
 
 // What's your name
-class _Step1  extends ActionWidget {
+class _Step1 extends ActionWidget {
   _Step1 ({super.key, required super.action});
   final TextEditingController nameController = TextEditingController();
 
@@ -40,26 +42,7 @@ class _Step1  extends ActionWidget {
           maxWidth: 300
         ),
         color: Colors.red,
-        child: Stack(
-          children: [
-            Align(
-              alignment: Alignment.topCenter,
-              child: TextField(controller: nameController,)
-            ),
-            Align(
-              alignment: Alignment.bottomRight,
-              child: FloatingActionButton(
-                onPressed: action,
-                backgroundColor: Theme.of(context).colorScheme.primary,
-                child: Icon(
-                  Icons.navigate_next,
-                  color: Theme.of(context).colorScheme.onPrimary,
-                  size: 30,
-                ),
-              )
-            )
-          ],
-        )
+        child: TextField(controller: nameController,)
     );
   }
 }
