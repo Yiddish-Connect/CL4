@@ -9,13 +9,13 @@ import '../services/auth.dart';
 class OneStep {
   final String title;
   final ActionWidget Function(void Function() callback) builder;
-/// Each step needs the following info:
-///   @param title: name of the step
-///   @param builder: lambda function like (callback) => MyWidget(callback). How to build the ActionWidget using a callback function.
-///   Example:
-  ///   OneStep(title: "Verify login", builder: (callback) => _Step1(action: callback)),
-///   *Note*: By default the callback is always 'MultiStep._next
-///   *Note* But you can use whatever action you want.
+  ///   @param title: name of the step
+  ///   @param builder: lambda function like (callback) => MyWidget(callback). How to build the ActionWidget using a callback function.
+  ///
+  ///   Example: OneStep(title: "Verify login", builder: (callback) => _Step1(action: callback)),
+  ///
+  ///   *Note*: By default the callback is always 'MultiStep._next
+  ///   *Note* But you can use whatever action you want.
   OneStep({required this.title, required this.builder});
 }
 
@@ -24,6 +24,11 @@ class MultiSteps extends StatefulWidget {
   final String title;
   final bool hasProgress;
   final bool hasButton;
+  /// @param steps: An array of OneStep()
+  /// @param title: Title in Appbar
+  /// @param hasProgress: Whether enables the progress bar
+  /// @param hasButton: Whether enables the 'next' button. (If not, please 'next' in your action widget of each step)
+  ///
   /// Example: Widget build(BuildContext context) {
   ///     return MultiSteps(
   ///       steps: [
@@ -33,7 +38,7 @@ class MultiSteps extends StatefulWidget {
   ///       ],
   ///     );
   ///
-  /// Note: MultiSteps doesn't support custom state. Consider using a provider or a InheritedWidget.
+  /// *Note*: MultiSteps doesn't support custom state. Consider using a provider or a InheritedWidget.
   const MultiSteps({super.key, required this.steps, required this.title, this.hasProgress = false, this.hasButton = false});
 
   @override
@@ -41,12 +46,12 @@ class MultiSteps extends StatefulWidget {
 }
 
 class _MultiStepsState extends State<MultiSteps> with TickerProviderStateMixin {
-  late PageController _pageController;
-  late AnimationController _animationController;
-  late Animation<Color?> _colorAnimation;
-  late Animation<double> _progressAnimation;
   int _page = 0; // 0 <= _page <= _size. After the user click proceeds in the last step, _page becomes _size
   late int _size;
+  PageController _pageController = PageController();
+  late AnimationController _animationController;
+  Animation<Color?>? _colorAnimation;
+  Animation<double>? _progressAnimation;
   Duration _duration = Duration(milliseconds: 300); // switching between steps
   final Color? _startColor = Colors.red[200];
   final Color? _endColor = Colors.green[200];
@@ -55,7 +60,6 @@ class _MultiStepsState extends State<MultiSteps> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _size = widget.steps.length;
-    _pageController = PageController();
     _animationController = AnimationController(
       /// [AnimationController]s can be created with `vsync: this` because of
       /// [TickerProviderStateMixin].
@@ -67,22 +71,25 @@ class _MultiStepsState extends State<MultiSteps> with TickerProviderStateMixin {
   }
 
   void _next() {
-    if (_page >= _size) return;
-    // Create & play new animations. Old: _page  New: _page + 1
-    double oldProgress = _page / _size;
-    double newProgress = (_page + 1) / _size;
-    Color? oldColor = Color.lerp(_startColor, _endColor, _page / _size); // interpolation
-    Color? newColor = Color.lerp(_startColor, _endColor, (_page + 1) / _size); // interpolation
-    _colorAnimation = ColorTween(begin: oldColor, end: newColor)
-        .animate(CurvedAnimation(parent: _animationController, curve: Curves.easeInOut));
-    _progressAnimation = Tween<double>(begin: oldProgress, end: newProgress)
-        .animate(CurvedAnimation(parent: _animationController, curve: Curves.easeInOut));
-    _animationController.forward(from: 0.0);
-
-    // Update _page
-    if (_page < _size && _page > -1) {
+    if (_page >= _size) {
+      return;
+    } else if (_page < _size - 1) {
       _pageController.animateToPage(_page + 1, duration: _duration, curve: Curves.easeInOut);
+    } else if (_page == _size - 1) { // When you click next in last step
+      int oldIndex = _size - 1;
+      int newIndex = _size;
       _page ++;
+      // Create & play new animations. Old: _page  New: _page + 1
+      double oldProgress = oldIndex / _size;
+      double newProgress = newIndex/ _size;
+      Color? oldColor = Color.lerp(_startColor, _endColor, oldIndex / _size); // interpolation
+      Color? newColor = Color.lerp(_startColor, _endColor, newIndex / _size); // interpolation
+      _colorAnimation = ColorTween(begin: oldColor, end: newColor)
+          .animate(CurvedAnimation(parent: _animationController, curve: Curves.easeInOut));
+      _progressAnimation = Tween<double>(begin: oldProgress, end: newProgress)
+          .animate(CurvedAnimation(parent: _animationController, curve: Curves.easeInOut));
+      _animationController.forward(from: 0.0);
+      toast(context, "TODO: do something like navigating");
     }
   }
 
@@ -110,7 +117,19 @@ class _MultiStepsState extends State<MultiSteps> with TickerProviderStateMixin {
                     controller: _pageController,
                     onPageChanged: (index) {
                       setState(() {
+                        int oldIndex = _page;
+                        int newIndex = index;
                         _page = index;
+                        // Create & play new animations. Old: _page  New: _page + 1
+                        double oldProgress = oldIndex / _size;
+                        double newProgress = newIndex/ _size;
+                        Color? oldColor = Color.lerp(_startColor, _endColor, oldIndex / _size); // interpolation
+                        Color? newColor = Color.lerp(_startColor, _endColor, newIndex / _size); // interpolation
+                        _colorAnimation = ColorTween(begin: oldColor, end: newColor)
+                            .animate(CurvedAnimation(parent: _animationController, curve: Curves.easeInOut));
+                        _progressAnimation = Tween<double>(begin: oldProgress, end: newProgress)
+                            .animate(CurvedAnimation(parent: _animationController, curve: Curves.easeInOut));
+                        _animationController.forward(from: 0.0);
                       });
                     },
                     children: widget.steps.asMap().entries.map((stepEntry) => stepBuilder(context, stepEntry.value.title, stepEntry.value.builder, stepEntry.key)).toList(),
@@ -150,8 +169,8 @@ class _MultiStepsState extends State<MultiSteps> with TickerProviderStateMixin {
                         animation: _animationController,
                         builder: (context, child) {
                           return LinearProgressIndicator(
-                            value: _page == 0 ? 0 : _progressAnimation.value,
-                            valueColor: _page == 0 ? null : _colorAnimation,
+                            value: _progressAnimation?.value ?? 0,
+                            valueColor: _colorAnimation ?? null,
                             backgroundColor: Colors.grey[300],
                             minHeight: 30,
                             borderRadius: BorderRadius.all(Radius.circular(15))
