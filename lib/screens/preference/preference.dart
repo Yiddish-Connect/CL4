@@ -1,5 +1,8 @@
+import 'dart:ui';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -11,7 +14,7 @@ class PreferenceProvider extends ChangeNotifier {
   String get name => _name;
   set name (String name) {
     _name = name;
-    print("NOTIFY");
+    print("notifyListeners()");
     notifyListeners();
   }
 
@@ -39,7 +42,8 @@ class PreferenceScreen extends StatelessWidget {
         hasButton: true,
         hasProgress: true,
         onComplete: () {
-          context.go("/home");
+          _dialogBuilder(context);
+          // context.go("/home");
         },
         steps: [
           OneStep(title: "What's your name?", builder: (prev, next) => _Step1()),
@@ -47,6 +51,98 @@ class PreferenceScreen extends StatelessWidget {
           OneStep(title: "Select up to 5 interests", builder: (prev, next) => _Step3()),
           OneStep(title: "Upload your photos", builder: (prev, next) => _Step4()),
         ],
+      ),
+    );
+  }
+
+  Future<void> _dialogBuilder(BuildContext context) {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) => Dialog(
+        child: Container(
+          constraints: BoxConstraints(
+            maxWidth: 500,
+            maxHeight: 450
+          ),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.all(Radius.circular(20)),
+            color: Theme.of(context).colorScheme.background,
+          ),
+          padding: EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              SizedBox(
+                width: 120,
+                height: 120,
+                child: Stack(
+                  children: [
+                    Align(
+                      alignment: Alignment.center,
+                      child: Container(
+                        width: 120,
+                        height: 120,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment.center,
+                      child: Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Theme.of(context).colorScheme.secondary,
+                        ),
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment.center,
+                      child: Icon(
+                        Icons.check,
+                        color: Theme.of(context).colorScheme.surface,
+                      )
+                    )
+                  ],
+                ),
+              ),
+              Text(
+                "You're Verified",
+                style: Theme.of(context).textTheme.titleLarge,
+                textAlign: TextAlign.center,
+              ),
+              Container(
+                constraints: BoxConstraints(
+                  maxWidth: 250,
+                ),
+                child: Text(
+                  "Your account is verified. Let's start to make friends!",
+                  style: Theme.of(context).textTheme.bodyMedium,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              SizedBox(
+                height: 50,
+                child: FractionallySizedBox(
+                  widthFactor: 0.8,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                    ),
+                    onPressed: () => context.go("/home"),
+                    child: Text("Get Started")
+                  ),
+                ),
+              )
+            ],
+          ),
+        )
       ),
     );
   }
@@ -64,13 +160,16 @@ class _Step1 extends StatelessWidget {
       builder: (BuildContext context, PreferenceProvider preferenceProvider, Widget? child) {
         // print("Assign the name from provider to textfield: ${Provider.of<PreferenceProvider>(context, listen: false).name} => ${nameController.text}");
         nameController.text = Provider.of<PreferenceProvider>(context, listen: false).name;
+        nameController.selection = TextSelection(
+          baseOffset: nameController.text.length,
+          extentOffset: nameController.text.length,
+        );
         return Container(
             padding: EdgeInsets.all(30),
             constraints: BoxConstraints(
                 maxHeight: 300,
                 maxWidth: 300
             ),
-            color: Colors.red,
             child: TextField(
               controller: nameController,
               onChanged: (value) {
