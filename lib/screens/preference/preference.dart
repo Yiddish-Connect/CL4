@@ -7,14 +7,20 @@ import 'package:yiddishconnect/utils/helpers.dart';
 import 'package:yiddishconnect/widgets/yd_multi_steps.dart';
 
 class PreferenceProvider extends ChangeNotifier {
+  String _name = "";
+  String get name => _name;
+  set name (String name) {
+    _name = name;
+    print("NOTIFY");
+    notifyListeners();
+  }
+
   List<String> _selectedInterests = [];
   List<String> get selectedInterests => _selectedInterests;
-
   void addInterest(String interest) {
     _selectedInterests.add(interest);
     notifyListeners();
   }
-
   void removeInterest(String interest) {
     _selectedInterests.remove(interest);
     notifyListeners();
@@ -54,17 +60,32 @@ class _Step1 extends ActionWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-        padding: EdgeInsets.all(30),
-        constraints: BoxConstraints(
-          maxHeight: 300,
-          maxWidth: 300
-        ),
-        color: Colors.red,
-        child: TextField(controller: nameController,)
+    // print("rebuild...  the value is ${nameController.value} ");
+    return Consumer<PreferenceProvider>(
+      builder: (BuildContext context, PreferenceProvider preferenceProvider, Widget? child) {
+        // print("Assign the name from provider to textfield: ${Provider.of<PreferenceProvider>(context, listen: false).name} => ${nameController.text}");
+        nameController.text = Provider.of<PreferenceProvider>(context, listen: false).name;
+        return Container(
+            padding: EdgeInsets.all(30),
+            constraints: BoxConstraints(
+                maxHeight: 300,
+                maxWidth: 300
+            ),
+            color: Colors.red,
+            child: TextField(
+              controller: nameController,
+              onChanged: (value) {
+                print("OnChange... value is ${value}");
+                Provider.of<PreferenceProvider>(context, listen: false).name = value;
+              },
+            )
+        );
+      },
     );
   }
 }
+// abcd
+// abcd
 
 // Location
 class _Step2 extends ActionWidget {
