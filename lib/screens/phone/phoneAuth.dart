@@ -24,8 +24,8 @@ class PhoneAuthScreen extends StatelessWidget {
         title: "Phone Login",
         hasProgress: true,
         steps: [
-          OneStep(title: "Step 1: Enter your phone number (+1)", builder: (callback) => _Step1(action: callback)),
-          OneStep(title: "Step 2: Enter 6-digits code", builder: (callback) => _Step2(action: callback)),
+          OneStep(title: "Step 1: Enter your phone number (+1)", builder: (prev, next) => _Step1(action: next)),
+          OneStep(title: "Step 2: Enter 6-digits code", builder: (prev, next) => _Step2(action: next)),
           // OneStep(title: "testing", builder: (callback) => _Step3(action: callback)),
         ],
       ),
@@ -69,11 +69,12 @@ class PhoneProvider extends ChangeNotifier {
 }
 
 // Step1: Enter the phone number
-class _Step1 extends ActionWidget {
+class _Step1 extends StatelessWidget {
   final TextEditingController _phoneNumberController = TextEditingController();
   final AuthService _auth = AuthService();
+  final void Function() action;
 
-  _Step1({super.key, required super.action});
+  _Step1({super.key, required this.action});
 
   @override
   Widget build(BuildContext context) {
@@ -173,11 +174,12 @@ class _Step1 extends ActionWidget {
 }
 
 // _Step2: Enter your SMS code
-class _Step2 extends ActionWidget {
+class _Step2 extends StatelessWidget {
 
   final AuthService _auth = AuthService();
+  final void Function() action;
 
-  _Step2({super.key, required super.action});
+  _Step2({super.key, required this.action});
 
   @override
   Widget build(BuildContext context) {
@@ -268,15 +270,6 @@ class _Step2 extends ActionWidget {
   }
 }
 
-class _Step3 extends ActionWidget {
-  const _Step3({super.key, required super.action});
-
-  @override
-  Widget build(BuildContext context) {
-  // print("_Step3 built");
-  return const Placeholder();
-  }
-}
 
 
 

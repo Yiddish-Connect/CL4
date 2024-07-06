@@ -42,10 +42,10 @@ class PreferenceScreen extends StatelessWidget {
           context.go("/home");
         },
         steps: [
-          OneStep(title: "What's your name?", builder: (callback) => _Step1(action: callback)),
-          OneStep(title: "Location", builder: (callback) => _Step2(action: callback)),
-          OneStep(title: "Select up to 5 interests", builder: (callback) => _Step3(action: callback)),
-          OneStep(title: "Upload your photos", builder: (callback) => _Step4(action: callback)),
+          OneStep(title: "What's your name?", builder: (prev, next) => _Step1()),
+          OneStep(title: "Location", builder: (prev, next) => _Step2()),
+          OneStep(title: "Select up to 5 interests", builder: (prev, next) => _Step3()),
+          OneStep(title: "Upload your photos", builder: (prev, next) => _Step4()),
         ],
       ),
     );
@@ -53,8 +53,8 @@ class PreferenceScreen extends StatelessWidget {
 }
 
 // What's your name
-class _Step1 extends ActionWidget {
-  _Step1 ({super.key, required super.action});
+class _Step1 extends StatelessWidget {
+  _Step1 ({super.key});
   final TextEditingController nameController = TextEditingController();
 
   @override
@@ -87,8 +87,8 @@ class _Step1 extends ActionWidget {
 // abcd
 
 // Location
-class _Step2 extends ActionWidget {
-  const _Step2({super.key, required super.action});
+class _Step2 extends StatelessWidget {
+  const _Step2({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -97,8 +97,8 @@ class _Step2 extends ActionWidget {
 }
 
 // Select up to 5 interests
-class _Step3 extends ActionWidget {
-  const _Step3({super.key, required super.action});
+class _Step3 extends StatelessWidget {
+  const _Step3({super.key});
 
   static const List<String> _interests = [
     'Gaming', 'Dancing', 'Language', 'Music', 'Movie',
@@ -168,8 +168,8 @@ class _Step3 extends ActionWidget {
 
 
 // Upload your photos
-class _Step4 extends ActionWidget {
-  const _Step4({super.key, required super.action});
+class _Step4 extends StatelessWidget {
+  const _Step4({super.key});
 
   @override
   Widget build(BuildContext context) {

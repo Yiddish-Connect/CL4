@@ -20,11 +20,11 @@ class EmailSignUpScreen extends StatelessWidget {
         steps: [
           OneStep(
             title: "Step 1: Enter your Email and password",
-            builder: (callback) => _Step1(action: callback),
+            builder: (prev, next) => _Step1(action: next),
           ),
           OneStep(
             title: "Step 2: Verify your Email address",
-            builder: (callback) => _Step2(action: callback),
+            builder: (prev, next) => _Step2(action: next),
           ),
         ],
       ),
@@ -44,12 +44,13 @@ class EmailProvider extends ChangeNotifier {
 }
 
 // Step 1: Ask user for email & password
-class _Step1 extends ActionWidget {
+class _Step1 extends StatelessWidget {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final AuthService _auth = AuthService();
+  final void Function() action;
 
-  _Step1({super.key, required super.action});
+  _Step1({super.key, required this.action});
 
   @override
   Widget build(BuildContext context) {
@@ -118,8 +119,9 @@ class _Step1 extends ActionWidget {
 }
 
 // Step 2: Ask user to click verification link
-class _Step2 extends ActionWidget {
-  _Step2({super.key, required super.action});
+class _Step2 extends StatelessWidget {
+  final void Function() action;
+  _Step2({super.key, required this.action});
 
   final AuthService _auth = AuthService();
 
