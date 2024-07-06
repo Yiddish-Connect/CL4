@@ -9,14 +9,13 @@ import '../services/auth.dart';
 
 class OneStep {
   final String title;
-  final ActionWidget Function(void Function() callback) builder;
+  final Widget Function(void Function() prev, void Function() next) builder;
   ///   @param title: name of the step
-  ///   @param builder: lambda function like (callback) => MyWidget(callback). How to build the ActionWidget using a callback function.
+  ///   @param builder: lambda function like (prev, next) => MyWidget(...). How to build the ActionWidget using a callback function.
   ///
-  ///   Example: OneStep(title: "Verify login", builder: (callback) => _Step1(action: callback)),
+  ///   Example: OneStep(title: "Verify login", builder: (prev, next) => _Step1(onButtonClicked: next)),
   ///
-  ///   *Note*: By default the callback is always 'MultiStep._next
-  ///   *Note* But you can use whatever action you want.
+  ///   *Note* You can pass none, either or both of prev and next to a Step.
   OneStep({required this.title, required this.builder});
 }
 
@@ -34,14 +33,14 @@ class MultiSteps extends StatefulWidget {
   /// Example: Widget build(BuildContext context) {
   ///     return MultiSteps(
   ///       steps: [
-  ///         OneStep(title: "Enter your phone number (+1)", builder: (callback) => _Step1(action: callback)),
-  ///         OneStep(title: "Are you a real human?", builder: (callback) => _Step1(action: callback)),
-  ///         OneStep(title: "Verify login", builder: (callback) => _Step1(action: callback)),
+  ///         OneStep(title: "Enter your phone number (+1)", builder: (prev, next) => _Step1(onButtonClicked: next)),
+  ///         OneStep(title: "Are you a real human?", builder: (prev, next) => _Step1(onSwipe: prev)),
+  ///         OneStep(title: "Verify login", builder: (prev, next) => _Step1(onClick: next, onDoubleClick: prev)),
   ///       ],
   ///     );
   ///
   /// *Note*: MultiSteps doesn't support custom state. Consider using a provider or a InheritedWidget.
-  const MultiSteps({super.key, required this.steps, required this.title, this.hasProgress = false, this.hasButton = false, this.onComplete = null });
+  const MultiSteps({super.key, required this.steps, required this.title, this.hasProgress = false, this.hasButton = false, this.onComplete });
 
   @override
   State<MultiSteps> createState() => _MultiStepsState();
@@ -257,8 +256,8 @@ class _MultiStepsState extends State<MultiSteps> with TickerProviderStateMixin {
   ///   *Extensibility* In MultiSteps, the callback function will always be _next(), which is navigating to next step.
   ///   But the action that those ActionWidgets will take can be changed.
   ///
-  /// Example: stepBuilder(context, "Step No.1", (callback) => EmailSignInPage(callback))
-  Widget stepBuilder(BuildContext context, String title, ActionWidget Function(void Function() callback) builder, int pageIndex) {
+  /// Example: stepBuilder(context, "Step No.1", (prev, next) => EmailSignInPage(onVerifyButtonClicked: next))
+  Widget stepBuilder(BuildContext context, String title, Widget Function(void Function() prev, void Function() next) builder, int pageIndex) {
     // print("stepBuilder of $title ...");
 
     return Container(
@@ -274,20 +273,13 @@ class _MultiStepsState extends State<MultiSteps> with TickerProviderStateMixin {
             ),
             // _Step widget content
             Container(
-                child: builder(_next) // *Extensibility* Replace the _next, if you want each ActionWidget to do something different.
+                child: builder(_prev, _next) // *Extensibility* Replace the _next, if you want each ActionWidget to do something different.
             )
           ],
         ),
     );
   }
 }
-
-abstract class ActionWidget extends StatelessWidget {
-  final void Function() action;
-
-  const ActionWidget({super.key, required this.action});
-}
-
 
 // class Parent extends StatelessWidget {
 //   final int a = 19;
