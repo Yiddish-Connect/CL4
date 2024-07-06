@@ -66,31 +66,33 @@ class _MultiStepsState extends State<MultiSteps> with TickerProviderStateMixin {
       vsync: this,
       duration: const Duration(seconds: 1),
     )..addListener(() {
-      setState(() {});
+      // setState(() {});
     });
   }
 
   void _next() {
-    if (_page >= _size) {
-      return;
-    } else if (_page < _size - 1) {
-      _pageController.animateToPage(_page + 1, duration: _duration, curve: Curves.easeInOut);
-    } else if (_page == _size - 1) { // When you click next in last step
-      int oldIndex = _size - 1;
-      int newIndex = _size;
-      _page ++;
-      // Create & play new animations. Old: _page  New: _page + 1
-      double oldProgress = oldIndex / _size;
-      double newProgress = newIndex/ _size;
-      Color? oldColor = Color.lerp(_startColor, _endColor, oldIndex / _size); // interpolation
-      Color? newColor = Color.lerp(_startColor, _endColor, newIndex / _size); // interpolation
-      _colorAnimation = ColorTween(begin: oldColor, end: newColor)
-          .animate(CurvedAnimation(parent: _animationController, curve: Curves.easeInOut));
-      _progressAnimation = Tween<double>(begin: oldProgress, end: newProgress)
-          .animate(CurvedAnimation(parent: _animationController, curve: Curves.easeInOut));
-      _animationController.forward(from: 0.0);
-      toast(context, "TODO: do something like navigating");
-    }
+    setState((){
+      if (_page >= _size) {
+        return;
+      } else if (_page < _size - 1) {
+        _pageController.animateToPage(_page + 1, duration: _duration, curve: Curves.easeInOut);
+      } else if (_page == _size - 1) {
+        // When you click next in last step
+        int oldIndex = _size - 1;
+        int newIndex = _size;
+        _page++;
+
+        // Create & play new animations. Old: _page  New: _page + 1
+        double oldProgress = oldIndex / _size;
+        double newProgress = newIndex / _size;
+        Color? oldColor = Color.lerp(_startColor, _endColor, oldIndex / _size); // interpolation
+        Color? newColor = Color.lerp(_startColor, _endColor, newIndex / _size); // interpolation
+        _colorAnimation = ColorTween(begin: oldColor, end: newColor).animate(CurvedAnimation(parent: _animationController, curve: Curves.easeInOut));
+        _progressAnimation = Tween<double>(begin: oldProgress, end: newProgress).animate(CurvedAnimation(parent: _animationController, curve: Curves.easeInOut));
+        _animationController.forward(from: 0.0);
+        toast(context, "TODO: do something like navigating");
+      }
+    });
   }
 
   @override
@@ -103,7 +105,7 @@ class _MultiStepsState extends State<MultiSteps> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    // print("MultiSteps built...");
+    print("MultiSteps built...");
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -116,9 +118,11 @@ class _MultiStepsState extends State<MultiSteps> with TickerProviderStateMixin {
                   PageView(
                     controller: _pageController,
                     onPageChanged: (index) {
+                      print("onPageChanged");
                       setState(() {
                         int oldIndex = _page;
                         int newIndex = index;
+                        // print ("$_page  $index");
                         _page = index;
                         // Create & play new animations. Old: _page  New: _page + 1
                         double oldProgress = oldIndex / _size;
