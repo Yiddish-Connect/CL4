@@ -3,8 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
 import 'authentication.dart';
 
-class OnboardingScreen extends StatelessWidget {
-  const OnboardingScreen({super.key});
+class LandingScreen extends StatelessWidget {
+  const LandingScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
