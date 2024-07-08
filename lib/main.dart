@@ -66,7 +66,7 @@ final _router = GoRouter(
   routes: [
     GoRoute(
       name: "landingScreen",
-      path: '/',
+      path: '/landing',
       builder: (context, state) => const LandingScreen(),
     ),
     GoRoute(
@@ -93,7 +93,7 @@ final _router = GoRouter(
     ),
     GoRoute(
       name: "homeScreen",
-      path: '/home',
+      path: '/',
       builder: (context, state) => DevHomeScreen(),
       routes: [
         GoRoute(
@@ -109,14 +109,16 @@ final _router = GoRouter(
   redirect: (context, state) {
     // if the user is not logged in, they need to login
     final loggedIn = AuthService().getUser() != null;
-    final loggingIn = state.matchedLocation.startsWith('/auth')|| state.matchedLocation == "/";
+    final loggingIn = state.matchedLocation.startsWith('/auth')|| state.matchedLocation == "/landing";
 
     print("\x1B[32m Route: ${state.matchedLocation} \x1B[0m   \x1B[34m User.uid: ${AuthService().getUser()?.uid} \x1B[0m");
-    if (!loggedIn) return loggingIn ? null : '/';
+
+    // If the user is not logged in (and not currently doing login process), send them to the landing page.
+    if (!loggedIn) return loggingIn ? null : '/landing';
 
     // if the user is logged in but still on the login page, send them to
     // the home page
-    if (loggedIn && loggingIn) return '/home';
+    if (loggedIn && loggingIn) return '/';
 
     // no need to redirect at all
     return null;
