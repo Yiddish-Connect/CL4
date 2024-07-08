@@ -45,7 +45,7 @@ class DevHomeScreen extends StatelessWidget {
                 if (!context.mounted) {
                   throw Exception("DevHome - Preference Button: context.mounted is false!!");
                 }
-                context.go("/home/preference");
+                context.go("/preference");
               },
           )
         ],

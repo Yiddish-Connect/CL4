@@ -43,7 +43,7 @@ class PreferenceScreen extends StatelessWidget {
         hasProgress: true,
         onComplete: () {
           _dialogBuilder(context);
-          // context.go("/home");
+          // context.go("/");
         },
         steps: [
           OneStep(title: "What's your name?", builder: (prev, next) => _Step1()),
@@ -135,7 +135,7 @@ class PreferenceScreen extends StatelessWidget {
                       foregroundColor: Theme.of(context).colorScheme.onPrimary,
                       backgroundColor: Theme.of(context).colorScheme.primary,
                     ),
-                    onPressed: () => context.go("/home"),
+                    onPressed: () => context.go("/"),
                     child: Text("Get Started")
                   ),
                 ),

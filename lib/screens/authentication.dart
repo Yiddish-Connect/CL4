@@ -164,7 +164,7 @@ class AuthScreen extends StatelessWidget {
             User? user = await _auth.signInWithGoogle();
             if (user != null) {
               toast(context, "Successfully signed in with Google");
-              context.go("/home");
+              context.go("/");
             } else {
               toast(context, "Something went wrong (null)");
             }

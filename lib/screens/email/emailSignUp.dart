@@ -16,6 +16,10 @@ class EmailSignUpScreen extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (context) => EmailProvider(),
       child: MultiSteps(
+        hasButton: false,
+        hasProgress: true,
+        enableSwipe: false,
+        enableBack: false,
         title: "Email Register",
         steps: [
           OneStep(
@@ -172,7 +176,7 @@ class _Step2 extends StatelessWidget {
                             if (_auth.getUser() == null) {
                               toast(context, "Verification Failed");
                             } else {
-                              context.go("/home");
+                              context.go("/");
                             }
                           },
                           child: Text("I have verified my Email")),

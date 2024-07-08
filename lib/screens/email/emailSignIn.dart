@@ -95,7 +95,7 @@ class _EmailSignInScreenState extends State<EmailSignInScreen> {
                             User? user = await _auth.signInWithEmailAndPassword(email, password);
                             if (user != null) {
                               toast(context, "Successfully signed in with Email");
-                              context.go("/home");
+                              context.go("/");
                             } else {
                               toast(context, "Something went wrong (null)");
                             }

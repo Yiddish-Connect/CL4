@@ -24,7 +24,10 @@ class MultiSteps extends StatefulWidget {
   final String title;
   final bool hasProgress;
   final bool hasButton;
+  final bool enableBack;
+  final bool enableSwipe;
   final void Function()? onComplete;
+
   /// @param steps: An array of OneStep()
   /// @param title: Title in Appbar
   /// @param hasProgress: Whether enables the progress bar
@@ -40,7 +43,7 @@ class MultiSteps extends StatefulWidget {
   ///     );
   ///
   /// *Note*: MultiSteps doesn't support custom state. Consider using a provider or a InheritedWidget.
-  const MultiSteps({super.key, required this.steps, required this.title, this.hasProgress = false, this.hasButton = false, this.onComplete });
+  const MultiSteps({super.key, required this.steps, required this.title, this.hasProgress = false, this.hasButton = false, this.onComplete, this.enableBack = true, this.enableSwipe = true});
 
   @override
   State<MultiSteps> createState() => _MultiStepsState();
@@ -146,6 +149,7 @@ class _MultiStepsState extends State<MultiSteps> with TickerProviderStateMixin {
                 children: [
                   PageView(
                     controller: _pageController,
+                    physics: widget.enableSwipe ? AlwaysScrollableScrollPhysics() : NeverScrollableScrollPhysics(),
                     onPageChanged: (index) {
                       print("onPageChanged");
                       setState(() {
@@ -178,42 +182,40 @@ class _MultiStepsState extends State<MultiSteps> with TickerProviderStateMixin {
                     alignment: Alignment.bottomRight,
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
-                      child: Container(
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: SizedBox(
-                                width: 75,
-                                height: 75,
-                                child: FloatingActionButton(
-                                  heroTag: "prev",
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(30.0), // set the desired border radius
-                                  ),
-                                  onPressed: _prev,
-                                  child: Icon(Icons.navigate_before),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (widget.enableBack == true) Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: SizedBox(
+                              width: 75,
+                              height: 75,
+                              child: FloatingActionButton(
+                                heroTag: "prev",
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30.0), // set the desired border radius
                                 ),
+                                onPressed: _prev,
+                                child: Icon(Icons.navigate_before),
                               ),
                             ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: SizedBox(
-                                width: 75,
-                                height: 75,
-                                child: FloatingActionButton(
-                                  heroTag: "next",
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(30.0), // set the desired border radius
-                                  ),
-                                  onPressed: _next, // Change this for extensibility
-                                  child: Icon(Icons.navigate_next),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: SizedBox(
+                              width: 75,
+                              height: 75,
+                              child: FloatingActionButton(
+                                heroTag: "next",
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30.0), // set the desired border radius
                                 ),
+                                onPressed: _next, // Change this for extensibility
+                                child: Icon(Icons.navigate_next),
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
                   )

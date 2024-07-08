@@ -22,7 +22,10 @@ class PhoneAuthScreen extends StatelessWidget {
       create: (context) => PhoneProvider(),
       child: MultiSteps(
         title: "Phone Login",
+        hasButton: false,
         hasProgress: true,
+        enableBack: false,
+        enableSwipe: false,
         steps: [
           OneStep(title: "Step 1: Enter your phone number (+1)", builder: (prev, next) => _Step1(action: next)),
           OneStep(title: "Step 2: Enter 6-digits code", builder: (prev, next) => _Step2(action: next)),
@@ -184,9 +187,10 @@ class _Step2 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // print("_Step2 built...");
+    // print(Provider.of<PhoneProvider>(context).phoneNumber);
     return Consumer<PhoneProvider>(
-        builder: (context, phoneNumberProvider, child) {
-          final TextEditingController codeController = TextEditingController(text: phoneNumberProvider.phoneAuthCredential != null ? phoneNumberProvider.phoneAuthCredential?.smsCode ?? "" : "");
+        builder: (context, phoneProvider, child) {
+          final TextEditingController codeController = TextEditingController(text: phoneProvider.phoneAuthCredential != null ? phoneProvider.phoneAuthCredential?.smsCode ?? "" : "");
           return Container(
             padding: EdgeInsets.all(30),
             constraints: BoxConstraints(maxWidth: 600),
@@ -196,7 +200,7 @@ class _Step2 extends StatelessWidget {
                 Container(
                     padding: EdgeInsets.all(5),
                     child: Text(
-                      "Enter the OTP code we sent to (${phoneNumberProvider.phoneNumber.substring(3, 6)})-${phoneNumberProvider.phoneNumber.substring(6, 9)}-${phoneNumberProvider.phoneNumber.substring(9, 13)}. The code expires in 5 minutes",
+                      "Enter the OTP code we sent to (${phoneProvider.phoneNumber.substring(3, 6)})-${phoneProvider.phoneNumber.substring(6, 9)}-${phoneProvider.phoneNumber.substring(9, 13)}. The code expires in 5 minutes",
                       textAlign: TextAlign.center,
                       style: Theme
                           .of(context)
@@ -250,7 +254,7 @@ class _Step2 extends StatelessWidget {
                                         .confirmationResult
                                 );
                                 if (user != null) {
-                                  context.go("/home");
+                                  context.go("/");
                                 } else {
                                   toast(context, "Something went wrong (null)");
                                 }
