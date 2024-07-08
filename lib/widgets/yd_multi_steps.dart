@@ -11,7 +11,7 @@ class OneStep {
   final String title;
   final Widget Function(void Function() prev, void Function() next) builder;
   ///   @param title: name of the step
-  ///   @param builder: lambda function like (prev, next) => MyWidget(...). How to build the ActionWidget using a callback function.
+  ///   @param builder: lambda function like (prev, next) => MyWidget(...). How to build the child Widget of PageView.
   ///
   ///   Example: OneStep(title: "Verify login", builder: (prev, next) => _Step1(onButtonClicked: next)),
   ///
@@ -28,7 +28,7 @@ class MultiSteps extends StatefulWidget {
   /// @param steps: An array of OneStep()
   /// @param title: Title in Appbar
   /// @param hasProgress: Whether enables the progress bar
-  /// @param hasButton: Whether enables the 'next' button. (If not, please 'next' in your action widget of each step)
+  /// @param hasButton: Whether enables the 'next' button. (If not, please make use of the 'prev' and 'next' passed from the builder)
   ///
   /// Example: Widget build(BuildContext context) {
   ///     return MultiSteps(
@@ -174,7 +174,7 @@ class _MultiStepsState extends State<MultiSteps> with TickerProviderStateMixin {
                       child: Text("$_page/$_size Done", style: Theme.of(context).textTheme.titleLarge,),
                     ),
                   ),
-                  if (widget.hasButton && kIsWeb) Align(
+                  if (widget.hasButton) Align(
                     alignment: Alignment.bottomRight,
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),

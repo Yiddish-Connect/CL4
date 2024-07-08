@@ -7,7 +7,7 @@ import 'package:yiddishconnect/screens/authentication.dart';
 import 'package:yiddishconnect/screens/dev_signin_signup/dev_home.dart';
 import 'package:yiddishconnect/screens/email/emailSignIn.dart';
 import 'package:yiddishconnect/screens/email/emailSignUp.dart';
-import 'package:yiddishconnect/screens/onboarding.dart';
+import 'package:yiddishconnect/screens/landing.dart';
 import 'package:yiddishconnect/screens/phone/phoneAuth.dart';
 import 'package:yiddishconnect/screens/preference/preference.dart';
 import 'package:yiddishconnect/services/auth.dart';
@@ -65,9 +65,9 @@ class MyAppState extends ChangeNotifier {
 final _router = GoRouter(
   routes: [
     GoRoute(
-      name: "onboardingScreen",
+      name: "landingScreen",
       path: '/',
-      builder: (context, state) => const OnboardingScreen(),
+      builder: (context, state) => const LandingScreen(),
     ),
     GoRoute(
       name: "authScreen",
@@ -95,11 +95,13 @@ final _router = GoRouter(
       name: "homeScreen",
       path: '/home',
       builder: (context, state) => DevHomeScreen(),
-    ),
-    GoRoute(
-      name: "preferenceScreen",
-      path: '/preference',
-      builder: (context, state) => PreferenceScreen(),
+      routes: [
+        GoRoute(
+          name: "preferenceScreen",
+          path: 'preference',
+          builder: (context, state) => PreferenceScreen(),
+        ),
+      ]
     ),
   ],
 
