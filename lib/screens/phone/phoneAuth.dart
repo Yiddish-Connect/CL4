@@ -21,9 +21,14 @@ class PhoneAuthScreen extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (context) => PhoneProvider(),
       child: MultiSteps(
+        title: "Phone Login",
+        hasButton: false,
+        hasProgress: true,
+        enableBack: false,
+        enableSwipe: false,
         steps: [
-          OneStep(title: "Step 1: Enter your phone number (+1)", builder: (callback) => _Step1(action: callback)),
-          OneStep(title: "Step 2: Enter 6-digits code", builder: (callback) => _Step2(action: callback)),
+          OneStep(title: "Step 1: Enter your phone number (+1)", builder: (prev, next) => _Step1(action: next)),
+          OneStep(title: "Step 2: Enter 6-digits code", builder: (prev, next) => _Step2(action: next)),
           // OneStep(title: "testing", builder: (callback) => _Step3(action: callback)),
         ],
       ),
@@ -67,11 +72,12 @@ class PhoneProvider extends ChangeNotifier {
 }
 
 // Step1: Enter the phone number
-class _Step1 extends ActionWidget {
+class _Step1 extends StatelessWidget {
   final TextEditingController _phoneNumberController = TextEditingController();
   final AuthService _auth = AuthService();
+  final void Function() action;
 
-  _Step1({super.key, required super.action});
+  _Step1({super.key, required this.action});
 
   @override
   Widget build(BuildContext context) {
@@ -171,18 +177,20 @@ class _Step1 extends ActionWidget {
 }
 
 // _Step2: Enter your SMS code
-class _Step2 extends ActionWidget {
+class _Step2 extends StatelessWidget {
 
   final AuthService _auth = AuthService();
+  final void Function() action;
 
-  _Step2({super.key, required super.action});
+  _Step2({super.key, required this.action});
 
   @override
   Widget build(BuildContext context) {
     // print("_Step2 built...");
+    // print(Provider.of<PhoneProvider>(context).phoneNumber);
     return Consumer<PhoneProvider>(
-        builder: (context, phoneNumberProvider, child) {
-          final TextEditingController codeController = TextEditingController(text: phoneNumberProvider.phoneAuthCredential != null ? phoneNumberProvider.phoneAuthCredential?.smsCode ?? "" : "");
+        builder: (context, phoneProvider, child) {
+          final TextEditingController codeController = TextEditingController(text: phoneProvider.phoneAuthCredential != null ? phoneProvider.phoneAuthCredential?.smsCode ?? "" : "");
           return Container(
             padding: EdgeInsets.all(30),
             constraints: BoxConstraints(maxWidth: 600),
@@ -192,7 +200,7 @@ class _Step2 extends ActionWidget {
                 Container(
                     padding: EdgeInsets.all(5),
                     child: Text(
-                      "Enter the OTP code we sent to (${phoneNumberProvider.phoneNumber.substring(3, 6)})-${phoneNumberProvider.phoneNumber.substring(6, 9)}-${phoneNumberProvider.phoneNumber.substring(9, 13)}. The code expires in 5 minutes",
+                      "Enter the OTP code we sent to (${phoneProvider.phoneNumber.substring(3, 6)})-${phoneProvider.phoneNumber.substring(6, 9)}-${phoneProvider.phoneNumber.substring(9, 13)}. The code expires in 5 minutes",
                       textAlign: TextAlign.center,
                       style: Theme
                           .of(context)
@@ -246,7 +254,7 @@ class _Step2 extends ActionWidget {
                                         .confirmationResult
                                 );
                                 if (user != null) {
-                                  context.go("/home");
+                                  context.go("/");
                                 } else {
                                   toast(context, "Something went wrong (null)");
                                 }
@@ -266,15 +274,6 @@ class _Step2 extends ActionWidget {
   }
 }
 
-class _Step3 extends ActionWidget {
-  const _Step3({super.key, required super.action});
-
-  @override
-  Widget build(BuildContext context) {
-  // print("_Step3 built");
-  return const Placeholder();
-  }
-}
 
 
 
