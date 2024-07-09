@@ -1,11 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:image_cropper/image_cropper.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:ydtind/services/storage/storage_repo.dart';
 import '../services/auth.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 
-class addPhoto extends StatelessWidget {
-  const addPhoto({super.key});
+class AddPhoto extends StatefulWidget {
+  const AddPhoto({super.key});
+
+  @override
+  State<AddPhoto> createState() => _AddPhotoState();
+}
+
+class _AddPhotoState extends State<AddPhoto>{
+  List<String> images = [];
 
   @override
   Widget build(BuildContext context) {
@@ -13,8 +23,8 @@ class addPhoto extends StatelessWidget {
       appBar: AppBar(
         //leadingWidth: 80,
         leading: Container(
-          height: 10.0, 
-          width: 10.0,  
+          height: 8.0, 
+          width: 8.0,  
           decoration: BoxDecoration(
             color: Color.fromRGBO(253, 247, 253, 1),
             shape: BoxShape.circle,
@@ -70,8 +80,51 @@ class addPhoto extends StatelessWidget {
                           ),
                           child: Center(
                             child: ElevatedButton(
-                              onPressed: () {
-                              
+                              onPressed: () async {
+                                final ImagePicker picker = ImagePicker();
+                                final XFile? image = await picker.pickImage(
+                                  source: ImageSource.gallery,
+                                  imageQuality: 50,
+                                );
+
+                                if (image == null && mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('No image was selected.')));
+                                }
+
+
+                                if (image != null && mounted) {
+
+                                  CroppedFile? croppedFile = await ImageCropper().cropImage(
+                                    sourcePath: image.path,
+                                    aspectRatio: const CropAspectRatio(
+                                      ratioX: 9,
+                                      ratioY: 16
+                                    ),
+                                    // aspectRatioPresets: [],
+                                    uiSettings: [
+                                      AndroidUiSettings(
+                                        toolbarTitle: 'Cropper',
+                                        initAspectRatio: CropAspectRatioPreset.original,
+                                        lockAspectRatio: false
+                                      ),
+
+                                    ]
+                                  );
+                                  // print('Uploading ...');
+                                  // StorageRepo().uploadImage(image.path);
+                                  if (croppedFile != null && mounted) {
+                                    setState(() {
+                                      images.add(croppedFile.path);
+                                    });
+                                    await Future.delayed((Duration(milliseconds: 100)));
+                                    if (mounted){
+                                      Navigator.pop(context, images);
+                                    }
+                                  }
+                                  
+                                  
+                                }
                               },
                               child: Text('Change Picture'),
                             ),
@@ -186,11 +239,58 @@ class addPhoto extends StatelessWidget {
 
                 ),  
                 SizedBox(height: 30),
+
                 ElevatedButton(
                   onPressed: () {
                     // Add  next button action here
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          content: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              CircularContainer(),
+                              SizedBox(height: 20),
+                              Text(
+                                "You're verified",
+                                style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 20,
+                                ),
+                              ),
+                              SizedBox(height: 10),
+                              Text("Your account is verified, let's start"),
+                              Text("making friends!")
+                            ],
+                          ),
+                          actions: [
+                            SizedBox(
+                              width: double.infinity,
+                              child: Center(
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    // To do forward
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Color.fromRGBO(75, 22, 26, 0.6),
+                                    foregroundColor: Colors.white,
+                                    padding: EdgeInsets.symmetric(horizontal: 70, vertical: 16),
+                                    textStyle: TextStyle(fontSize: 14),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(30),
+                                    ),
+                                  ),
+                                  child: Text('Get Started'),
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    );
                   },
-                  child: Text('Next'),
+
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color.fromRGBO(75, 22, 26, 0.6),
                     foregroundColor: Colors.white,
@@ -200,6 +300,7 @@ class addPhoto extends StatelessWidget {
                       borderRadius: BorderRadius.circular(30),
                     ),
                   ),
+                  child: Text('Next'),
                 ),
               ],
             ),
@@ -243,143 +344,36 @@ class addPhoto extends StatelessWidget {
   }
 }
 
-      //
-      // body: Padding(
-      //   padding: const EdgeInsets.all(16.0),
-      //   child: Column(
-      //     children: [
-      //       Text(
-      //         'Upload your photos',
-      //         style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black),
-      //       ),
-      //       SizedBox(height: 16),
-      //       Expanded(
-      //         child: GridView.builder(
-      //           itemCount: 6,
-      //           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-      //             crossAxisCount: 3,
-      //             crossAxisSpacing: 10,
-      //             mainAxisSpacing: 10,
-      //           ),
-      //           itemBuilder: (context, index) {
-      //             return index == 0
-      //                 ? Stack(
-      //                     children: [
-      //                       Container(
-      //                         decoration: BoxDecoration(
-      //                           borderRadius: BorderRadius.circular(8),
-      //                           image: DecorationImage(
-      //                             image: AssetImage('assets/sample_photo.jpg'), // Your image asset here
-      //                             fit: BoxFit.cover,
-      //                           ),
-      //                         ),
-      //                       ),
-      //                       Positioned(
-      //                         bottom: 8,
-      //                         left: 8,
-      //                         child: ElevatedButton(
-      //                           style: ElevatedButton.styleFrom(
-      //                             backgroundColor: Colors.white.withOpacity(0.7),
-      //                             shape: RoundedRectangleBorder(
-      //                               borderRadius: BorderRadius.circular(8),
-      //                             ),
-      //                           ),
-      //                           onPressed: () {
-      //                             // Add your change photo action here
-      //                           },
-      //                           child: Text(
-      //                             'Change Photo',
-      //                             style: TextStyle(color: Colors.black),
-      //                           ),
-      //                         ),
-      //                       ),
-      //                     ],
-      //                   )
-      //                 : Container(
-      //                     decoration: BoxDecoration(
-      //                       borderRadius: BorderRadius.circular(8),
-      //                       color: Colors.grey[300],
-      //                     ),
-      //                     child: Center(
-      //                       child: IconButton(
-      //                         icon: Icon(Icons.add),
-      //                         onPressed: () {
-      //                           // Add your add photo action here
-      //                         },
-      //                       ),
-      //                     ),
-      //                   );
-      //           },
-      //         ),
-      //       ),
-      //       // SizedBox(height: 16),
-      //       ElevatedButton(
-      //         onPressed: () {
-      //           // Add  next button action here
-      //         },
-      //         child: Text('Next'),
-      //         style: ElevatedButton.styleFrom(
-      //           backgroundColor: Colors.purple,
-      //           foregroundColor: Colors.white,
-      //           padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-      //           textStyle: TextStyle(fontSize: 18),
-      //           shape: RoundedRectangleBorder(
-      //             borderRadius: BorderRadius.circular(30),
-      //           ),
-      //         ),
-      //       ),
-      //       SizedBox(height: 16),
-      //       Text(
-      //         '5/5',
-      //         style: TextStyle(color: Colors.purple, fontSize: 16),
-      //       ),
-      //     ],
-      //   ),
-      // ),
 
-
-class Tile extends StatelessWidget {
-  const Tile({
-    Key? key,
-    required this.index,
-    this.extent,
-    this.backgroundColor,
-    this.bottomSpace,
-  }) : super(key: key);
-
-  final int index;
-  final double? extent;
-  final double? bottomSpace;
-  final Color? backgroundColor;
-
+class CircularContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final child = Container(
-      color: backgroundColor,
-      height: extent,
+    return Container(
+      width: 80.0,
+      height: 80.0,
+      margin: EdgeInsets.only(top:30, bottom: 20),
+      
+      decoration: BoxDecoration(
+        color: Colors.purple.shade200,
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.purple.shade100.withOpacity(0.8),
+            spreadRadius: 15,
+            blurRadius: 15,
+            offset: Offset(0, 5), // changes position of shadow
+          ),
+        ],
+      ),
       child: Center(
-        child: CircleAvatar(
-          minRadius: 20,
-          maxRadius: 20,
-          backgroundColor: Colors.white,
-          foregroundColor: Colors.black,
-          child: Text('$index', style: const TextStyle(fontSize: 20)),
+        
+        child: Icon(
+          Icons.check,
+          color: Colors.white,
+          size: 50.0,
         ),
       ),
     );
-
-    if (bottomSpace == null) {
-      return child;
-    }
-
-    return Column(
-      children: [
-        Expanded(child: child),
-        Container(
-          height: bottomSpace,
-          color: Colors.green,
-        )
-      ],
-    );
   }
 }
+
