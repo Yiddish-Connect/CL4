@@ -1,5 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:yiddishconnect/services/auth.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
 import 'authentication.dart';
 
@@ -58,8 +60,17 @@ class LandingScreen extends StatelessWidget {
                         child: ElevatedButton(
                             style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary, foregroundColor: Theme.of(context).colorScheme.onPrimary),
                             // Continue => Anonymous mode (TODO)
-                            onPressed: () {
-                              toast(context, "TODO: anonymous mode???");
+                            onPressed: () async {
+                              try {
+                                User? user = await AuthService().signInAnonymously();
+                                if (user != null) {
+                                  context.go("/home");
+                                } else {
+                                  toast(context, "Something went wrong (null)");
+                                }
+                              } catch (e) {
+                                toast(context, e.toString());
+                              }
                             },
                             child: Text("Continue")
                             // Don't need to specify the style here.
