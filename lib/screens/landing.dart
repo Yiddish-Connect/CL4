@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
-import 'signIn.dart';
+import 'authentication.dart';
 
-class OnboardingScreen extends StatelessWidget {
+class LandingScreen extends StatelessWidget {
+  const LandingScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     // var appState = context.watch<MyAppState>();
@@ -76,9 +79,9 @@ class OnboardingScreen extends StatelessWidget {
                           style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.surface, foregroundColor: Theme.of(context).colorScheme.onSurface),
                           // Sign in => SignInPage
                           onPressed: () {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => SignInScreen()));
+                            context.go("/auth");
                           },
-                          child: Text("Sign in"),
+                          child: Text("Login"),
                           // Don't need to specify the style here.
                           // The default style here is inherited from ElevatedButton, which will automatically looks for labelMedium
                         ),

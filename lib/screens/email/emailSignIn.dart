@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
 import '../../services/auth.dart';
 import '../dev_signin_signup/dev_home.dart';
@@ -26,7 +27,7 @@ class _EmailSignInScreenState extends State<EmailSignInScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Sign in'),
+        title: Text('Login'),
       ),
       body: Padding(
         padding: EdgeInsets.all(32.0), // 16 + 16
@@ -64,11 +65,11 @@ class _EmailSignInScreenState extends State<EmailSignInScreen> {
                 Container(
                     padding: EdgeInsets.all(5),
                     child: RichText(text: TextSpan(
-                        text: "Forget your password?",
+                        text: "Forget your password? ",
                         style: Theme.of(context).textTheme.labelMedium,
                         children: [
                           TextSpan(
-                              text: "Reset password",
+                              text: "Reset",
                               style: Theme.of(context).textTheme.labelMedium,
                               recognizer: TapGestureRecognizer()..onTap = () {
                                 String email = _emailController.text;
@@ -94,7 +95,7 @@ class _EmailSignInScreenState extends State<EmailSignInScreen> {
                             User? user = await _auth.signInWithEmailAndPassword(email, password);
                             if (user != null) {
                               toast(context, "Successfully signed in with Email");
-                              Navigator.push(context, MaterialPageRoute(builder: (context) => DevHome()));
+                              context.go("/");
                             } else {
                               toast(context, "Something went wrong (null)");
                             }
@@ -102,7 +103,7 @@ class _EmailSignInScreenState extends State<EmailSignInScreen> {
                             toast(context, e.toString());
                           }
                         },
-                        child: Text('Sign in'),
+                        child: Text('Login'),
                       ),
                     ),
                   ),
