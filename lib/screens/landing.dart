@@ -1,8 +1,13 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:yiddishconnect/services/auth.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
-import 'signIn.dart';
+import 'authentication.dart';
 
-class OnboardingScreen extends StatelessWidget {
+class LandingScreen extends StatelessWidget {
+  const LandingScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     // var appState = context.watch<MyAppState>();
@@ -55,8 +60,17 @@ class OnboardingScreen extends StatelessWidget {
                         child: ElevatedButton(
                             style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary, foregroundColor: Theme.of(context).colorScheme.onPrimary),
                             // Continue => Anonymous mode (TODO)
-                            onPressed: () {
-                              toast(context, "TODO: anonymous mode???");
+                            onPressed: () async {
+                              try {
+                                User? user = await AuthService().signInAnonymously();
+                                if (user != null) {
+                                  context.go("/home");
+                                } else {
+                                  toast(context, "Something went wrong (null)");
+                                }
+                              } catch (e) {
+                                toast(context, e.toString());
+                              }
                             },
                             child: Text("Continue")
                             // Don't need to specify the style here.
@@ -76,9 +90,9 @@ class OnboardingScreen extends StatelessWidget {
                           style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.surface, foregroundColor: Theme.of(context).colorScheme.onSurface),
                           // Sign in => SignInPage
                           onPressed: () {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => SignInScreen()));
+                            context.go("/auth");
                           },
-                          child: Text("Sign in"),
+                          child: Text("Login"),
                           // Don't need to specify the style here.
                           // The default style here is inherited from ElevatedButton, which will automatically looks for labelMedium
                         ),

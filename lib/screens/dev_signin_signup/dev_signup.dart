@@ -25,7 +25,7 @@ class _DevSignUpPageState extends State<DevSignUpPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Sign up'),
+        title: Text('Register'),
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
@@ -58,7 +58,7 @@ class _DevSignUpPageState extends State<DevSignUpPage> {
                   toast(context, e.toString());
                 }
               },
-              child: Text('Signup'),
+              child: Text('Register'),
             ),
           ],
         ),
