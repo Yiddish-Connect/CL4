@@ -75,6 +75,8 @@ flutter:
           style: italic
   assets: 
   - assets/example.png
+  - assets/google_icon@2x.png
+  - assets/apple_icon@2x.png
 
 # Supported platforms
 platforms:
