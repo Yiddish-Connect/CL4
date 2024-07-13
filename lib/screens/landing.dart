@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:yiddishconnect/services/auth.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
+import 'package:yiddishconnect/widgets/yd_animated_curve.dart';
 import 'authentication.dart';
 
 class LandingScreen extends StatelessWidget {
@@ -16,20 +17,15 @@ class LandingScreen extends StatelessWidget {
       body: Container(
         color: Theme.of(context).colorScheme.background,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 100, 20, 50),
-          child: Column(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+          padding: const EdgeInsets.all(20),
+          child: Column(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
             Container(
               // The avatar (TODO)
-              constraints: BoxConstraints(minHeight: 200),
-              margin: EdgeInsets.all(20),
+              padding: EdgeInsets.all(10),
               child: Center(
                 child: Stack(
                   children: [
-                    Container(
-                      color: Colors.blue, // Set the color of the block
-                      width: 180, // Set the width of the block
-                      height: 180, // Set the height of the block
-                    ),
+                    AnimatedCurve(),
                   ],
                 ),
               ),
