@@ -23,12 +23,14 @@ class LandingScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             mainAxisSize: MainAxisSize.max,
             children: [
+              // Flexible spacer 50 px
               Flexible(
                 flex: 1,
                 child: SizedBox(
                   height: 50, // Set the initial minimum height here
                 ),
               ),
+              // Avatar
               Container(
                 width: 500 + 20,
                 height: 300 + 20,
@@ -97,6 +99,7 @@ class LandingScreen extends StatelessWidget {
                   ),
                 ),
               ),
+              // "Make friends with people like you"
               Container(
                 // The text
                 margin: const EdgeInsets.all(20.0),
@@ -108,6 +111,7 @@ class LandingScreen extends StatelessWidget {
                   style: Theme.of(context).textTheme.headlineLarge,
                 )),
               ),
+              // Buttons
               Container(
                 // The 2 buttons
                 margin: const EdgeInsets.all(20.0),
