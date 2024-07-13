@@ -20,134 +20,143 @@ class AuthScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 100, 20, 50),
-        child: Column(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          Container(
-            // The avatar (TODO)
-            margin: EdgeInsets.all(20),
-            constraints: BoxConstraints(minHeight: 200),
-            child: Center(
-              child: Stack(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            Flexible(
+              flex: 1,
+              child: SizedBox(
+                height: 50, // Set the initial minimum height here
+              ),
+            ),
+            Container(
+              // The avatar (TODO)
+              margin: EdgeInsets.all(20),
+              constraints: BoxConstraints(minHeight: 200),
+              child: Center(
+                child: Stack(
+                  children: [
+                    Container(
+                      color: Colors.red, // Set the color of the block
+                      width: 180, // Set the width of the block
+                      height: 180, // Set the height of the block
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Container(
+              // The text
+              margin: const EdgeInsets.all(20.0),
+              constraints: BoxConstraints(minHeight: 100),
+              child: Center(
+                child: Text(
+                  "Let's meet new people around you",
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.headlineLarge,
+                ),
+              ),
+            ),
+            Container(
+              // The 2 buttons
+              margin: const EdgeInsets.all(20.0),
+              child: Column(
                 children: [
-                  Container(
-                    color: Colors.red, // Set the color of the block
-                    width: 180, // Set the width of the block
-                    height: 180, // Set the height of the block
+                  // Email Sign-in
+                  Padding(
+                    padding: const EdgeInsets.all(5.0),
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: FractionallySizedBox(
+                        widthFactor: 0.7,
+                        child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary, foregroundColor: Theme.of(context).colorScheme.onPrimary),
+                            onPressed: () {
+                              context.go("/auth/email/sign-in");
+                            },
+                            child: Row(
+                              mainAxisSize: MainAxisSize.max,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.email,
+                                  color: Theme.of(context).colorScheme.onPrimary,
+                                  size: 30,
+                                ),
+                                SizedBox(width: 8.0),
+                                Text("Login with Email", style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.onPrimary)),
+                              ],
+                            )
+                          // Don't need to specify the style here.
+                          // The default style here is inherited from ElevatedButton, which will automatically looks for labelMedium
+                        ),
+                      ),
+                    ),
                   ),
+                  // Phone Sign-in
+                  Padding(
+                    padding: const EdgeInsets.all(5.0),
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: FractionallySizedBox(
+                        widthFactor: 0.7,
+                        child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.secondary, foregroundColor: Theme.of(context).colorScheme.onSecondary),
+                            onPressed: () {
+                              context.go("/auth/phone");
+                            },
+                            child: Row(
+                              mainAxisSize: MainAxisSize.max,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.phone_android,
+                                  color: Theme.of(context).colorScheme.onSecondary,
+                                  size: 30,
+                                ),
+                                SizedBox(width: 8.0),
+                                Text("Login with Phone", style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.onSecondary)),
+                              ],
+                            )
+                          // Don't need to specify the style here.
+                          // The default style here is inherited from ElevatedButton, which will automatically looks for labelMedium
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Social Media Sign-in
+                  Padding(
+                    padding: const EdgeInsets.all(5.0),
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: FractionallySizedBox(
+                        widthFactor: 0.7,
+                        child: (Theme.of(context).platform == TargetPlatform.iOS || Theme.of(context).platform == TargetPlatform.macOS) ? _buildAppleButton(context) : _buildGoogleButton(context)
+                        ),
+                      ),
+                    ),
+                  // The 'Don't have an account? Create one with Email'
+                  Padding(
+                      padding: const EdgeInsets.all(15.0),
+                      child: RichText(
+                        text: TextSpan(style: Theme.of(context).textTheme.labelSmall, text: "Don't have an account? ", children: [
+                          TextSpan(
+                              style: Theme.of(context).textTheme.labelMedium,
+                              text: "Create one with Email",
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = () {
+                                  context.go("/auth/email/sign-up");
+                                })
+                        ]),
+                      ))
                 ],
               ),
-            ),
-          ),
-          Container(
-            // The text
-            margin: const EdgeInsets.all(20.0),
-            constraints: BoxConstraints(minHeight: 100),
-            child: Center(
-              child: Text(
-                "Let's meet new people around you",
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.headlineLarge,
-              ),
-            ),
-          ),
-          Container(
-            // The 2 buttons
-            margin: const EdgeInsets.all(20.0),
-            child: Column(
-              children: [
-                // Email Sign-in
-                Padding(
-                  padding: const EdgeInsets.all(5.0),
-                  child: SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: FractionallySizedBox(
-                      widthFactor: 0.7,
-                      child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary, foregroundColor: Theme.of(context).colorScheme.onPrimary),
-                          onPressed: () {
-                            context.go("/auth/email/sign-in");
-                          },
-                          child: Row(
-                            mainAxisSize: MainAxisSize.max,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.email,
-                                color: Theme.of(context).colorScheme.onPrimary,
-                                size: 30,
-                              ),
-                              SizedBox(width: 8.0),
-                              Text("Login with Email", style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.onPrimary)),
-                            ],
-                          )
-                        // Don't need to specify the style here.
-                        // The default style here is inherited from ElevatedButton, which will automatically looks for labelMedium
-                      ),
-                    ),
-                  ),
-                ),
-                // Phone Sign-in
-                Padding(
-                  padding: const EdgeInsets.all(5.0),
-                  child: SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: FractionallySizedBox(
-                      widthFactor: 0.7,
-                      child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.secondary, foregroundColor: Theme.of(context).colorScheme.onSecondary),
-                          onPressed: () {
-                            context.go("/auth/phone");
-                          },
-                          child: Row(
-                            mainAxisSize: MainAxisSize.max,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.phone_android,
-                                color: Theme.of(context).colorScheme.onSecondary,
-                                size: 30,
-                              ),
-                              SizedBox(width: 8.0),
-                              Text("Login with Phone", style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.onSecondary)),
-                            ],
-                          )
-                        // Don't need to specify the style here.
-                        // The default style here is inherited from ElevatedButton, which will automatically looks for labelMedium
-                      ),
-                    ),
-                  ),
-                ),
-                // Social Media Sign-in
-                Padding(
-                  padding: const EdgeInsets.all(5.0),
-                  child: SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: FractionallySizedBox(
-                      widthFactor: 0.7,
-                      child: (Theme.of(context).platform == TargetPlatform.iOS || Theme.of(context).platform == TargetPlatform.macOS) ? _buildAppleButton(context) : _buildGoogleButton(context)
-                      ),
-                    ),
-                  ),
-                // The 'Don't have an account? Create one with Email'
-                Padding(
-                    padding: const EdgeInsets.all(15.0),
-                    child: RichText(
-                      text: TextSpan(style: Theme.of(context).textTheme.labelSmall, text: "Don't have an account? ", children: [
-                        TextSpan(
-                            style: Theme.of(context).textTheme.labelMedium,
-                            text: "Create one with Email",
-                            recognizer: TapGestureRecognizer()
-                              ..onTap = () {
-                                context.go("/auth/email/sign-up");
-                              })
-                      ]),
-                    ))
-              ],
-            ),
-          )
+            )
         ]),
       ),
     );
