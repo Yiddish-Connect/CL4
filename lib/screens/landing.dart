@@ -36,7 +36,7 @@ class LandingScreen extends StatelessWidget {
                     // The user avatar 1
                     Positioned(
                       top: 100,
-                      left: 70,
+                      left: 40,
                       child: Opacity(
                         opacity: 0.8,
                         child: CircleAvatar(
@@ -48,7 +48,7 @@ class LandingScreen extends StatelessWidget {
                     // The user avatar 2
                     Positioned(
                       top: 10,
-                      right: 70,
+                      right: 40,
                       child: Opacity(
                         opacity: 0.8,
                         child: CircleAvatar(
@@ -60,7 +60,7 @@ class LandingScreen extends StatelessWidget {
                     // "Intermediate"
                     Positioned(
                       top: 20,
-                      left: 100,
+                      left: 60,
                       child: Label(
                         borderColor: Theme.of(context).colorScheme.primary,
                         backgroundColor: Theme.of(context).colorScheme.background,
@@ -74,7 +74,7 @@ class LandingScreen extends StatelessWidget {
                     // "Proficient"
                     Positioned(
                       bottom: 120,
-                      right: 100,
+                      right: 60,
                       child: Label(
                         borderColor: Theme.of(context).colorScheme.secondary,
                         backgroundColor: Theme.of(context).colorScheme.background,
