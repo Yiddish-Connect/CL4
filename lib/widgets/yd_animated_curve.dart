@@ -99,7 +99,7 @@ class _AnimatedCurveState extends State<AnimatedCurve> with TickerProviderStateM
         minHeight: 300,
         maxHeight: 300
       ),
-      color: Colors.grey,
+      // color: Colors.grey,
       child: LayoutBuilder(
         builder: (context, constraints) {
           return AnimatedBuilder(
