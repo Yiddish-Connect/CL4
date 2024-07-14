@@ -17,7 +17,8 @@ class _HomeScreenState extends State<HomeScreen> {
     HomePage(),
     TestWidgetOne(),
     TestWidgetTwo(),
-    TestWidgetThree()
+    TestWidgetThree(),
+    TestWidgetFour(),
   ];
 
 
@@ -31,7 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: IconButton(
           onPressed: () => toast(context, "TODO: notification"),
           icon: Icon(Icons.notifications),
-          iconSize: 32,
+          iconSize: 24.0
         ),
       ),
     ];
@@ -80,6 +81,10 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icon(Icons.three_k),
             label: "Three",
           ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.four_k),
+            label: "Four",
+          ),
         ],
         currentIndex: _index,
         onTap: (int selectedIndex) {
@@ -100,8 +105,11 @@ class _HomeScreenState extends State<HomeScreen> {
 class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Text('Homeeeee'),
+    return Container(
+      color: Colors.orangeAccent,
+      child: Center(
+        child: Text('Homeeeee'),
+      ),
     );
   }
 }
@@ -109,8 +117,11 @@ class HomePage extends StatelessWidget {
 class TestWidgetOne extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Text('Widget One'),
+    return Container(
+      color: Colors.grey,
+      child: Center(
+        child: Text('Widget One'),
+      ),
     );
   }
 }
@@ -119,9 +130,10 @@ class TestWidgetTwo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.blue,
-      width: 100,
-      height: 100,
+      color: Colors.blueGrey,
+      child: Center(
+        child: Text('Widget Two'),
+      ),
     );
   }
 }
@@ -129,10 +141,23 @@ class TestWidgetTwo extends StatelessWidget {
 class TestWidgetThree extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Icon(
-      Icons.star,
-      size: 50,
-      color: Colors.red,
+    return Container(
+      color: Colors.teal,
+      child: Center(
+        child: Text('Widget Three'),
+      ),
+    );
+  }
+}
+
+class TestWidgetFour extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.brown,
+      child: Center(
+        child: Text('Widget Four'),
+      ),
     );
   }
 }
