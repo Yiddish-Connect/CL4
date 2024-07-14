@@ -12,6 +12,7 @@ import 'package:yiddishconnect/screens/landing.dart';
 import 'package:yiddishconnect/screens/phone/phoneAuth.dart';
 import 'package:yiddishconnect/screens/preference/preference.dart';
 import 'package:yiddishconnect/services/auth.dart';
+import 'package:yiddishconnect/utils/colorful.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
 import 'firebase_options.dart';
 
@@ -32,6 +33,7 @@ class MyApp extends StatelessWidget {
       create: (context) => MyAppState(),
       child: MaterialApp.router(
         title: 'Yiddish Connect',
+        debugShowCheckedModeBanner: false,
         theme: ThemeData(
           useMaterial3: true,
           colorScheme: ColorScheme.fromSeed(seedColor: Color(0xfff3dbab)), // Same to https://yiddishlandcalifornia.org/
