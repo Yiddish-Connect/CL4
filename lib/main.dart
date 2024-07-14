@@ -7,6 +7,7 @@ import 'package:yiddishconnect/screens/authentication.dart';
 import 'package:yiddishconnect/screens/dev_signin_signup/dev_home.dart';
 import 'package:yiddishconnect/screens/email/emailSignIn.dart';
 import 'package:yiddishconnect/screens/email/emailSignUp.dart';
+import 'package:yiddishconnect/screens/homeScreen.dart';
 import 'package:yiddishconnect/screens/landing.dart';
 import 'package:yiddishconnect/screens/phone/phoneAuth.dart';
 import 'package:yiddishconnect/screens/preference/preference.dart';
@@ -94,7 +95,7 @@ final _router = GoRouter(
     GoRoute(
       name: "homeScreen",
       path: '/',
-      builder: (context, state) => DevHomeScreen(),
+      builder: (context, state) => HomeScreen(),
       routes: [
         GoRoute(
           name: "preferenceScreen",
