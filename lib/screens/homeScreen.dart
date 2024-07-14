@@ -72,7 +72,7 @@ class _HomeScreenState extends State<HomeScreen> {
             boxShadow: [
               BoxShadow(color: Colors.black38, spreadRadius: 0, blurRadius: 10),
             ],
-            color: Theme.of(context).colorScheme.surface,
+            color: Theme.of(context).colorScheme.surface
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.all(Radius.circular(30)),
@@ -81,28 +81,28 @@ class _HomeScreenState extends State<HomeScreen> {
               child: BottomNavigationBar(
                 items: [
                   BottomNavigationBarItem(
-                    icon: Icon(Icons.home),
+                    icon: Icon(Icons.home_outlined),
                     label: "Home",
                     backgroundColor: Theme.of(context).colorScheme.surface,
                   ),
                   BottomNavigationBarItem(
-                    icon: Icon(Icons.one_k),
-                    label: "One",
+                    icon: Icon(Icons.explore_outlined),
+                    label: "Explore",
                     backgroundColor: Theme.of(context).colorScheme.surface,
                   ),
                   BottomNavigationBarItem(
-                    icon: Icon(Icons.two_k),
-                    label: "Two",
+                    icon: Icon(Icons.add),
+                    label: "Match",
                     backgroundColor: Theme.of(context).colorScheme.surface,
                   ),
                   BottomNavigationBarItem(
-                    icon: Icon(Icons.three_k),
-                    label: "Three",
+                    icon: Icon(Icons.people_outline),
+                    label: "Friends",
                     backgroundColor: Theme.of(context).colorScheme.surface,
                   ),
                   BottomNavigationBarItem(
-                    icon: Icon(Icons.four_k),
-                    label: "Four",
+                    icon: Icon(Icons.chat_bubble_outline),
+                    label: "Chat",
                     backgroundColor: Theme.of(context).colorScheme.surface,
                   ),
                 ],
@@ -112,7 +112,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     _index = selectedIndex;
                   });
                 },
-                // backgroundColor: Theme.of(context).colorScheme.surface,
                 selectedItemColor: Theme.of(context).colorScheme.primary,
                 unselectedItemColor: Theme.of(context).colorScheme.secondary,
                 elevation: 0,
