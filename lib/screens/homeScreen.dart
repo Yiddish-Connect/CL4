@@ -63,38 +63,70 @@ class _HomeScreenState extends State<HomeScreen> {
         index: _index,
         children: _pages,
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: "Home",
+      bottomNavigationBar: FractionallySizedBox(
+        widthFactor: 0.9,
+        child: Container(
+          height: 64,
+          padding: EdgeInsets.symmetric(horizontal: 32, vertical: 0),
+          margin: EdgeInsets.only(top: 10, bottom: 20, left: 20, right: 20),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            // color: Colors.yellow,
+            borderRadius: BorderRadius.circular(32),
+            boxShadow: [
+              BoxShadow(
+              color: Colors.black26,
+              blurRadius: 10,
+              offset: Offset(0, -2),
+            ),
+            ],
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.one_k),
-            label: "One",
+
+          child: SizedBox(
+            height: 64,
+            child: BottomNavigationBar(
+              items: [
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.home),
+                  label: "Home",
+                  backgroundColor: Theme.of(context).colorScheme.surface,
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.one_k),
+                  label: "One",
+                  backgroundColor: Theme.of(context).colorScheme.surface,
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.two_k),
+                  label: "Two",
+                  backgroundColor: Theme.of(context).colorScheme.surface,
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.three_k),
+                  label: "Three",
+                  backgroundColor: Theme.of(context).colorScheme.surface,
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.four_k),
+                  label: "Four",
+                  backgroundColor: Theme.of(context).colorScheme.surface,
+                ),
+              ],
+              currentIndex: _index,
+              onTap: (int selectedIndex) {
+                setState(() {
+                  _index = selectedIndex;
+                });
+              },
+              // backgroundColor: Theme.of(context).colorScheme.surface,
+              selectedItemColor: Theme.of(context).colorScheme.primary,
+              unselectedItemColor: Theme.of(context).colorScheme.secondary,
+              elevation: 0,
+              type: BottomNavigationBarType.shifting, // default
+
+            ),
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.two_k),
-            label: "Two",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.three_k),
-            label: "Three",
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.four_k),
-            label: "Four",
-          ),
-        ],
-        currentIndex: _index,
-        onTap: (int selectedIndex) {
-          setState(() {
-            _index = selectedIndex;
-          });
-        },
-        backgroundColor: Theme.of(context).colorScheme.background,
-        selectedItemColor: Theme.of(context).colorScheme.primary,
-        unselectedItemColor: Theme.of(context).colorScheme.secondary,
+        ),
       ),
     );
   }
