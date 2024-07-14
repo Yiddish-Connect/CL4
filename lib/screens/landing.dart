@@ -64,7 +64,7 @@ class LandingScreen extends StatelessWidget {
                               try {
                                 User? user = await AuthService().signInAnonymously();
                                 if (user != null) {
-                                  context.go("/home");
+                                  context.go("/");
                                 } else {
                                   toast(context, "Something went wrong (null)");
                                 }
