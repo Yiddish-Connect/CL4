@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
@@ -11,19 +12,51 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _index = 0; // Index of the child currently visible
+  // All children
   List<Widget> _pages = [
     HomePage(),
     TestWidgetOne(),
     TestWidgetTwo(),
     TestWidgetThree()
-  ]; // All children
+  ];
 
 
   @override
   Widget build(BuildContext context) {
+    // Action icons for the current child
+    List<Widget> actions = [
+      Container(
+        // color: Colors.red,
+        padding: const EdgeInsets.only(right: 20),
+        child: IconButton(
+          onPressed: () => toast(context, "TODO: notification"),
+          icon: Icon(Icons.notifications),
+          iconSize: 32,
+        ),
+      ),
+    ];
+
+    Widget leading = Padding(
+      padding: const EdgeInsets.only(left: 20),
+      child: InkWell(
+        onTap: () => toast(context, "TODO: user profile?"),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: CircleAvatar(
+            backgroundImage: NetworkImage("https://picsum.photos/250"),
+            radius: 50
+          ),
+        ),
+      ),
+    );
+
+
     return Scaffold(
       appBar: AppBar(
-        title: Text("TODO: a title"),
+        actions: actions,
+        leading: leading,
+        toolbarHeight: 70,
+        leadingWidth: 90,
       ),
       body: IndexedStack(
         index: _index,
