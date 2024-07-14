@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:yiddishconnect/screens/dev_signin_signup/dev_home.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -131,10 +132,15 @@ class _HomeScreenState extends State<HomeScreen> {
 class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    print("HomePage build()");
+
     return Container(
       color: Colors.orangeAccent,
-      child: Center(
-        child: Text('Homeeeee'),
+      child: Opacity(
+        opacity: 0.5,
+        child: Center(
+          child: DevHomeScreen(),
+        ),
       ),
     );
   }
@@ -143,6 +149,8 @@ class HomePage extends StatelessWidget {
 class TestWidgetOne extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    print("WidgetOne build()");
+
     return Container(
       color: Colors.grey,
       child: Center(
@@ -155,6 +163,8 @@ class TestWidgetOne extends StatelessWidget {
 class TestWidgetTwo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    print("WidgetTwo build()");
+
     return Container(
       color: Colors.blueGrey,
       child: Center(
@@ -167,6 +177,8 @@ class TestWidgetTwo extends StatelessWidget {
 class TestWidgetThree extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    print("WidgetThree build()");
+
     return Container(
       color: Colors.teal,
       child: Center(
@@ -179,6 +191,8 @@ class TestWidgetThree extends StatelessWidget {
 class TestWidgetFour extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    print("WidgetFour build()");
+
     return Container(
       color: Colors.brown,
       child: Center(
