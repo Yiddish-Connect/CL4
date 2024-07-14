@@ -66,68 +66,63 @@ class _HomeScreenState extends State<HomeScreen> {
       bottomNavigationBar: FractionallySizedBox(
         widthFactor: 0.9,
         child: Container(
-          height: 64,
-          padding: EdgeInsets.symmetric(horizontal: 32, vertical: 0),
-          margin: EdgeInsets.only(top: 10, bottom: 20, left: 20, right: 20),
+          margin: EdgeInsets.only(top: 10, bottom: 20, left: 10, right: 10),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
-            // color: Colors.yellow,
-            borderRadius: BorderRadius.circular(32),
+            borderRadius: BorderRadius.all(Radius.circular(30)),
             boxShadow: [
-              BoxShadow(
-              color: Colors.black26,
-              blurRadius: 10,
-              offset: Offset(0, -2),
-            ),
+              BoxShadow(color: Colors.black38, spreadRadius: 0, blurRadius: 10),
             ],
+            color: Theme.of(context).colorScheme.surface,
           ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.all(Radius.circular(30)),
+            child: SizedBox(
+              height: 60,
+              child: BottomNavigationBar(
+                items: [
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.home),
+                    label: "Home",
+                    backgroundColor: Theme.of(context).colorScheme.surface,
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.one_k),
+                    label: "One",
+                    backgroundColor: Theme.of(context).colorScheme.surface,
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.two_k),
+                    label: "Two",
+                    backgroundColor: Theme.of(context).colorScheme.surface,
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.three_k),
+                    label: "Three",
+                    backgroundColor: Theme.of(context).colorScheme.surface,
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Icon(Icons.four_k),
+                    label: "Four",
+                    backgroundColor: Theme.of(context).colorScheme.surface,
+                  ),
+                ],
+                currentIndex: _index,
+                onTap: (int selectedIndex) {
+                  setState(() {
+                    _index = selectedIndex;
+                  });
+                },
+                // backgroundColor: Theme.of(context).colorScheme.surface,
+                selectedItemColor: Theme.of(context).colorScheme.primary,
+                unselectedItemColor: Theme.of(context).colorScheme.secondary,
+                elevation: 0,
+                type: BottomNavigationBarType.shifting, // default
 
-          child: SizedBox(
-            height: 64,
-            child: BottomNavigationBar(
-              items: [
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.home),
-                  label: "Home",
-                  backgroundColor: Theme.of(context).colorScheme.surface,
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.one_k),
-                  label: "One",
-                  backgroundColor: Theme.of(context).colorScheme.surface,
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.two_k),
-                  label: "Two",
-                  backgroundColor: Theme.of(context).colorScheme.surface,
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.three_k),
-                  label: "Three",
-                  backgroundColor: Theme.of(context).colorScheme.surface,
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.four_k),
-                  label: "Four",
-                  backgroundColor: Theme.of(context).colorScheme.surface,
-                ),
-              ],
-              currentIndex: _index,
-              onTap: (int selectedIndex) {
-                setState(() {
-                  _index = selectedIndex;
-                });
-              },
-              // backgroundColor: Theme.of(context).colorScheme.surface,
-              selectedItemColor: Theme.of(context).colorScheme.primary,
-              unselectedItemColor: Theme.of(context).colorScheme.secondary,
-              elevation: 0,
-              type: BottomNavigationBarType.shifting, // default
-
+              ),
             ),
           ),
         ),
-      ),
+      )
     );
   }
 }
