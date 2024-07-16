@@ -12,8 +12,6 @@ class LandingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // var appState = context.watch<MyAppState>();
-
     return Scaffold(
       body: Container(
         color: Theme.of(context).colorScheme.background,
@@ -27,14 +25,13 @@ class LandingScreen extends StatelessWidget {
               Flexible(
                 flex: 1,
                 child: SizedBox(
-                  height: 50, // Set the initial minimum height here
+                  height: 50,
                 ),
               ),
-              // Avatar
+              // Avatar with animated curve
               Container(
                 width: 500 + 20,
                 height: 300 + 20,
-                // color: Colors.amber,
                 padding: EdgeInsets.all(10),
                 child: Center(
                   child: Stack(
@@ -42,7 +39,7 @@ class LandingScreen extends StatelessWidget {
                       // The animated curve
                       Align(
                         alignment: Alignment.center,
-                        child: AnimatedCurve()
+                        child: AnimatedCurve(),
                       ),
                       // The user avatar 1
                       Positioned(
@@ -54,7 +51,7 @@ class LandingScreen extends StatelessWidget {
                             backgroundImage: NetworkImage('https://picsum.photos/200'),
                             radius: 50,
                           ),
-                        )
+                        ),
                       ),
                       // The user avatar 2
                       Positioned(
@@ -66,7 +63,7 @@ class LandingScreen extends StatelessWidget {
                             backgroundImage: NetworkImage('https://picsum.photos/200'),
                             radius: 50,
                           ),
-                        )
+                        ),
                       ),
                       // "Intermediate"
                       Positioned(
@@ -79,8 +76,7 @@ class LandingScreen extends StatelessWidget {
                           text: "Intermediate",
                           height: 30,
                           width: 100,
-                        )
-
+                        ),
                       ),
                       // "Proficient"
                       Positioned(
@@ -93,7 +89,7 @@ class LandingScreen extends StatelessWidget {
                           text: "Proficient",
                           height: 30,
                           width: 100,
-                        )
+                        ),
                       ),
                     ],
                   ),
@@ -101,19 +97,18 @@ class LandingScreen extends StatelessWidget {
               ),
               // "Make friends with people like you"
               Container(
-                // The text
                 margin: const EdgeInsets.all(20.0),
                 constraints: BoxConstraints(minHeight: 100),
                 child: Center(
-                    child: Text(
-                  "Make friends with people like you",
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.headlineLarge,
-                )),
+                  child: Text(
+                    "Make friends with people like you",
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.headlineLarge,
+                  ),
+                ),
               ),
               // Buttons
               Container(
-                // The 2 buttons
                 margin: const EdgeInsets.all(20.0),
                 child: Column(
                   children: [
@@ -125,24 +120,25 @@ class LandingScreen extends StatelessWidget {
                         child: FractionallySizedBox(
                           widthFactor: 0.6,
                           child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary, foregroundColor: Theme.of(context).colorScheme.onPrimary),
-                              // Continue => Anonymous mode (TODO)
-                              onPressed: () async {
-                                try {
-                                  User? user = await AuthService().signInAnonymously();
-                                  if (user != null) {
-                                    context.go("/home");
-                                  } else {
-                                    toast(context, "Something went wrong (null)");
-                                  }
-                                } catch (e) {
-                                  toast(context, e.toString());
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Theme.of(context).colorScheme.primary,
+                              foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                            ),
+                            // Continue => Anonymous mode
+                            onPressed: () async {
+                              try {
+                                User? user = await AuthService().signInAnonymously();
+                                if (user != null) {
+                                  context.go("/");
+                                } else {
+                                  toast(context, "Something went wrong (null)");
                                 }
-                              },
-                              child: Text("Continue")
-                              // Don't need to specify the style here.
-                              // The default style here is inherited from ElevatedButton, which will automatically looks for labelMedium
-                              ),
+                              } catch (e) {
+                                toast(context, e.toString());
+                              }
+                            },
+                            child: Text("Continue"),
+                          ),
                         ),
                       ),
                     ),
@@ -154,22 +150,24 @@ class LandingScreen extends StatelessWidget {
                         child: FractionallySizedBox(
                           widthFactor: 0.6,
                           child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.surface, foregroundColor: Theme.of(context).colorScheme.onSurface),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Theme.of(context).colorScheme.surface,
+                              foregroundColor: Theme.of(context).colorScheme.onSurface,
+                            ),
                             // Sign in => SignInPage
                             onPressed: () {
                               context.go("/auth");
                             },
                             child: Text("Login"),
-                            // Don't need to specify the style here.
-                            // The default style here is inherited from ElevatedButton, which will automatically looks for labelMedium
                           ),
                         ),
                       ),
-                    )
+                    ),
                   ],
                 ),
-              )
-          ]),
+              ),
+            ],
+          ),
         ),
       ),
     );
