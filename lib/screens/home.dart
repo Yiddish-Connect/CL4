@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:yiddishconnect/screens/dev_signin_signup/dev_home.dart';
+import 'package:yiddishconnect/screens/match/matchPage.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -12,51 +14,81 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _index = 0; // Index of the child currently visible
+  // Index of the child currently visible
+  int _index = 0;
   // All children
   List<Widget> _pages = [
-    HomePage(),
-    TestWidgetOne(),
-    TestWidgetTwo(),
-    TestWidgetThree(),
-    TestWidgetFour(),
+    HomePage(), // _index: 0
+    TestWidgetOne(), // _index: 1
+    MatchPage(), // _index: 2
+    TestWidgetThree(), // _index: 3
+    TestWidgetFour(), // _index: 4
   ];
 
-
-  @override
-  Widget build(BuildContext context) {
-    // Action icons for the current child
-    List<Widget> actions = [
-      Container(
+  // Get the "actions" of the Scaffold from given index
+  List<Widget> _getActions(int index) {
+    List<Widget> matchPageActions = [
+      Padding(
         // color: Colors.red,
-        padding: const EdgeInsets.only(right: 20),
+        padding: const EdgeInsets.all(8),
         child: IconButton(
-          onPressed: () => toast(context, "TODO: notification"),
-          icon: Icon(Icons.notifications),
-          iconSize: 24.0
+            onPressed: () => toast(context, "TODO: search"),
+            icon: Icon(Icons.search, size: 28.0,),
+            iconSize: 28.0
+        ),
+      ),
+      Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: IconButton(
+            onPressed: () => toast(context, "TODO: filter"),
+            icon: Icon(Icons.filter_list, size: 28.0),
+            iconSize: 28.0
         ),
       ),
     ];
 
-    Widget leading = Padding(
-      padding: const EdgeInsets.only(left: 20),
+    List<Widget> otherPageActions = [
+      Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: IconButton(
+            onPressed: () => toast(context, "TODO: notifications"),
+            icon: Icon(Icons.notifications_outlined, size: 28.0),
+            iconSize: 28.0
+        ),
+      ),
+    ];
+
+    return switch (index) {
+      0 || 1 || 3 || 4 => otherPageActions,
+      2 => matchPageActions,
+      _ => [Container()]
+    };
+  }
+
+  // Get the "leading" of the Scaffold from given index
+  Widget _getLeading(int index) {
+    // The leading will always be the user's profile picture
+    return Padding(
+      padding: const EdgeInsets.all(0.0),
       child: InkWell(
         onTap: () => toast(context, "TODO: user profile?"),
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: CircleAvatar(
-            backgroundImage: NetworkImage("https://picsum.photos/250"),
-            radius: 50
+              backgroundImage: NetworkImage("https://picsum.photos/250"),
+              radius: 50
           ),
         ),
-      ),
-    );
+      ))
+    ;
+  }
 
-
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        actions: actions,
-        leading: leading,
+        actions: _getActions(_index),
+        leading: _getLeading(_index),
         toolbarHeight: 70,
         leadingWidth: 90,
       ),
