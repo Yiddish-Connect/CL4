@@ -43,7 +43,7 @@ class _MatchFilterState extends State<MatchFilter> {
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: Align(
             alignment: Alignment.center,
-            child: Text("Filters", style: Theme.of(context).textTheme.displaySmall,),
+            child: Text("Filters", style: Theme.of(context).textTheme.headlineMedium,),
           ),
         ),
 
@@ -55,7 +55,7 @@ class _MatchFilterState extends State<MatchFilter> {
             children: [
               Text(
                 "Practice Option",
-                style: Theme.of(context).textTheme.titleLarge,
+                style: Theme.of(context).textTheme.titleMedium,
                 textAlign: TextAlign.start,
               ),
               Row(
@@ -65,6 +65,7 @@ class _MatchFilterState extends State<MatchFilter> {
                   // "Online"
                   Expanded(
                     child: CheckboxListTile(
+                      contentPadding: EdgeInsets.all(8.0),
                       value: practiceOptionsSelection.contains(PracticeOption.online),
                       onChanged: (bool? value) => setState(() {
                         if (value == true) {
@@ -72,14 +73,15 @@ class _MatchFilterState extends State<MatchFilter> {
                         } else {
                           practiceOptionsSelection.remove(PracticeOption.online);
                         }
-                        print( "onchange 1-1!");
+                        // print( "onchange 1-1!");
                       }),
-                      title: Text("Online"),
+                      title: Text("Online", style: Theme.of(context).textTheme.bodyMedium),
                     ),
                   ),
                   // "In-Person"
                   Expanded(
                     child: CheckboxListTile(
+                      contentPadding: EdgeInsets.all(8.0),
                       value: practiceOptionsSelection.contains(PracticeOption.inPerson),
                       onChanged: (bool? value) => setState(() {
                         if (value == true) {
@@ -89,7 +91,7 @@ class _MatchFilterState extends State<MatchFilter> {
                         }
                         // print( "onchange 1-2!");
                       }),
-                      title: Text("In-Person"),
+                      title: Text("In-Person", style: Theme.of(context).textTheme.bodyMedium),
                     ),
                   )
                 ],
@@ -106,7 +108,7 @@ class _MatchFilterState extends State<MatchFilter> {
             children: [
               Text(
                 "Yiddish Proficiency",
-                style: Theme.of(context).textTheme.titleLarge,
+                style: Theme.of(context).textTheme.titleMedium,
                 textAlign: TextAlign.start,
               ),
               Row(
@@ -116,7 +118,7 @@ class _MatchFilterState extends State<MatchFilter> {
                   // "Beginner"
                   Expanded(
                     child: CheckboxListTile(
-
+                      contentPadding: EdgeInsets.all(8.0),
                       value: yiddishProficiencySelection.contains(YiddishProficiency.beginner),
                       onChanged: (bool? value) => setState(() {
                         if (value == true) {
@@ -126,12 +128,13 @@ class _MatchFilterState extends State<MatchFilter> {
                         }
                         // print( "onchange 2-1!");
                       }),
-                      title: Text("Beginner"),
+                      title: Text("Beginner", style: Theme.of(context).textTheme.bodyMedium),
                     ),
                   ),
                   // "Intermediate"
                   Expanded(
                     child: CheckboxListTile(
+                      contentPadding: EdgeInsets.all(8.0),
                       value: yiddishProficiencySelection.contains(YiddishProficiency.intermediate),
                       onChanged: (bool? value) => setState(() {
                         if (value == true) {
@@ -141,13 +144,13 @@ class _MatchFilterState extends State<MatchFilter> {
                         }
                         // print( "onchange 2-2!");
                       }),
-                      title: Text("Intermediate"),
+                      title: Text("Intermediate", style: Theme.of(context).textTheme.bodyMedium),
                     ),
                   ),
                   // "Proficient"
                   Expanded(
                     child: CheckboxListTile(
-
+                      contentPadding: EdgeInsets.all(8.0),
                       value: yiddishProficiencySelection.contains(YiddishProficiency.fluent),
                       onChanged: (bool? value) => setState(() {
                         if (value == true) {
@@ -157,7 +160,7 @@ class _MatchFilterState extends State<MatchFilter> {
                         }
                         // print( "onchange 2-3!");
                       }),
-                      title: Text("Fluent"),
+                      title: Text("Fluent", style: Theme.of(context).textTheme.bodyMedium),
                     ),
                   ),
                 ],
@@ -177,11 +180,11 @@ class _MatchFilterState extends State<MatchFilter> {
                 children: [
                   Text(
                     "Distance",
-                    style: Theme.of(context).textTheme.titleLarge
+                    style: Theme.of(context).textTheme.titleMedium
                   ),
                   Text(
                     "${distanceSelection.round()} km",
-                    style: Theme.of(context).textTheme.bodyLarge
+                    style: Theme.of(context).textTheme.bodyMedium
                   ),
                 ],
               ),
@@ -209,11 +212,11 @@ class _MatchFilterState extends State<MatchFilter> {
                 children: [
                   Text(
                       "Age",
-                      style: Theme.of(context).textTheme.titleLarge
+                      style: Theme.of(context).textTheme.titleMedium
                   ),
                   Text(
                       "${(ageRangeSelection.start).round()} ~ ${(ageRangeSelection.end).round()}",
-                      style: Theme.of(context).textTheme.bodyLarge
+                      style: Theme.of(context).textTheme.bodyMedium
                   ),
                 ],
               ),
