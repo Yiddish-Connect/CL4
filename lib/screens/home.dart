@@ -2,9 +2,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:yiddishconnect/screens/dev_signin_signup/dev_home.dart';
 import 'package:yiddishconnect/screens/match/bottomFilter.dart';
 import 'package:yiddishconnect/screens/match/matchPage.dart';
+import 'package:yiddishconnect/screens/match/matchPageProvider.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -86,75 +88,80 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        actions: _getActions(_index),
-        leading: _getLeading(_index),
-        toolbarHeight: 70,
-        leadingWidth: 90,
-      ),
-      body: IndexedStack(
-        index: _index,
-        children: _pages,
-      ),
-      bottomNavigationBar: FractionallySizedBox(
-        widthFactor: 0.9,
-        child: Container(
-          margin: EdgeInsets.only(top: 10, bottom: 20, left: 10, right: 10),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.all(Radius.circular(30)),
-            boxShadow: [
-              BoxShadow(color: Colors.black38, spreadRadius: 0, blurRadius: 10),
-            ],
-            color: Theme.of(context).colorScheme.surface
-          ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.all(Radius.circular(30)),
-            child: SizedBox(
-              height: 60,
-              child: BottomNavigationBar(
-                items: [
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.home_outlined),
-                    label: "Home",
-                    backgroundColor: Theme.of(context).colorScheme.surface,
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.explore_outlined),
-                    label: "Explore",
-                    backgroundColor: Theme.of(context).colorScheme.surface,
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.add),
-                    label: "Match",
-                    backgroundColor: Theme.of(context).colorScheme.surface,
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.people_outline),
-                    label: "Friends",
-                    backgroundColor: Theme.of(context).colorScheme.surface,
-                  ),
-                  BottomNavigationBarItem(
-                    icon: Icon(Icons.chat_bubble_outline),
-                    label: "Chat",
-                    backgroundColor: Theme.of(context).colorScheme.surface,
-                  ),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => MatchPageProvider()),
+      ],
+      child: Scaffold(
+        appBar: AppBar(
+          actions: _getActions(_index),
+          leading: _getLeading(_index),
+          toolbarHeight: 70,
+          leadingWidth: 90,
+        ),
+        body: IndexedStack(
+          index: _index,
+          children: _pages,
+        ),
+        bottomNavigationBar: FractionallySizedBox(
+          widthFactor: 0.9,
+          child: Container(
+            margin: EdgeInsets.only(top: 10, bottom: 20, left: 10, right: 10),
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.all(Radius.circular(30)),
+                boxShadow: [
+                  BoxShadow(color: Colors.black38, spreadRadius: 0, blurRadius: 10),
                 ],
-                currentIndex: _index,
-                onTap: (int selectedIndex) {
-                  setState(() {
-                    _index = selectedIndex;
-                  });
-                },
-                selectedItemColor: Theme.of(context).colorScheme.primary,
-                unselectedItemColor: Theme.of(context).colorScheme.secondary,
-                elevation: 0,
-                type: BottomNavigationBarType.shifting, // default
+                color: Theme.of(context).colorScheme.surface
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.all(Radius.circular(30)),
+              child: SizedBox(
+                height: 60,
+                child: BottomNavigationBar(
+                  items: [
+                    BottomNavigationBarItem(
+                      icon: Icon(Icons.home_outlined),
+                      label: "Home",
+                      backgroundColor: Theme.of(context).colorScheme.surface,
+                    ),
+                    BottomNavigationBarItem(
+                      icon: Icon(Icons.explore_outlined),
+                      label: "Explore",
+                      backgroundColor: Theme.of(context).colorScheme.surface,
+                    ),
+                    BottomNavigationBarItem(
+                      icon: Icon(Icons.add),
+                      label: "Match",
+                      backgroundColor: Theme.of(context).colorScheme.surface,
+                    ),
+                    BottomNavigationBarItem(
+                      icon: Icon(Icons.people_outline),
+                      label: "Friends",
+                      backgroundColor: Theme.of(context).colorScheme.surface,
+                    ),
+                    BottomNavigationBarItem(
+                      icon: Icon(Icons.chat_bubble_outline),
+                      label: "Chat",
+                      backgroundColor: Theme.of(context).colorScheme.surface,
+                    ),
+                  ],
+                  currentIndex: _index,
+                  onTap: (int selectedIndex) {
+                    setState(() {
+                      _index = selectedIndex;
+                    });
+                  },
+                  selectedItemColor: Theme.of(context).colorScheme.primary,
+                  unselectedItemColor: Theme.of(context).colorScheme.secondary,
+                  elevation: 0,
+                  type: BottomNavigationBarType.shifting, // default
 
+                ),
               ),
             ),
           ),
-        ),
+        )
       )
     );
   }
