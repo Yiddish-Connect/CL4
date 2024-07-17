@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:yiddishconnect/screens/dev_signin_signup/dev_home.dart';
+import 'package:yiddishconnect/screens/match/bottomFilter.dart';
 import 'package:yiddishconnect/screens/match/matchPage.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
 
@@ -40,7 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
       Padding(
         padding: const EdgeInsets.all(8.0),
         child: IconButton(
-            onPressed: () => toast(context, "TODO: filter"),
+            onPressed: () => showFilter(context),
             icon: Icon(Icons.filter_list, size: 28.0),
             iconSize: 28.0
         ),
