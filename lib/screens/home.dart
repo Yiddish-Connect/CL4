@@ -28,12 +28,11 @@ class _HomeScreenState extends State<HomeScreen> {
     TestWidgetFour(), // _index: 4
   ];
 
-
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => MatchPageProvider()),
+        ChangeNotifierProvider(create: (context) => MatchPageProvider())
       ],
       child: Scaffold(
         appBar: AppBar(

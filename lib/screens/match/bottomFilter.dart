@@ -1,6 +1,8 @@
 import 'dart:collection';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:yiddishconnect/screens/match/matchPageProvider.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
 import '../../models/filter.dart';
 
@@ -265,7 +267,11 @@ class _MatchFilterState extends State<MatchFilter> {
                 color: Colors.green,
                 onPressed: () => {
                   setState(() {
-                    toast(context, "TODO: Update the provider");
+                    Provider.of<MatchPageProvider>(context, listen: false).yiddishProficiencySelection = yiddishProficiencySelection.toList();
+                    Provider.of<MatchPageProvider>(context, listen: false).practiceOptionsSelection = practiceOptionsSelection.toList();
+                    Provider.of<MatchPageProvider>(context, listen: false).maxDistance = distanceSelection.round();
+                    Provider.of<MatchPageProvider>(context, listen: false).minAge = ageRangeSelection.start.round();
+                    Provider.of<MatchPageProvider>(context, listen: false).maxAge = ageRangeSelection.end.round();
                     Navigator.pop(context);
                   })
                 },
