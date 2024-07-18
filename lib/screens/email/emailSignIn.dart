@@ -3,6 +3,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
+import 'package:yiddishconnect/widgets/ErrorHandlers.dart';
 import '../../services/auth.dart';
 import '../dev_signin_signup/dev_home.dart';
 
@@ -39,7 +40,8 @@ class _EmailSignInScreenState extends State<EmailSignInScreen> {
               children: [
                 Container(
                   padding: EdgeInsets.all(30),
-                  child: Text("Enter your Email & password", style: Theme.of(context).textTheme.titleLarge),
+                  child: Text("Enter your Email & password",
+                      style: Theme.of(context).textTheme.titleLarge),
                 ),
                 Container(
                   padding: EdgeInsets.all(5),
@@ -64,22 +66,22 @@ class _EmailSignInScreenState extends State<EmailSignInScreen> {
                 ),
                 Container(
                     padding: EdgeInsets.all(5),
-                    child: RichText(text: TextSpan(
-                        text: "Forget your password? ",
-                        style: Theme.of(context).textTheme.labelMedium,
-                        children: [
+                    child: RichText(
+                        text: TextSpan(
+                            text: "Forget your password? ",
+                            style: Theme.of(context).textTheme.labelMedium,
+                            children: [
                           TextSpan(
                               text: "Reset",
                               style: Theme.of(context).textTheme.labelMedium,
-                              recognizer: TapGestureRecognizer()..onTap = () {
-                                String email = _emailController.text;
-                                _auth.sendPasswordResetEmailTo(email);
-                                toast(context, "We have sent a password recovery link to $email");
-                              }
-                          )
-                        ]
-                    ))
-                ),
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = () {
+                                  String email = _emailController.text;
+                                  _auth.sendPasswordResetEmailTo(email);
+                                  toast(context,
+                                      "We have sent a password recovery link to $email");
+                                })
+                        ]))),
                 Container(
                   padding: EdgeInsets.all(30),
                   child: SizedBox(
@@ -87,20 +89,26 @@ class _EmailSignInScreenState extends State<EmailSignInScreen> {
                     child: FractionallySizedBox(
                       widthFactor: 0.6,
                       child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(backgroundColor: Theme.of(context).colorScheme.primary, foregroundColor: Theme.of(context).colorScheme.onPrimary),
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                Theme.of(context).colorScheme.primary,
+                            foregroundColor:
+                                Theme.of(context).colorScheme.onPrimary),
                         onPressed: () async {
                           String email = _emailController.text;
                           String password = _passwordController.text;
                           try {
-                            User? user = await _auth.signInWithEmailAndPassword(email, password);
+                            User? user = await _auth.signInWithEmailAndPassword(
+                                email, password);
                             if (user != null) {
-                              toast(context, "Successfully signed in with Email");
+                              toast(
+                                  context, "Successfully signed in with Email");
                               context.go("/");
                             } else {
                               toast(context, "Something went wrong (null)");
                             }
                           } catch (e) {
-                            toast(context, e.toString());
+                            emailError(context, e.toString());
                           }
                         },
                         child: Text('Login'),
