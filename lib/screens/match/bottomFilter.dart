@@ -37,6 +37,14 @@ class _MatchFilterState extends State<MatchFilter> {
   double distanceSelection = 1000;
   RangeValues ageRangeSelection = RangeValues(0, 100);
 
+  @override
+  void initState() {
+    distanceSelection = widget.dataProvider.maxDistance + 0.0;
+    ageRangeSelection = RangeValues(widget.dataProvider.minAge + 0.0, widget.dataProvider.maxAge + 0.0);
+    for (var element in widget.dataProvider.practiceOptionsSelection) { practiceOptionsSelection.add(element);}
+    for (var element in widget.dataProvider.yiddishProficiencySelection) { yiddishProficiencySelection.add(element);}
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
