@@ -7,20 +7,25 @@ import 'package:yiddishconnect/utils/helpers.dart';
 import '../../models/filter.dart';
 
 void showFilter(BuildContext context) {
+  // assert: context contains the matchPageProvider
+  MatchPageProvider matchPageProvider = Provider.of<MatchPageProvider>(context, listen: false);
+
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
     builder: (BuildContext context) {
       return Padding(
         padding: const EdgeInsets.all(18.0),
-        child: MatchFilter(),
+        child: MatchFilter(dataProvider: matchPageProvider),
       );
     }
   );
 }
 
 class MatchFilter extends StatefulWidget {
-  const MatchFilter({super.key});
+  final MatchPageProvider dataProvider;
+
+  MatchFilter({super.key, required this.dataProvider});
 
   @override
   State<MatchFilter> createState() => _MatchFilterState();
@@ -265,15 +270,13 @@ class _MatchFilterState extends State<MatchFilter> {
                   size: 48,
                 ),
                 color: Colors.green,
-                onPressed: () => {
-                  setState(() {
-                    Provider.of<MatchPageProvider>(context, listen: false).yiddishProficiencySelection = yiddishProficiencySelection.toList();
-                    Provider.of<MatchPageProvider>(context, listen: false).practiceOptionsSelection = practiceOptionsSelection.toList();
-                    Provider.of<MatchPageProvider>(context, listen: false).maxDistance = distanceSelection.round();
-                    Provider.of<MatchPageProvider>(context, listen: false).minAge = ageRangeSelection.start.round();
-                    Provider.of<MatchPageProvider>(context, listen: false).maxAge = ageRangeSelection.end.round();
-                    Navigator.pop(context);
-                  })
+                onPressed: () {
+                  widget.dataProvider.yiddishProficiencySelection = yiddishProficiencySelection.toList();
+                  widget.dataProvider.practiceOptionsSelection = practiceOptionsSelection.toList();
+                  widget.dataProvider.maxDistance = distanceSelection.round();
+                  widget.dataProvider.minAge = ageRangeSelection.start.round();
+                  widget.dataProvider.maxAge = ageRangeSelection.end.round();
+                  Navigator.pop(context);
                 },
               ),
             ],
