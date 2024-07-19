@@ -70,263 +70,27 @@ class _AddPhotoState extends State<AddPhoto>{
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black),
                 ),
                 SizedBox(height: 20),
-                Padding( 
-                  padding:EdgeInsets.all(10.0),
+                Padding(
+                  padding: EdgeInsets.all(10.0),
                   child: StaggeredGrid.count(
                     crossAxisCount: 3,
                     mainAxisSpacing: 3,
                     crossAxisSpacing: 3,
-                    children: [
+                    children: List.generate(6, (index) => 
                       StaggeredGridTile.count(
-                        crossAxisCellCount: 2,
-                        mainAxisCellCount: 2,
-                        child: Container(
-                          margin: EdgeInsets.all(2.5),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(25),
-                            color: Colors.grey[200],
-                          ),
-                          child: Stack(
-                            children: [
-                              if (_images[0] != null)
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(25),
-                                  child: Image.file(
-                                    _images[0]!,
-                                    fit: BoxFit.cover,
-                                    width: double.infinity,
-                                    height: double.infinity,
-                                  ),
-                                ),
-                              Center(
-                                child: ElevatedButton(
-                                  onPressed: () async {
-                                    final files = await imageHelper.pickImage();
-                                    if (files.isNotEmpty) {
-                                      final croppedFile = await imageHelper.crop(
-                                        file: files.first,
-                                      );
-                                      if (croppedFile != null) {
-                                        setState(() => _images[0] = File(croppedFile.path));
-                                      }
-                                    }
-                                  },
-                                  child: Text('Add'),
-                                ),
-                              ),
-                            ],
-                          ),
+                        crossAxisCellCount: index == 0 ? 2 : 1,
+                        mainAxisCellCount: index == 0 ? 2 : 1,
+                        child: ImageTile(
+                          imageFile: _images[index],
+                          onImageSelected: (file) {
+                            setState(() => _images[index] = file);
+                          },
                         ),
                       ),
-
-                      StaggeredGridTile.count(
-                        crossAxisCellCount: 1,
-                        mainAxisCellCount: 1,
-                        child: Container(
-                          margin: EdgeInsets.all(2.5),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(25),
-                            color: Colors.grey[200],
-                          ),
-                          child: Stack(
-                            children: [
-                              if (_images[1] != null)
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(25),
-                                  child: Image.file(
-                                    _images[1]!,
-                                    fit: BoxFit.cover,
-                                    width: double.infinity,
-                                    height: double.infinity,
-                                  ),
-                                ),
-                              Center(
-                                child: ElevatedButton(
-                                  onPressed: () async {
-                                    final files = await imageHelper.pickImage();
-                                    if (files.isNotEmpty) {
-                                      final croppedFile = await imageHelper.crop(
-                                        file: files.first,
-                                      );
-                                      if (croppedFile != null) {
-                                        setState(() => _images[1] = File(croppedFile.path));
-                                      }
-                                    }
-                                  },
-                                  child: Text('Add'),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      StaggeredGridTile.count(
-                        crossAxisCellCount: 1,
-                        mainAxisCellCount: 1,
-                        child: Container(
-                          margin: EdgeInsets.all(2.5),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(25),
-                            color: Colors.grey[200],
-                          ),
-                          child: Stack(
-                            children: [
-                              if (_images[2] != null)
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(25),
-                                  child: Image.file(
-                                    _images[2]!,
-                                    fit: BoxFit.cover,
-                                    width: double.infinity,
-                                    height: double.infinity,
-                                  ),
-                                ),
-                              Center(
-                                child: ElevatedButton(
-                                  onPressed: () async {
-                                    final files = await imageHelper.pickImage();
-                                    if (files.isNotEmpty) {
-                                      final croppedFile = await imageHelper.crop(
-                                        file: files.first,
-                                      );
-                                      if (croppedFile != null) {
-                                        setState(() => _images[2] = File(croppedFile.path));
-                                      }
-                                    }
-                                  },
-                                  child: Text('Add'),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      StaggeredGridTile.count(
-                        crossAxisCellCount: 1,
-                        mainAxisCellCount: 1,
-                        child: Container(
-                          margin: EdgeInsets.all(2.5),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(25),
-                            color: Colors.grey[200],
-                          ),
-                          child: Stack(
-                            children: [
-                              if (_images[3] != null)
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(25),
-                                  child: Image.file(
-                                    _images[3]!,
-                                    fit: BoxFit.cover,
-                                    width: double.infinity,
-                                    height: double.infinity,
-                                  ),
-                                ),
-                              Center(
-                                child: ElevatedButton(
-                                  onPressed: () async {
-                                    final files = await imageHelper.pickImage();
-                                    if (files.isNotEmpty) {
-                                      final croppedFile = await imageHelper.crop(
-                                        file: files.first,
-                                      );
-                                      if (croppedFile != null) {
-                                        setState(() => _images[3] = File(croppedFile.path));
-                                      }
-                                    }
-                                  },
-                                  child: Text('Add'),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      StaggeredGridTile.count(
-                        crossAxisCellCount: 1,
-                        mainAxisCellCount: 1,
-                        child: Container(
-                          margin: EdgeInsets.all(2.5),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(25),
-                            color: Colors.grey[200],
-                          ),
-                          child: Stack(
-                            children: [
-                              if (_images[4] != null)
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(25),
-                                  child: Image.file(
-                                    _images[4]!,
-                                    fit: BoxFit.cover,
-                                    width: double.infinity,
-                                    height: double.infinity,
-                                  ),
-                                ),
-                              Center(
-                                child: ElevatedButton(
-                                  onPressed: () async {
-                                    final files = await imageHelper.pickImage();
-                                    if (files.isNotEmpty) {
-                                      final croppedFile = await imageHelper.crop(
-                                        file: files.first,
-                                      );
-                                      if (croppedFile != null) {
-                                        setState(() => _images[4] = File(croppedFile.path));
-                                      }
-                                    }
-                                  },
-                                  child: Text('Add'),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      StaggeredGridTile.count(
-                        crossAxisCellCount: 1,
-                        mainAxisCellCount: 1,
-                        child: Container(
-                          margin: EdgeInsets.all(2.5),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(25),
-                            color: Colors.grey[200],
-                          ),
-                          child: Stack(
-                            children: [
-                              if (_images[5] != null)
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(25),
-                                  child: Image.file(
-                                    _images[5]!,
-                                    fit: BoxFit.cover,
-                                    width: double.infinity,
-                                    height: double.infinity,
-                                  ),
-                                ),
-                              Center(
-                                child: ElevatedButton(
-                                  onPressed: () async {
-                                    final files = await imageHelper.pickImage();
-                                    if (files.isNotEmpty) {
-                                      final croppedFile = await imageHelper.crop(
-                                        file: files.first,
-                                      );
-                                      if (croppedFile != null) {
-                                        setState(() => _images[5] = File(croppedFile.path));
-                                      }
-                                    }
-                                  },
-                                  child: Text('Add'),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                ),  
+                ),
+                
                 SizedBox(height: 30),
 
                 ElevatedButton(
@@ -406,10 +170,8 @@ class _AddPhotoState extends State<AddPhoto>{
                     ),
                 ),
                 
-
                 Padding(
                   padding: EdgeInsets.only(left: 15, right: 10, bottom: 20.0),
-                  
                   child: new LinearPercentIndicator(
                     width: MediaQuery.of(context).size.width - 30,
                     animation: false,
@@ -420,11 +182,8 @@ class _AddPhotoState extends State<AddPhoto>{
                     progressColor: Color.fromRGBO(221, 136, 207, 1),
                   ),
                 ),
-                
               ],
             )
-
-            
           ],
         )
       )
@@ -466,3 +225,54 @@ class CircularContainer extends StatelessWidget {
   }
 }
 
+class ImageTile extends StatelessWidget {
+  final File? imageFile;
+  final ValueChanged<File> onImageSelected;
+
+  const ImageTile({
+    Key? key,
+    required this.imageFile,
+    required this.onImageSelected,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.all(2.5),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(25),
+        color: Colors.grey[200],
+      ),
+      child: Stack(
+        children: [
+          if (imageFile != null)
+            ClipRRect(
+              borderRadius: BorderRadius.circular(25),
+              child: Image.file(
+                imageFile!,
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: double.infinity,
+              ),
+            ),
+          Center(
+            child: ElevatedButton(
+              onPressed: () async {
+                final files = await imageHelper.pickImage();
+                if (files.isNotEmpty) {
+                  final croppedFile = await imageHelper.crop(
+                    file: files.first,
+                  );
+                  if (croppedFile != null) {
+                    onImageSelected(File(croppedFile.path));
+                  }
+                }
+              },
+              child: Text('Add'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
