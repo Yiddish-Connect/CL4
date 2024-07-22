@@ -270,8 +270,8 @@ class AuthScreen extends StatelessWidget {
             } else {
               toast(context, "Something went wrong (null)");
             }
-          } catch (e) {
-            googleError(context, e.toString());
+          } on FirebaseAuthException catch (e) {
+            googleError(context, e.code.toString());
           }
         },
         child: Row(
