@@ -107,8 +107,8 @@ class _EmailSignInScreenState extends State<EmailSignInScreen> {
                             } else {
                               toast(context, "Something went wrong (null)");
                             }
-                          } catch (e) {
-                            emailError(context, e.toString());
+                          } on FirebaseAuthException catch (e) {
+                            emailError(context, e.code);
                           }
                         },
                         child: Text('Login'),
