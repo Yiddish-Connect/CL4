@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -27,6 +28,7 @@ class ImageHelper {
 
   Future<CroppedFile?> crop({
     required XFile file,
+    required BuildContext context,
     CropStyle cropStyle = CropStyle.rectangle,
   }) async => 
     await _imageCropper.cropImage(
@@ -36,5 +38,6 @@ class ImageHelper {
       uiSettings: [
         IOSUiSettings(),
         AndroidUiSettings(),
+        WebUiSettings(context: context)
       ],);
 }
