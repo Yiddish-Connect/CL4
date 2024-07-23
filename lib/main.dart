@@ -11,6 +11,7 @@ import 'package:yiddishconnect/screens/landing.dart';
 import 'package:yiddishconnect/screens/phone/phoneAuth.dart';
 import 'package:yiddishconnect/screens/preference/preference.dart';
 import 'package:yiddishconnect/services/auth.dart';
+import 'package:yiddishconnect/screens/Filter/filter_screen.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
 import 'firebase_options.dart';
 
@@ -100,6 +101,11 @@ final _router = GoRouter(
           name: "preferenceScreen",
           path: 'preference',
           builder: (context, state) => PreferenceScreen(),
+        ),
+        GoRoute(
+          name: "filterScreen",
+          path: 'filter',
+          builder: (context, state) => FilterScreen(),
         ),
       ]
     ),
