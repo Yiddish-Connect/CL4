@@ -1,6 +1,8 @@
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -8,6 +10,9 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
 import 'package:yiddishconnect/widgets/yd_multi_steps.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:provider/provider.dart';
+import 'package:yiddishconnect/utils/image_helper.dart';
 
 class PreferenceProvider extends ChangeNotifier {
   String _name = "";
@@ -265,11 +270,140 @@ class _Step3 extends StatelessWidget {
 
 
 // Upload your photos
-class _Step4 extends StatelessWidget {
+class _Step4 extends StatefulWidget {
   const _Step4({super.key});
 
   @override
+  State<_Step4> createState() => _Step4State();
+}
+
+class _Step4State extends State<_Step4> {
+  List<File?> _images = List<File?>.filled(6, null); // List for app images
+  List<String?> _webImages = List<String?>.filled(6, null); // List for web images
+
+  @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Container(
+      // color: Color.fromRGBO(253, 247, 253, 1),
+      child: SingleChildScrollView(
+        padding: EdgeInsets.all(16), // Add padding to avoid edge issues
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: 400), // Set max width for the grid
+              child: Padding(
+                padding: EdgeInsets.all(10.0),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final itemSize = (constraints.maxWidth - 3 * 3) / 3; // Calculate item size
+                    return StaggeredGrid.count(
+                      crossAxisCount: 3,
+                      mainAxisSpacing: 3,
+                      crossAxisSpacing: 3,
+                      children: List.generate(6, (index) =>
+                        StaggeredGridTile.count(
+                          crossAxisCellCount: index == 0 ? 2 : 1,
+                          mainAxisCellCount: index == 0 ? 2 : 1,
+                          child: Container(
+                            width: itemSize,
+                            height: itemSize,
+                            child: ImageTile(
+                              imageFile: _images[index],
+                              webImage: _webImages[index],
+                              onImageSelected: (file) {
+                                setState(() {
+                                  if (kIsWeb) {
+                                    _webImages[index] = file.path;
+                                  } else {
+                                    _images[index] = file;
+                                  }
+                                });
+                              },
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+            SizedBox(height: 20), // Add spacing at the bottom
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+// Image upload helper widget
+class ImageTile extends StatelessWidget {
+  final File? imageFile;
+  final String? webImage; // Add a field for web image
+  final ValueChanged<File> onImageSelected;
+
+  const ImageTile({
+    Key? key,
+    required this.imageFile,
+    required this.webImage,
+    required this.onImageSelected,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.all(1.5),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        color: Colors.grey[200],
+      ),
+      child: Stack(
+        children: [
+          if (kIsWeb && webImage != null) // Check if it's web and web image is available
+            ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: Image.network(
+                webImage!,
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: double.infinity,
+              ),
+            )
+          else if (imageFile != null)
+            ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: Image.file(
+                imageFile!,
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: double.infinity,
+              ),
+            ),
+          Align(
+            alignment: Alignment.bottomCenter, // Position at the bottom center
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 20.0),
+              child: ElevatedButton(
+                onPressed: () async {
+                  final files = await ImageHelper().pickImage();
+                  if (files.isNotEmpty) {
+                    final croppedFile = await ImageHelper().crop(
+                      file: files.first,
+                      context: context,
+                    );
+                    if (croppedFile != null) {
+                      onImageSelected(File(croppedFile.path));
+                    }
+                  }
+                },
+                child: Text('Add'),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
