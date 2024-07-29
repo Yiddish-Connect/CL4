@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:yiddishconnect/screens/dev_signin_signup/dev_home.dart';
+import 'package:yiddishconnect/screens/event/eventPage.dart';
 import 'package:yiddishconnect/screens/match/bottomFilter.dart';
 import 'package:yiddishconnect/screens/match/matchPage.dart';
 import 'package:yiddishconnect/screens/match/matchPageProvider.dart';
@@ -22,7 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
   // All children
   List<Widget> _pages = [
     HomePage(), // _index: 0
-    TestWidgetOne(), // _index: 1
+    EventPage(), // _index: 1
     MatchPage(), // _index: 2
     TestWidgetThree(), // _index: 3
     TestWidgetFour(), // _index: 4

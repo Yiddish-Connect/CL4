@@ -77,6 +77,7 @@ flutter:
   - assets/example.png
   - assets/google_icon@2x.png
   - assets/apple_icon@2x.png
+  - assets/yiddishland.png
 
 # Supported platforms
 platforms:
