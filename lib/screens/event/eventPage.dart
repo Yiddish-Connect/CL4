@@ -6,15 +6,27 @@ import 'package:yiddishconnect/models/yiddishlandEvent.dart';
 import 'package:yiddishconnect/services/firestore.dart';
 
 class EventPage extends StatefulWidget {
-  const EventPage({super.key});
+  EventPage({super.key});
 
   @override
   State<EventPage> createState() => _EventPageState();
 }
 
 class _EventPageState extends State<EventPage> {
+  late Future<QuerySnapshot> futureEvents;
   final SearchController searchController = SearchController();
 
+
+  @override
+  void initState() {
+    futureEvents = FirestoreService().yiddishlandEvents.get()
+      .then((QuerySnapshot snapshot) {
+        print("Successfully fetched ${snapshot.size} yiddishland events!");
+        return snapshot;
+      })
+    ;
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -93,13 +105,13 @@ class _EventPageState extends State<EventPage> {
 
   @override
   void dispose() {
-    super.dispose();
     searchController.dispose();
+    super.dispose();
   }
 
   Widget _createEventList() {
     return FutureBuilder(
-      future: FirestoreService().yiddishlandEvents.get(),
+      future: futureEvents,
       builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> querySnapshot) {
         if (querySnapshot.hasError) {
           print(querySnapshot.error);
