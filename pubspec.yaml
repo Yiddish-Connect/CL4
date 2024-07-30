@@ -20,6 +20,7 @@ dependencies:
   go_router: ^14.2.0
   cloud_firestore: ^4.17.5
   url_launcher: ^6.3.0
+  flutter_staggered_animations: ^1.1.1
 
 dev_dependencies:
   flutter_test:
