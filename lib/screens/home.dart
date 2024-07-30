@@ -18,9 +18,11 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // Index of the child currently visible
+  // Index of the selected drawer option (profile/settings)
+  int _drawerIndex = 0;
+  // Index of the selected page (home/event/match/friends/chat)
   int _index = 0;
-  // All children
+  // All children pages
   List<Widget> _pages = [
     HomePage(), // _index: 0
     EventPage(), // _index: 1
@@ -35,15 +37,16 @@ class _HomeScreenState extends State<HomeScreen> {
       providers: [
         ChangeNotifierProvider(create: (context) => MatchPageProvider())
       ],
-      child: Builder(
+      child: Builder( // Use a Builder() here to ensure that provider is properly initialized before building the UI.
         builder: (context) {
           return Scaffold(
             appBar: AppBar(
-              actions: _getActions(context, _index),
-              leading: _getLeading(context, _index),
+              actions: _createActions(context, _index),
+              leading: _createLeading(context, _index),
               toolbarHeight: 70,
               leadingWidth: 90,
             ),
+            drawer: _createDrawer(),
             body: IndexedStack(
               index: _index,
               children: _pages,
@@ -101,7 +104,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       unselectedItemColor: Theme.of(context).colorScheme.secondary,
                       elevation: 0,
                       type: BottomNavigationBarType.shifting, // default
-
                     ),
                   ),
                 ),
@@ -112,65 +114,142 @@ class _HomeScreenState extends State<HomeScreen> {
       )
     );
   }
-}
 
-// Get the "actions" of the Scaffold from given index
-List<Widget> _getActions(BuildContext context, int index) {
-  List<Widget> matchPageActions = [
-    Padding(
-      // color: Colors.red,
-      padding: const EdgeInsets.all(8),
-      child: IconButton(
-          onPressed: () => toast(context, "TODO: search"),
-          icon: Icon(Icons.search, size: 28.0,),
-          iconSize: 28.0
-      ),
-    ),
-    Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: IconButton(
-          onPressed: () => showFilter(context),
-          icon: Icon(Icons.filter_list, size: 28.0),
-          iconSize: 28.0
-      ),
-    ),
-  ];
+  // Get the Scaffold.drawer
+  Widget _createDrawer() {
+    void onItemTapped(int index) {
+      setState(() {
+        _drawerIndex = index;
+      });
+    }
 
-  List<Widget> otherPageActions = [
-    Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: IconButton(
-          onPressed: () => toast(context, "TODO: notifications"),
-          icon: Icon(Icons.notifications_outlined, size: 28.0),
-          iconSize: 28.0
-      ),
-    ),
-  ];
-
-  return switch (index) {
-    0 || 1 || 3 || 4 => otherPageActions,
-    2 => matchPageActions,
-    _ => [Container()]
-  };
-}
-
-// Get the "leading" of the Scaffold from given index
-Widget _getLeading(BuildContext context, int index) {
-  // The leading will always be the user's profile picture
-  return Padding(
-      padding: const EdgeInsets.all(0.0),
-      child: InkWell(
-        onTap: () => toast(context, "TODO: user profile?"),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: CircleAvatar(
-              backgroundImage: NetworkImage("https://picsum.photos/250"),
-              radius: 50
+    return Drawer(
+      child: ListView(
+        // Important: Remove any padding from the ListView.
+        padding: EdgeInsets.zero,
+        children: [
+          const DrawerHeader(
+            decoration: BoxDecoration(
+              color: Colors.blue,
+            ),
+            child: Text('Drawer Header'),
           ),
-        ),
-      ))
-  ;
+          ListTile(
+            title: const Text('Home'),
+            selected: _drawerIndex == 0,
+            onTap: () {
+              // Update the state of the app
+              onItemTapped(0);
+              toast(context, "TODO: _onItemTapped(0)");
+              // Then close the drawer
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            title: const Text('Business'),
+            selected: _drawerIndex == 1,
+            onTap: () {
+              // Update the state of the app
+              onItemTapped(1);
+              toast(context, "TODO: _onItemTapped(1)");
+              // Then close the drawer
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            title: const Text('School'),
+            selected: _drawerIndex == 2,
+            onTap: () {
+              // Update the state of the app
+              toast(context, "TODO: _onItemTapped(2)");
+              onItemTapped(2);
+              // Then close the drawer
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Get the "actions" of the Scaffold.appbar from given index
+  List<Widget> _createActions(BuildContext context, int index) {
+    List<Widget> matchPageActions = [
+      Builder(
+        builder: (context) {
+          return Padding(
+            // color: Colors.red,
+            padding: const EdgeInsets.all(8),
+            child: IconButton(
+                onPressed: () => toast(context, "TODO: search"),
+                icon: Icon(Icons.search, size: 28.0,),
+                iconSize: 28.0
+            ),
+          );
+        }
+      ),
+      Builder(
+        builder: (context) {
+          return Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: IconButton(
+                onPressed: () => showFilter(context),
+                icon: Icon(Icons.filter_list, size: 28.0),
+                iconSize: 28.0
+            ),
+          );
+        }
+      ),
+    ];
+
+    List<Widget> otherPageActions = [
+      Builder(
+        builder: (context) {
+          return Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: IconButton(
+                onPressed: () => toast(context, "TODO: notifications"),
+                icon: Icon(Icons.notifications_outlined, size: 28.0),
+                iconSize: 28.0
+            ),
+          );
+        }
+      ),
+    ];
+
+    return switch (index) {
+      0 || 1 || 3 || 4 => otherPageActions,
+      2 => matchPageActions,
+      _ => [Container()]
+    };
+  }
+
+  // Get the "leading" of the Scaffold.appbar from given index
+  Widget _createLeading(BuildContext context, int index) {
+    // The leading will always be the user's profile picture
+    return Builder(
+        builder: (context) {
+          return Padding(
+              padding: const EdgeInsets.all(0.0),
+              child: InkWell(
+                onTap: () => Scaffold.of(context).openDrawer(),
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: CircleAvatar(
+                      backgroundImage: NetworkImage("https://picsum.photos/250"),
+                      radius: 50
+                  ),
+                ),
+              ));
+        }
+    )
+    ;
+  }
 }
+
+
+
+
 
 class HomePage extends StatelessWidget {
   @override
