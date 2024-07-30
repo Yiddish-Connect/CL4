@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -22,17 +24,30 @@ class _HomeScreenState extends State<HomeScreen> {
   int _drawerIndex = 0;
   // Index of the selected page (home/event/match/friends/chat)
   int _index = 0;
-  // All children pages
+  // All children pages, lazy loading.
   List<Widget> _pages = [
-    HomePage(), // _index: 0
-    EventPage(), // _index: 1
-    MatchPage(), // _index: 2
-    TestWidgetThree(), // _index: 3
-    TestWidgetFour(), // _index: 4
+    Placeholder(),
+    Placeholder(),
+    Placeholder(),
+    Placeholder(),
+    Placeholder(),
   ];
+  // Lazy loading. A HashSet storing the index of page.
+  // A page will only load at the first time the user enters it. (via BottomNavigationBar).
+  // And it will not unnecessarily rebuild when the user switches pages.
+  HashSet<int> _loaded = HashSet();
+
+  @override
+  void initState() {
+    // Initially only the HomePage is loaded.
+    _loaded.add(0);
+    _pages[0] = HomePage();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
+    print("Home-Screen build()...");
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => MatchPageProvider())
@@ -97,7 +112,20 @@ class _HomeScreenState extends State<HomeScreen> {
                       currentIndex: _index,
                       onTap: (int selectedIndex) {
                         setState(() {
-                          _index = selectedIndex;
+                          if (_loaded.contains(selectedIndex)) {
+                            _index = selectedIndex;
+                          } else {
+                            _index = selectedIndex;
+                            _loaded.add(_index);
+                            _pages[_index] = switch (_index) {
+                              0 => HomePage(),
+                              1 => EventPage(),
+                              2 => MatchPage(),
+                              3 => TestWidgetFour(),
+                              4 => TestWidgetThree(),
+                              _ => Placeholder(),
+                            };
+                          }
                         });
                       },
                       selectedItemColor: Theme.of(context).colorScheme.primary,
