@@ -40,6 +40,7 @@ class _EventPageState extends State<EventPage> {
           pinned: false,
           floating: true,
           snap: true, // Whether show animation when the search bar appears
+          automaticallyImplyLeading: false, // If true, this SliverAppBar will automatically inherit the leading from outer AppBar
           flexibleSpace: FlexibleSpaceBar(
             centerTitle: true,
             // title: Text("Yiddishland"),
