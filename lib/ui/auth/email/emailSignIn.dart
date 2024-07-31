@@ -4,10 +4,12 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
-import 'package:yiddishconnect/widgets/ErrorHandlers.dart';
-import '../../services/auth.dart';
-import '../dev_signin_signup/dev_home.dart';
 
+import '../../../services/firebaseAuthentication.dart';
+import '../../../widgets/ErrorHandlers.dart';
+
+/// The Email sign-in screen using Firebase Authentication (Email)
+/// Route: '/auth/email/sign-in'
 class EmailSignInScreen extends StatefulWidget {
   @override
   State<EmailSignInScreen> createState() => _EmailSignInScreenState();
