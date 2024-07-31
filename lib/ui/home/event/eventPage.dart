@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:yiddishconnect/models/yiddishlandEvent.dart';
 import 'package:yiddishconnect/services/firestore.dart';
 
+/// The "Event" tab under the home-screen
 class EventPage extends StatefulWidget {
   EventPage({super.key});
 

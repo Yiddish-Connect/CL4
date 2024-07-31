@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:yiddishconnect/ui/home/match/matchPageProvider.dart';
 
+// The "Match" tab under the home-screen
 class MatchPage extends StatefulWidget {
   const MatchPage({super.key});
 

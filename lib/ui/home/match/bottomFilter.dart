@@ -1,11 +1,12 @@
 import 'dart:collection';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:yiddishconnect/ui/home/match/matchPageProvider.dart';
-import 'package:yiddishconnect/utils/helpers.dart';
 import '../../../models/filter.dart';
 
+/// This function should be called in the match page.
+/// It shows the bottom filter allowing users to select the filters, such as age and distance
+/// *Note: The ModalBottomSheet is created in the root of the ENTIRE widget tree of the App, meaning it's not a child of the match page.
 void showFilter(BuildContext context) {
   // assert: context contains the matchPageProvider
   MatchPageProvider matchPageProvider = Provider.of<MatchPageProvider>(context, listen: false);

@@ -1,9 +1,5 @@
 import 'dart:collection';
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:yiddishconnect/ui/auth/dev_signin_signup/dev_home.dart';
 import 'package:yiddishconnect/ui/home/event/eventPage.dart';
@@ -12,6 +8,9 @@ import 'package:yiddishconnect/ui/home/match/matchPage.dart';
 import 'package:yiddishconnect/ui/home/match/matchPageProvider.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
 
+/// The home-screen.
+/// It contains 5 tabs: home, events, match, friends, chat
+/// Route: '/home'
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 

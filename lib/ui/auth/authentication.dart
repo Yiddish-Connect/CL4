@@ -7,6 +7,8 @@ import 'package:yiddishconnect/utils/helpers.dart';
 import '../../widgets/yd_animated_curve.dart';
 import '../../widgets/yd_label.dart';
 
+/// The authentication main screen showing all 3 methods: phone, email, Google/Apple
+/// Route: 'auth'
 class AuthScreen extends StatelessWidget {
   final AuthService _auth = AuthService();
 

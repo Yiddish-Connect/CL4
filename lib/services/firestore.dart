@@ -1,8 +1,8 @@
-// Put firebase firestore database service here
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-// https://firebase.flutter.dev/docs/firestore/usage
+/// A singleton class containing Firestore-related service
+///
+/// https://firebase.flutter.dev/docs/firestore/usage
 class FirestoreService {
   final FirebaseFirestore db = FirebaseFirestore.instance;
 

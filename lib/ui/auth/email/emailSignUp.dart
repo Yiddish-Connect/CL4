@@ -6,8 +6,9 @@ import 'package:provider/provider.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
 import '../../../services/firebaseAuthentication.dart';
 import '../../../widgets/yd_multi_steps.dart';
-import '../dev_signin_signup/dev_home.dart';
 
+/// The Email sign-up screen using Firebase Authentication (Email)
+/// Route: '/auth/email/sign-up'
 class EmailSignUpScreen extends StatelessWidget {
   const EmailSignUpScreen({super.key});
 
