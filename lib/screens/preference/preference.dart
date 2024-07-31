@@ -13,6 +13,8 @@ import 'package:yiddishconnect/widgets/yd_multi_steps.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:provider/provider.dart';
 import 'package:yiddishconnect/utils/image_helper.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class PreferenceProvider extends ChangeNotifier {
   String _name = "";
@@ -351,6 +353,27 @@ class ImageTile extends StatelessWidget {
     required this.onImageSelected,
   }) : super(key: key);
 
+  Future<void> uploadImage(File file) async {
+    try {
+      String fileName = DateTime.now().millisecondsSinceEpoch.toString();
+      // get a reference to storage root
+      Reference storageRef = FirebaseStorage.instance.ref().child('user_1/$fileName');
+      //get a reference for image to be stored
+      UploadTask uploadTask = storageRef.putFile(file);
+
+      TaskSnapshot taskSnapshot = await uploadTask;
+      String downloadUrl = await taskSnapshot.ref.getDownloadURL();
+
+      // Save the download URL to Firestore
+      await FirebaseFirestore.instance.collection('profiles').add({
+        'imageUrl': downloadUrl,
+        // Add other user profile details here
+      });
+    } catch (e) {
+      print('$e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -361,7 +384,7 @@ class ImageTile extends StatelessWidget {
       ),
       child: Stack(
         children: [
-          if (kIsWeb && webImage != null) // Check if it's web and web image is available
+          if (kIsWeb && webImage != null)  // Check if it's web and web image is available
             ClipRRect(
               borderRadius: BorderRadius.circular(20),
               child: Image.network(
@@ -387,15 +410,21 @@ class ImageTile extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 20.0),
               child: ElevatedButton(
                 onPressed: () async {
-                  final files = await ImageHelper().pickImage();
-                  if (files.isNotEmpty) {
-                    final croppedFile = await ImageHelper().crop(
-                      file: files.first,
-                      context: context,
-                    );
-                    if (croppedFile != null) {
-                      onImageSelected(File(croppedFile.path));
+                  try {
+                    final files = await ImageHelper().pickImage();
+                    if (files.isNotEmpty) {
+                      final croppedFile = await ImageHelper().crop(
+                        file: files.first,
+                        context: context,
+                      );
+                      if (croppedFile != null) {
+                        File imageFile = File(croppedFile.path);
+                        onImageSelected(File(croppedFile.path));
+                        await uploadImage(imageFile);
+                      }
                     }
+                  } catch (e) {
+                    print('$e');
                   }
                 },
                 child: Text('Add'),

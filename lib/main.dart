@@ -13,6 +13,7 @@ import 'package:yiddishconnect/screens/preference/preference.dart';
 import 'package:yiddishconnect/services/auth.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
 import 'firebase_options.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
