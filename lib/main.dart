@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:yiddishconnect/ui/auth/authentication.dart';
-import 'package:yiddishconnect/ui/auth/dev_signin_signup/dev_home.dart';
 import 'package:yiddishconnect/ui/auth/email/emailSignIn.dart';
 import 'package:yiddishconnect/ui/auth/email/emailSignUp.dart';
 import 'package:yiddishconnect/ui/home/home.dart';
@@ -12,8 +11,6 @@ import 'package:yiddishconnect/ui/landing.dart';
 import 'package:yiddishconnect/ui/auth/phone/phoneAuth.dart';
 import 'package:yiddishconnect/ui/home/preference/preference.dart';
 import 'package:yiddishconnect/services/firebaseAuthentication.dart';
-import 'package:yiddishconnect/utils/colorful.dart';
-import 'package:yiddishconnect/utils/helpers.dart';
 import 'firebase_options.dart';
 
 void main() async {

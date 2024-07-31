@@ -1,4 +1,3 @@
-// Put firebase authentication here
 import 'dart:async';
 import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -20,7 +19,7 @@ var actionCodeSettings = ActionCodeSettings(
     androidMinimumVersion: '12'
 );
 
-/// Singleton Pattern
+/// A singleton class containing Firebase Authentication related service
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   StreamSubscription<User?>? _subscription;

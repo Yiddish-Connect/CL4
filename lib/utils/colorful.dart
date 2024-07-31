@@ -1,3 +1,4 @@
+/// Print colorful message in the terminal
 class Colorful {
   static const String reset = "\x1B[0m";
 

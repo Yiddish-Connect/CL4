@@ -5,8 +5,10 @@ import 'package:yiddishconnect/services/firebaseAuthentication.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
 import 'package:yiddishconnect/widgets/yd_animated_curve.dart';
 import '../widgets/yd_label.dart';
-import 'auth/authentication.dart';
 
+/// The landing page, what the user will see after entering the app.
+/// Route: '/landing'
+/// User will be redirected to this page, if it happens that they are not authenticated.
 class LandingScreen extends StatelessWidget {
   const LandingScreen({super.key});
 
