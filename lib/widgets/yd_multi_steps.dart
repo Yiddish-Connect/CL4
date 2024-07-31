@@ -4,8 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
-import '../screens/dev_signin_signup/dev_home.dart';
-import '../services/auth.dart';
+import '../ui/auth/dev_signin_signup/dev_home.dart';
+import '../services/firebaseAuthentication.dart';
 
 class OneStep {
   final String title;
@@ -29,8 +29,11 @@ class MultiSteps extends StatefulWidget {
   final void Function()? onComplete;
 
   /// @param steps: An array of OneStep()
+  ///
   /// @param title: Title in Appbar
+  ///
   /// @param hasProgress: Whether enables the progress bar
+  ///
   /// @param hasButton: Whether enables the 'next' button. (If not, please make use of the 'prev' and 'next' passed from the builder)
   ///
   /// Example: Widget build(BuildContext context) {

@@ -1,8 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-
-import '../../services/auth.dart';
-import '../../utils/helpers.dart';
+import '../../../services/firebaseAuthentication.dart';
+import '../../../utils/helpers.dart';
 
 class DevSignUpPage extends StatefulWidget {
   @override
