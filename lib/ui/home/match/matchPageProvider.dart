@@ -1,6 +1,6 @@
 import 'dart:collection';
 import 'package:flutter/material.dart';
-import '../../models/filter.dart';
+import '../../../models/filter.dart';
 
 class MatchPageProvider extends ChangeNotifier {
   List<PracticeOption> _practiceOptionsSelection = [];

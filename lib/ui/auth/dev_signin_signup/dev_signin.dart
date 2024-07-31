@@ -1,19 +1,18 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:yiddishconnect/utils/helpers.dart';
 
-import '../../services/auth.dart';
-import '../../utils/helpers.dart';
+import '../../../services/firebaseAuthentication.dart';
 
-class DevSignUpPage extends StatefulWidget {
+class DevSignInPage extends StatefulWidget {
   @override
-  _DevSignUpPageState createState() => _DevSignUpPageState();
+  _DevSignInPageState createState() => _DevSignInPageState();
 }
 
-class _DevSignUpPageState extends State<DevSignUpPage> {
+class _DevSignInPageState extends State<DevSignInPage> {
   final AuthService _auth = AuthService();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-
 
   @override
   void dispose() {
@@ -21,11 +20,12 @@ class _DevSignUpPageState extends State<DevSignUpPage> {
     _passwordController.dispose();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Register'),
+        title: Text('Login'),
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
@@ -46,10 +46,10 @@ class _DevSignUpPageState extends State<DevSignUpPage> {
                 String email = _emailController.text;
                 String password = _passwordController.text;
                 try {
-                  User? user = await _auth.registerWithEmailAndPassword(email, password);
+                  User? user = await _auth.signInWithEmailAndPassword(email, password);
                   if (user != null) {
                     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text("Successfully signed up (dev)"),
+                      content: Text("Login Successful!!!"),
                     ));
                   } else {
                     toast(context, 'Something went wrong (null)');
@@ -58,7 +58,7 @@ class _DevSignUpPageState extends State<DevSignUpPage> {
                   toast(context, e.toString());
                 }
               },
-              child: Text('Register'),
+              child: Text('Login'),
             ),
           ],
         ),

@@ -8,9 +8,9 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:yiddishconnect/widgets/yd_multi_steps.dart';
 import 'dart:io';
-import '../../services/auth.dart';
-import '../../utils/formatters.dart';
-import '../../utils/helpers.dart';
+import '../../../services/firebaseAuthentication.dart';
+import '../../../utils/formatters.dart';
+import '../../../utils/helpers.dart';
 import '../dev_signin_signup/dev_home.dart';
 
 class PhoneAuthScreen extends StatelessWidget {
