@@ -1,8 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
-
-import '../../services/auth.dart';
+import '../../../services/firebaseAuthentication.dart';
 
 class DevSignInPage extends StatefulWidget {
   @override

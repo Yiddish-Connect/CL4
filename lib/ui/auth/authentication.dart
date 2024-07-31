@@ -2,18 +2,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:yiddishconnect/screens/dev_signin_signup/dev_signin.dart';
-import 'package:yiddishconnect/screens/dev_signin_signup/dev_signup.dart';
-import 'package:yiddishconnect/screens/email/emailSignIn.dart';
-import 'package:yiddishconnect/screens/email/emailSignUp.dart';
-import 'package:yiddishconnect/screens/phone/phoneAuth.dart';
-import 'package:yiddishconnect/services/auth.dart';
+import 'package:yiddishconnect/services/firebaseAuthentication.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
+import '../../widgets/yd_animated_curve.dart';
+import '../../widgets/yd_label.dart';
 import 'package:yiddishconnect/widgets/ErrorHandlers.dart';
-import '../widgets/yd_animated_curve.dart';
-import '../widgets/yd_label.dart';
 import 'dev_signin_signup/dev_home.dart';
 
+/// The authentication main screen showing all 3 methods: phone, email, Google/Apple
+/// Route: 'auth'
 class AuthScreen extends StatelessWidget {
   final AuthService _auth = AuthService();
 
