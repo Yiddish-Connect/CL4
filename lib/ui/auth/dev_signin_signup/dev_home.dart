@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:yiddishconnect/services/auth.dart';
+import 'package:yiddishconnect/services/firebaseAuthentication.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
 
 class DevHomeScreen extends StatelessWidget {

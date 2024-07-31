@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
-import '../../services/auth.dart';
-import '../../widgets/yd_multi_steps.dart';
+import '../../../services/firebaseAuthentication.dart';
+import '../../../widgets/yd_multi_steps.dart';
 import '../dev_signin_signup/dev_home.dart';
 
 class EmailSignUpScreen extends StatelessWidget {

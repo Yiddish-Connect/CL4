@@ -2,9 +2,9 @@ import 'dart:collection';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:yiddishconnect/screens/match/matchPageProvider.dart';
+import 'package:yiddishconnect/ui/home/match/matchPageProvider.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
-import '../../models/filter.dart';
+import '../../../models/filter.dart';
 
 void showFilter(BuildContext context) {
   // assert: context contains the matchPageProvider

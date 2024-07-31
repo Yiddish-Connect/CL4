@@ -1,11 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:yiddishconnect/services/auth.dart';
+import 'package:yiddishconnect/services/firebaseAuthentication.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
 import 'package:yiddishconnect/widgets/yd_animated_curve.dart';
 import '../widgets/yd_label.dart';
-import 'authentication.dart';
+import 'auth/authentication.dart';
 
 class LandingScreen extends StatelessWidget {
   const LandingScreen({super.key});

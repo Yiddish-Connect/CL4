@@ -1,18 +1,19 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:yiddishconnect/utils/helpers.dart';
 
-import '../../services/auth.dart';
+import '../../../services/firebaseAuthentication.dart';
+import '../../../utils/helpers.dart';
 
-class DevSignInPage extends StatefulWidget {
+class DevSignUpPage extends StatefulWidget {
   @override
-  _DevSignInPageState createState() => _DevSignInPageState();
+  _DevSignUpPageState createState() => _DevSignUpPageState();
 }
 
-class _DevSignInPageState extends State<DevSignInPage> {
+class _DevSignUpPageState extends State<DevSignUpPage> {
   final AuthService _auth = AuthService();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+
 
   @override
   void dispose() {
@@ -20,12 +21,11 @@ class _DevSignInPageState extends State<DevSignInPage> {
     _passwordController.dispose();
     super.dispose();
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Login'),
+        title: Text('Register'),
       ),
       body: Padding(
         padding: EdgeInsets.all(16.0),
@@ -46,10 +46,10 @@ class _DevSignInPageState extends State<DevSignInPage> {
                 String email = _emailController.text;
                 String password = _passwordController.text;
                 try {
-                  User? user = await _auth.signInWithEmailAndPassword(email, password);
+                  User? user = await _auth.registerWithEmailAndPassword(email, password);
                   if (user != null) {
                     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text("Login Successful!!!"),
+                      content: Text("Successfully signed up (dev)"),
                     ));
                   } else {
                     toast(context, 'Something went wrong (null)');
@@ -58,7 +58,7 @@ class _DevSignInPageState extends State<DevSignInPage> {
                   toast(context, e.toString());
                 }
               },
-              child: Text('Login'),
+              child: Text('Register'),
             ),
           ],
         ),

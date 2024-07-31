@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:yiddishconnect/screens/match/matchPageProvider.dart';
+import 'package:yiddishconnect/ui/home/match/matchPageProvider.dart';
 
 class MatchPage extends StatefulWidget {
   const MatchPage({super.key});
