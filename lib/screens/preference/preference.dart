@@ -1,14 +1,10 @@
 import 'dart:io';
 import 'dart:ui';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:yiddishconnect/utils/helpers.dart';
 import 'package:yiddishconnect/widgets/yd_multi_steps.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:provider/provider.dart';
@@ -31,6 +27,17 @@ class PreferenceProvider extends ChangeNotifier {
   }
   void removeInterest(String interest) {
     _selectedInterests.remove(interest);
+    notifyListeners();
+  }
+
+  List<String> _selectedProficiency = [];
+  List<String> get selectedProficiency => _selectedInterests;
+  void addProficiency(String proficiency) {
+    _selectedProficiency.add(proficiency);
+    notifyListeners();
+  }
+  void removeProficiency(String proficiency) {
+    _selectedProficiency.remove(proficiency);
     notifyListeners();
   }
 }
@@ -188,13 +195,92 @@ class _Step1 extends StatelessWidget {
   }
 }
 
-// Location
+// Language Proficiency
 class _Step2 extends StatelessWidget {
   const _Step2({super.key});
 
+  static const List<String> _proficiencyLevels = [
+    'Advanced', 'Intermediate', 'Beginner'
+  ];
+
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Scaffold(
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        iconTheme: IconThemeData(color: Colors.black),
+        title: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            'What is your Yiddish language proficiency?',
+            style: TextStyle(color: Color.fromARGB(255, 162, 47, 145), fontSize: 24, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
+          ),
+        ),
+        centerTitle: true,
+      ),
+      body: Center(
+        child: Container(
+          constraints: BoxConstraints(maxWidth: 600),
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              Spacer(),
+              Column(
+                children: List.generate(_proficiencyLevels.length, (index) {
+                  return Consumer<PreferenceProvider>(
+                    builder: (BuildContext context, PreferenceProvider preferenceProvider, Widget? child) {
+                  bool isSelected = context.read<PreferenceProvider>().selectedProficiency.contains(_proficiencyLevels[index]);
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 5.0),
+                    child: ChoiceChip(
+                      label: Text(_proficiencyLevels[index]),
+                      selected: isSelected,
+                      selectedColor: Color.fromARGB(255, 247, 141, 231),
+                      onSelected: (selected) {
+                          if (selected) {
+                            preferenceProvider.addProficiency(_proficiencyLevels[index]);
+                          } else {
+                            preferenceProvider._selectedProficiency = []; 
+                          }
+                      },
+                      backgroundColor: Colors.white,
+                      labelStyle: TextStyle(color: isSelected ? Colors.white : Color.fromARGB(255, 162, 47, 145)),
+                      shape: StadiumBorder(
+                        side: BorderSide(
+                          color: isSelected ? Color.fromARGB(255, 247, 141, 231) : Colors.grey,
+                        ),
+                      ),
+                    )
+                  );
+                });
+                }),
+              ),
+              Spacer(),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Column(
+                  children: [
+                    Text(
+                      '3/5',
+                      style: TextStyle(color: Color.fromARGB(255, 162, 47, 145), fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(height: 8),
+                    LinearProgressIndicator(
+                      value: 3 / 5,
+                      backgroundColor: Color.fromARGB(255, 254, 196, 247),
+                      color: Color.fromARGB(255, 247, 141, 231),
+                    ),
+                    SizedBox(height: 16),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -219,25 +305,37 @@ class _Step3 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // print("rebuild!!");
-    return Container(
-      constraints: BoxConstraints(
-        maxWidth: 600
+
+    return Scaffold(
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        iconTheme: IconThemeData(color: Colors.black),
+        title: Text(
+          'Select up to 5 interests',
+          style: TextStyle(color: Color.fromARGB(255, 162, 47, 145), fontSize: 24, fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
       ),
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          Wrap(
-            spacing: 10.0,
-            runSpacing: 10.0,
-            children: List.generate(_interests.length, (index) {
+      body: Center(
+        child: Container(
+          constraints: BoxConstraints(maxWidth: 600),
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              Wrap(
+                spacing: 10.0,
+                runSpacing: 10.0,
+                alignment: WrapAlignment.center,
+                children: List.generate(_interests.length, (index) {
               return Consumer<PreferenceProvider>(
                 builder: (BuildContext context, PreferenceProvider preferenceProvider, Widget? child) {
                   bool isSelected = context.read<PreferenceProvider>().selectedInterests.contains(_interests[index]);
                   return ChoiceChip(
                     label: Text(_interests[index]),
-                    avatar: Icon(_icons[index], color: isSelected ? Colors.white : Colors.purple),
+                    avatar: Icon(_icons[index], color: isSelected ? Colors.black : Colors.black),
                     selected: isSelected,
-                    selectedColor: Colors.purple,
+                    selectedColor: Color.fromARGB(255, 247, 141, 231),
                     onSelected: (selected) {
                       if (selected && preferenceProvider.selectedInterests.length < 5) {
                         preferenceProvider.addInterest(_interests[index]);
@@ -246,10 +344,10 @@ class _Step3 extends StatelessWidget {
                       }
                     },
                     backgroundColor: Colors.white,
-                    labelStyle: TextStyle(color: isSelected ? Colors.white : Colors.purple),
+                    labelStyle: TextStyle(color: isSelected ? Colors.white : Color.fromARGB(255, 162, 47, 145), fontSize: 16),
                     shape: StadiumBorder(
                       side: BorderSide(
-                        color: isSelected ? Colors.purple : Colors.grey,
+                        color: isSelected ? Color.fromARGB(255, 247, 141, 231) : Colors.grey,
                       ),
                     ),
                   );
@@ -257,14 +355,30 @@ class _Step3 extends StatelessWidget {
               );
             }),
           ),
-          SizedBox(height: 20),
-          Text(
-            "${Provider.of<PreferenceProvider>(context, listen: true).selectedInterests.length}/5 selected",
-            style: TextStyle(color: Colors.purple, fontSize: 16),
-          ),
-        ],
-      ),
-    );
+          Spacer(),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Column(
+                  children: [
+                    Text(
+                      '4/5',
+                      style: TextStyle(color: Color.fromARGB(255, 162, 47, 145), fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(height: 8),
+                    LinearProgressIndicator(
+                      value: 4 / 5,
+                      backgroundColor: Color.fromARGB(255, 254, 196, 247),
+                      color: Color.fromARGB(255, 247, 141, 231),
+                    ),
+                    SizedBox(height: 16),
+                  ],
+                ),
+              ),
+            ]
+          )
+        )
+      )
+    );  
   }
 }
 
