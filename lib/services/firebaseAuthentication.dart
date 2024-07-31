@@ -1,4 +1,3 @@
-// Put firebase authentication here
 import 'dart:async';
 import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -20,7 +19,7 @@ var actionCodeSettings = ActionCodeSettings(
     androidMinimumVersion: '12'
 );
 
-/// Singleton Pattern
+/// A singleton class containing Firebase Authentication related service
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   StreamSubscription<User?>? _subscription;
@@ -209,6 +208,56 @@ class AuthService {
       throw PlatformException(code: "0613", message: "signInWithGoogle() only supports Android and Web. Where did you call this function?");
     }
     
+  }
+
+  Future<User?> signInAnonymously() async {
+    try {
+      UserCredential userCredential = await FirebaseAuth.instance.signInAnonymously();
+      print("Signed in with temporary account.");
+      return userCredential.user;
+    } on FirebaseAuthException catch (e) {
+      switch (e.code) {
+        case "operation-not-allowed":
+          print("Anonymous auth hasn't been enabled for this project.");
+          rethrow;
+        default:
+          throw Exception("Unknown error.");
+      }
+    }
+  }
+
+  // TODO: Convert the anonymous user to permanent user
+  /// @param userCredential: UserCredential of the anonymous user
+  /// @param method: "phone" or "google"
+  Future<void> linkAnonymousUser(UserCredential userCredential, String method) async {
+    // TODO
+    // // Google Sign-in
+    // final credential = GoogleAuthProvider.credential(idToken: idToken);
+    //
+    // // Email and password sign-in
+    // final credential = EmailAuthProvider.credential(email: emailAddress, password: password);
+    //
+    // // Etc.
+    //
+    // try {
+    //   final userCredential = await FirebaseAuth.instance.currentUser
+    //       ?.linkWithCredential(credential);
+    // } on FirebaseAuthException catch (e) {
+    //   switch (e.code) {
+    //     case "provider-already-linked":
+    //       print("The provider has already been linked to the user.");
+    //       break;
+    //     case "invalid-credential":
+    //       print("The provider's credential is not valid.");
+    //       break;
+    //     case "credential-already-in-use":
+    //       print("The account corresponding to the credential already exists, "
+    //           "or is already linked to a Firebase User.");
+    //       break;
+    //   // See the API reference for the full list of error codes.
+    //     default:
+    //       print("Unknown error.");
+    //   }
   }
 
   // Register with email and password
