@@ -25,6 +25,7 @@ class _EventPageState extends State<EventPage> {
   @override
   void initState() {
     // The events data is only fetched from Firestore once here, when the EventPage widget is first built.
+    print("EventPage initState()... (This should only happen once)");
     futureEvents = FirestoreService().yiddishlandEvents.get()
       .then((QuerySnapshot snapshot) {
         print("Successfully fetched ${snapshot.size} yiddishland events!");
@@ -36,7 +37,7 @@ class _EventPageState extends State<EventPage> {
 
   @override
   Widget build(BuildContext context) {
-    print("eventPage build()");
+    print("EventPage build()");
     return FutureBuilder(
       future: futureEvents,
       builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> querySnapshot) {
