@@ -88,6 +88,7 @@ class _EventPageState extends State<EventPage> {
                               return ListTile(
                                 title: Text(event.title),
                                 onTap: () {
+                                  controller.closeView(event.title);
                                   itemScrollController.scrollTo(index: index, duration: Duration(milliseconds: 500));
                                 },
                               );
