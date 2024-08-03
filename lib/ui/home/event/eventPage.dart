@@ -87,7 +87,7 @@ class _EventPageState extends State<EventPage> {
                               return ListTile(
                                 title: Text(event.title),
                                 onTap: () {
-                                  itemScrollController.scrollTo(index: index, duration: Duration(milliseconds: 2000));
+                                  itemScrollController.scrollTo(index: index, duration: Duration(milliseconds: 500));
                                 },
                               );
                             });
@@ -134,7 +134,7 @@ class _EventPageState extends State<EventPage> {
             }
 
             if (querySnapshot.connectionState == ConnectionState.waiting) {
-              return Text("Loading");
+              return Center(child: SizedBox(height: 50, width: 50, child: CircularProgressIndicator()));
             }
 
             return AnimationLimiter(
@@ -150,7 +150,7 @@ class _EventPageState extends State<EventPage> {
 
                   return AnimationConfiguration.staggeredList(
                       position: index,
-                      duration: const Duration(milliseconds: 1000), // The list will "float" to the screen. The duration is currently 2000ms.
+                      duration: const Duration(milliseconds: 1500), // The list will "float" to the screen. The duration is currently 2000ms.
                       child: SlideAnimation(
                         verticalOffset: 150.0,
                         child: FadeInAnimation(child: _createEventCard(event)),
