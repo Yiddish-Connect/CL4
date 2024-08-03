@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:yiddishconnect/ui/auth/dev_signin_signup/dev_home.dart';
+import 'package:yiddishconnect/ui/chat/chat.dart';
+import 'package:yiddishconnect/ui/friend/friend.dart';
 import 'package:yiddishconnect/ui/home/event/eventPage.dart';
 import 'package:yiddishconnect/ui/home/match/bottomFilter.dart';
 import 'package:yiddishconnect/ui/home/match/matchPage.dart';
@@ -120,8 +122,8 @@ class _HomeScreenState extends State<HomeScreen> {
                               0 => HomePage(),
                               1 => EventPage(),
                               2 => MatchPage(),
-                              3 => TestWidgetFour(),
-                              4 => TestWidgetThree(),
+                              3 => FriendPage(),
+                              4 => ChatPage(),
                               _ => Placeholder(),
                             };
                           }
@@ -233,60 +235,3 @@ class HomePage extends StatelessWidget {
     );
   }
 }
-
-class TestWidgetOne extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    print("WidgetOne build()");
-
-    return Container(
-      color: Colors.grey,
-      child: Center(
-        child: Text('Widget One'),
-      ),
-    );
-  }
-}
-
-class TestWidgetTwo extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    print("WidgetTwo build()");
-
-    return Container(
-      color: Colors.blueGrey,
-      child: Center(
-        child: Text('Widget Two'),
-      ),
-    );
-  }
-}
-
-class TestWidgetThree extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    print("WidgetThree build()");
-
-    return Container(
-      color: Colors.teal,
-      child: Center(
-        child: Text('Widget Three'),
-      ),
-    );
-  }
-}
-
-class TestWidgetFour extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    print("WidgetFour build()");
-
-    return Container(
-      color: Colors.brown,
-      child: Center(
-        child: Text('Widget Four'),
-      ),
-    );
-  }
-}
-
