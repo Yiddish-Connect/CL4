@@ -2,6 +2,7 @@ import 'package:email_validator/email_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:form_validator/form_validator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
@@ -67,6 +68,14 @@ class _Step1State extends State<_Step1> {
   final TextEditingController _passwordController = TextEditingController();
   final formKey = GlobalKey<FormState>();
 
+  static const passwordReqirements =
+      "Password must include:\n1 special character & 1 capital letter";
+  final passwordValidator = ValidationBuilder()
+      .minLength(10)
+      .maxLength(50)
+      .regExp(new RegExp("[\p{Lu}\p{Lt}]"), passwordReqirements)
+      .build();
+
   final AuthService _auth = AuthService();
 
   @override
@@ -103,8 +112,10 @@ class _Step1State extends State<_Step1> {
                 padding: EdgeInsets.all(5),
                 child: SizedBox(
                   height: 80,
-                  child: TextField(
+                  child: TextFormField(
                     controller: _passwordController,
+                    validator: passwordValidator,
+                    autovalidateMode: AutovalidateMode.onUserInteraction,
                     decoration: InputDecoration(labelText: 'Password'),
                     obscureText: true,
                   ),
