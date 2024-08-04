@@ -7,6 +7,7 @@ import 'package:yiddishconnect/ui/auth/phone/phoneAuth.dart';
 import 'package:yiddishconnect/ui/home/home.dart';
 import 'package:yiddishconnect/ui/home/preference/preference.dart';
 import 'package:yiddishconnect/ui/landing.dart';
+import 'package:yiddishconnect/ui/user/user.dart';
 
 final ydRouter = GoRouter(
   routes: [
@@ -44,9 +45,14 @@ final ydRouter = GoRouter(
         routes: [
           GoRoute(
             name: "preferenceScreen",
-            path: 'preference',
+            path: "preference",
             builder: (context, state) => PreferenceScreen(),
           ),
+          GoRoute(
+            name: "userScreen",
+            path: "user",
+            builder: (context, state) => UserScreen(),
+          )
         ]
     ),
   ],
