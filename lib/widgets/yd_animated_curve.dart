@@ -27,6 +27,8 @@ class _AnimatedCurveState extends State<AnimatedCurve> with TickerProviderStateM
   double yLim = 3; // math y range. Chane this to make shape larger in the canvas.
   double canvasWidth = 300; // canvas width of CustomPaint
   double canvasHeight = 300; // canvas height of CustomPaint
+  double precision = 1e-9;
+  double offset = 0.2; // Offset to help prevent gap caused by anti-aliasing
 
   @override
   void initState() {
@@ -48,10 +50,18 @@ class _AnimatedCurveState extends State<AnimatedCurve> with TickerProviderStateM
     super.dispose();
   }
 
+  double roundToPrecision(double value) {
+    return (value / precision).round() * precision;
+  }
+
   /// I store the path1 and path2 in my AnimatedCurve widget instead of the CustomPaint (where path is commonly stored).
   /// This is to efficiently reuse the previous path.
   /// i.e. I add new point to the existing path1, path2, instead of calculating the path from scratch every animation frame.
   void _updatePath() {
+    // This listener is called whenever animation frame changes.
+    // Note that startPoint and endPoint might not be consecutive.
+    // e.g. When progress increased by 0.01 each frame, startPoint = 1000 * 0.10 = 100, while endPoint = 1000 * 0.11 = 110.
+    // In this case, we need to draw all the 10 points between them.
     int startPoint = (numPoints * lastProgress).toInt();
     int endPoint = (numPoints * _progressAnimation.value).toInt();
 
@@ -60,7 +70,8 @@ class _AnimatedCurveState extends State<AnimatedCurve> with TickerProviderStateM
       double dTheta = deltaTheta / numPoints;
       double theta1 = i * dTheta;
       double theta2 = pi - i * dTheta;
-
+      // print("theta1: $theta1");
+      // print("theta2: $theta2");
       double r1 = (sin(2 * theta1) != 0) ? 2 * a * sin(3 * theta1) / sin(2 * theta1) : 2 * a * 3 / 2;
       double r2 = (sin(2 * theta2) != 0) ? 2 * a * sin(3 * theta2) / sin(2 * theta2) : 2 * a * 3 / 2;
 
@@ -72,15 +83,19 @@ class _AnimatedCurveState extends State<AnimatedCurve> with TickerProviderStateM
       double plotMidX = canvasWidth / 2;
       double plotMidY = canvasHeight / 2;
 
-      double plotX1 = plotMidX + x1 / xLim * canvasWidth; // convert the (x, y) to position on canvas
-      double plotY1 = plotMidY - y1 / yLim * canvasHeight; // convert the (x, y) to position on canvas
-      double plotX2 = plotMidX + x2 / xLim * canvasWidth; // convert the (x, y) to position on canvas
-      double plotY2 = plotMidY - y2 / yLim * canvasHeight; // convert the (x, y) to position on canvas
+      double plotX1 = (plotMidX + x1 / xLim * canvasWidth); // convert the (x, y) to position on canvas
+      double plotY1 = (plotMidY - y1 / yLim * canvasHeight); // convert the (x, y) to position on canvas
+      double plotX2 = (plotMidX + x2 / xLim * canvasWidth); // convert the (x, y) to position on canvas
+      double plotY2 = (plotMidY - y2 / yLim * canvasHeight); // convert the (x, y) to position on canvas
 
-      if (i == 0 && startPoint == 0) {
-        path1.moveTo(plotX1, plotY1);
-        path2.moveTo(plotX2, plotY2);
+      if (i == 0 && startPoint == 0) { // When drawing the very first point of the curve
+        // print("1Move to $plotX1, $plotY1");
+        // print("2Move to $plotX2 $plotY2");
+        path1.moveTo(plotX1 + offset, plotY1 + offset);
+        path2.moveTo(plotX2 - offset, plotY2 - offset);
       } else {
+        // print("1Line to $plotX1, $plotY1");
+        // print("2Line to $plotX2, $plotY2");
         path1.lineTo(plotX1, plotY1);
         path2.lineTo(plotX2, plotY2);
       }
