@@ -1,8 +1,7 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
 
-
+/// This is a PhoneNumberFormatter used in /auth/phone.
+/// It ensures that the user's number input will be displayed in the format "(123)-456-7890"
 class PhoneNumberFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {

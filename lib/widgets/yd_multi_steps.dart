@@ -4,8 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
-import '../screens/dev_signin_signup/dev_home.dart';
-import '../services/auth.dart';
+import '../ui/auth/dev_signin_signup/dev_home.dart';
+import '../services/firebaseAuthentication.dart';
 
 class OneStep {
   final String title;

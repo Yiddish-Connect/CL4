@@ -1,20 +1,10 @@
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:yiddishconnect/screens/authentication.dart';
-import 'package:yiddishconnect/screens/dev_signin_signup/dev_home.dart';
-import 'package:yiddishconnect/screens/email/emailSignIn.dart';
-import 'package:yiddishconnect/screens/email/emailSignUp.dart';
-import 'package:yiddishconnect/screens/home.dart';
-import 'package:yiddishconnect/screens/landing.dart';
-import 'package:yiddishconnect/screens/phone/phoneAuth.dart';
-import 'package:yiddishconnect/screens/preference/preference.dart';
-import 'package:yiddishconnect/services/auth.dart';
-import 'package:yiddishconnect/utils/colorful.dart';
-import 'package:yiddishconnect/utils/helpers.dart';
+import 'package:yiddishconnect/router.dart';
 import 'firebase_options.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -55,7 +45,7 @@ class MyApp extends StatelessWidget {
             labelSmall: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w500, fontSize: 11.0),
           ),
         ),
-        routerConfig: _router,
+        routerConfig: ydRouter,
       ),
     );
   }
@@ -65,66 +55,5 @@ class MyAppState extends ChangeNotifier {
   var current = WordPair.random(); // a random word
 }
 
-final _router = GoRouter(
-  routes: [
-    GoRoute(
-      name: "landingScreen",
-      path: '/landing',
-      builder: (context, state) => const LandingScreen(),
-    ),
-    GoRoute(
-      name: "authScreen",
-      path: '/auth',
-      builder: (context, state) => AuthScreen(),
-      routes: [
-        GoRoute(
-          name: "phoneAuthScreen",
-          path: 'phone',
-          builder: (context, state) => PhoneAuthScreen(),
-        ),
-        GoRoute(
-          name: "emailSignInScreen",
-          path: 'email/sign-in',
-          builder: (context, state) => EmailSignInScreen(),
-        ),
-        GoRoute(
-          name: "emailSignUpScreen",
-          path: 'email/sign-up',
-          builder: (context, state) => EmailSignUpScreen(),
-        ),
-      ]
-    ),
-    GoRoute(
-      name: "homeScreen",
-      path: '/',
-      builder: (context, state) => HomeScreen(),
-      routes: [
-        GoRoute(
-          name: "preferenceScreen",
-          path: 'preference',
-          builder: (context, state) => PreferenceScreen(),
-        ),
-      ]
-    ),
-  ],
 
-  // redirect to the login page if the user is not logged in
-  redirect: (context, state) {
-    // if the user is not logged in, they need to login
-    final loggedIn = AuthService().getUser() != null;
-    final loggingIn = state.matchedLocation.startsWith('/auth')|| state.matchedLocation == "/landing";
-
-    print("\x1B[32m Route: ${state.matchedLocation} \x1B[0m   \x1B[34m User.uid: ${AuthService().getUser()?.uid} \x1B[0m");
-
-    // If the user is not logged in (and not currently doing login process), send them to the landing page.
-    if (!loggedIn) return loggingIn ? null : '/landing';
-
-    // if the user is logged in but still on the login page, send them to
-    // the home page
-    if (loggedIn && loggingIn) return '/';
-
-    // no need to redirect at all
-    return null;
-  },
-);
 
