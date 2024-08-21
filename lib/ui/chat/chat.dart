@@ -7,6 +7,8 @@ class ChatPage extends StatefulWidget {
   @override
   State<ChatPage> createState() => _ChatPageState();
 }
+ 
+
 
 class _ChatPageState extends State<ChatPage> {
   late ChatUser currentUser;
@@ -25,8 +27,8 @@ class _ChatPageState extends State<ChatPage> {
 
     otherUser = ChatUser(
       id: '2',
-      firstName: 'Cold',
-      lastName: 'Play',
+      firstName: 'Alan',
+      lastName: 'Turing',
       customProperties: {'avatar': 'https://www.wrappixel.com/ampleadmin/assets/images/users/4.jpg'},
     );
 
@@ -43,17 +45,32 @@ class _ChatPageState extends State<ChatPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Chat'),
-      ),
-      body: DashChat(
-        
-        currentUser: currentUser,
-        onSend: (ChatMessage m) {
-          setState(() {
-            messages.insert(0, m);
+        leading: CircleAvatar(
+    backgroundImage: otherUser.customProperties?['avatar'] != null
+        ? NetworkImage(otherUser.customProperties!['avatar']!)
+        : null,
+    child: otherUser.customProperties?['avatar'] == null
+        ? Icon(Icons.person)
+        : null,
+  ),
+    
+  title: Text("${otherUser.firstName} ${otherUser.lastName}"),
+  backgroundColor: Colors.orangeAccent,
+),
+
+      body: Container(
+        color: Colors.white, // Set the background color here
+        child: DashChat(
+          currentUser: currentUser,
+          onSend: (ChatMessage m) {
+            setState(() {
+              messages.insert(0, m);
           });
         },
+      
+      
         messages: messages,
+      ),
       ),
     );
   }
