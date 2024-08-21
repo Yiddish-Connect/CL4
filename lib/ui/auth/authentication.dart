@@ -9,6 +9,7 @@ import '../../widgets/yd_label.dart';
 import 'package:yiddishconnect/widgets/ErrorHandlers.dart';
 import 'dev_signin_signup/dev_home.dart';
 
+/// This screen when user clicks on "Login" in the landing page
 /// The authentication main screen showing all 3 methods: phone, email, Google/Apple
 /// Route: 'auth'
 class AuthScreen extends StatelessWidget {
