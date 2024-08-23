@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:ui';
 import 'dart:html' as html;
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -358,11 +359,11 @@ class ImageTile extends StatelessWidget {
     required this.onImageSelected,
   }) : super(key: key);
 
-  Future<void> uploadImage(dynamic file) async {
+  Future<void> uploadImage(dynamic file, String userId) async {
     try {
       String fileName = DateTime.now().millisecondsSinceEpoch.toString();
       // get a reference to storage root
-      Reference storageRef = FirebaseStorage.instance.ref().child('user_1/$fileName');
+      Reference storageRef = FirebaseStorage.instance.ref().child('user_$userId/$fileName');
 
       UploadTask uploadTask;
 
@@ -379,8 +380,8 @@ class ImageTile extends StatelessWidget {
       TaskSnapshot taskSnapshot = await uploadTask;
       String downloadUrl = await taskSnapshot.ref.getDownloadURL();
   
-      await FirebaseFirestore.instance.collection('profiles').add({
-        'imageUrl': downloadUrl,
+      await FirebaseFirestore.instance.collection('profiles').doc(userId).update({
+        'imageUrls': FieldValue.arrayUnion([downloadUrl]),
       });
     } catch (e) {
       print('Error: $e');
@@ -431,14 +432,19 @@ class ImageTile extends StatelessWidget {
                         context: context,
                       );
                       if (croppedFile != null) {
-                        if (kIsWeb) {
-                          Uint8List fileBytes = await files.first.readAsBytes();
-                          onImageSelected(fileBytes);
-                          await uploadImage(fileBytes);
-                        } else {
-                          File imageFile = File(croppedFile.path);
-                          onImageSelected(imageFile);
-                          await uploadImage(imageFile);
+                        // to be fixed
+                        User? user = FirebaseAuth.instance.currentUser;
+                        if (user != null) {
+                          String userId = user.uid;
+                          if (kIsWeb) {
+                            Uint8List fileBytes = await files.first.readAsBytes();
+                            onImageSelected(fileBytes);
+                            await uploadImage(fileBytes, userId);
+                          } else {
+                            File imageFile = File(croppedFile.path);
+                            onImageSelected(imageFile);
+                            await uploadImage(imageFile, userId);
+                          }
                         }
                       }
                     }
