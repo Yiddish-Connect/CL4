@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:yiddishconnect/models/profileDB.dart';
 import 'package:yiddishconnect/widgets/yd_multi_steps.dart';
 import 'dart:io';
 import '../../../services/firebaseAuthentication.dart';
@@ -178,6 +179,7 @@ class _Step1 extends StatelessWidget {
 class _Step2 extends StatelessWidget {
 
   final AuthService _auth = AuthService();
+  final UserService _user = UserService();
   final void Function() action;
 
   _Step2({super.key, required this.action});
@@ -252,6 +254,8 @@ class _Step2 extends StatelessWidget {
                                         .confirmationResult
                                 );
                                 if (user != null) {
+                                  // Initialize user profile after successful sign-in
+                                  await _user.handleUserLogin(user);
                                   context.go("/");
                                 } else {
                                   toast(context, "Something went wrong (null)");
@@ -271,8 +275,5 @@ class _Step2 extends StatelessWidget {
     );
   }
 }
-
-
-
 
 
