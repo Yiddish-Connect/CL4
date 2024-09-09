@@ -2,13 +2,13 @@ import 'package:dash_chat_2/dash_chat_2.dart';
 import 'package:flutter/material.dart';
 
 class ChatPage extends StatefulWidget {
-  const ChatPage({super.key});
+  final String chatUser;
+
+  const ChatPage({super.key, required this.chatUser});
 
   @override
   State<ChatPage> createState() => _ChatPageState();
 }
- 
-
 
 class _ChatPageState extends State<ChatPage> {
   late ChatUser currentUser;
@@ -46,17 +46,17 @@ class _ChatPageState extends State<ChatPage> {
     return Scaffold(
       appBar: AppBar(
         leading: CircleAvatar(
-    backgroundImage: otherUser.customProperties?['avatar'] != null
-        ? NetworkImage(otherUser.customProperties!['avatar']!)
-        : null,
-    child: otherUser.customProperties?['avatar'] == null
-        ? Icon(Icons.person)
-        : null,
-  ),
-    
-  title: Text("${otherUser.firstName} ${otherUser.lastName}"),
-  backgroundColor: Colors.orangeAccent,
-),
+          backgroundImage: otherUser.customProperties?['avatar'] != null
+              ? NetworkImage(otherUser.customProperties!['avatar']!)
+              : null,
+          child: otherUser.customProperties?['avatar'] == null
+              ? Icon(Icons.person)
+              : null,
+        ),
+
+        title: Text("${otherUser.firstName} ${otherUser.lastName}"),
+        backgroundColor: Colors.orangeAccent,
+      ),
 
       body: Container(
         color: Colors.white, // Set the background color here
@@ -65,12 +65,12 @@ class _ChatPageState extends State<ChatPage> {
           onSend: (ChatMessage m) {
             setState(() {
               messages.insert(0, m);
-          });
-        },
-      
-      
-        messages: messages,
-      ),
+            });
+          },
+
+
+          messages: messages,
+        ),
       ),
     );
   }
