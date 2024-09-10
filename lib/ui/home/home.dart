@@ -1,5 +1,6 @@
 import 'dart:collection';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:yiddishconnect/ui/auth/dev_signin_signup/dev_home.dart';
 import 'package:yiddishconnect/ui/home/event/eventPage.dart';
@@ -7,6 +8,9 @@ import 'package:yiddishconnect/ui/home/match/bottomFilter.dart';
 import 'package:yiddishconnect/ui/home/match/matchPage.dart';
 import 'package:yiddishconnect/ui/home/match/matchPageProvider.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
+
+import 'chat/chat.dart';
+import 'friend/friend.dart';
 
 /// The home-screen.
 /// It contains 5 tabs: home, events, match, friends, chat
@@ -60,7 +64,6 @@ class _HomeScreenState extends State<HomeScreen> {
               toolbarHeight: 70,
               leadingWidth: 90,
             ),
-            drawer: _createDrawer(),
             body: IndexedStack(
               index: _index,
               children: _pages,
@@ -120,8 +123,8 @@ class _HomeScreenState extends State<HomeScreen> {
                               0 => HomePage(),
                               1 => EventPage(),
                               2 => MatchPage(),
-                              3 => TestWidgetFour(),
-                              4 => TestWidgetThree(),
+                              3 => FriendPage(),
+                              4 => ChatPage(),
                               _ => Placeholder(),
                             };
                           }
@@ -139,63 +142,6 @@ class _HomeScreenState extends State<HomeScreen> {
           );
         }
       )
-    );
-  }
-
-  // Get the Scaffold.drawer
-  Widget _createDrawer() {
-    void onItemTapped(int index) {
-      setState(() {
-        _drawerIndex = index;
-      });
-    }
-
-    return Drawer(
-      child: ListView(
-        // Important: Remove any padding from the ListView.
-        padding: EdgeInsets.zero,
-        children: [
-          const DrawerHeader(
-            decoration: BoxDecoration(
-              color: Colors.blue,
-            ),
-            child: Text('Drawer Header'),
-          ),
-          ListTile(
-            title: const Text('Home'),
-            selected: _drawerIndex == 0,
-            onTap: () {
-              // Update the state of the app
-              onItemTapped(0);
-              toast(context, "TODO: _onItemTapped(0)");
-              // Then close the drawer
-              Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            title: const Text('Business'),
-            selected: _drawerIndex == 1,
-            onTap: () {
-              // Update the state of the app
-              onItemTapped(1);
-              toast(context, "TODO: _onItemTapped(1)");
-              // Then close the drawer
-              Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            title: const Text('School'),
-            selected: _drawerIndex == 2,
-            onTap: () {
-              // Update the state of the app
-              toast(context, "TODO: _onItemTapped(2)");
-              onItemTapped(2);
-              // Then close the drawer
-              Navigator.pop(context);
-            },
-          ),
-        ],
-      ),
     );
   }
 
@@ -259,7 +205,7 @@ class _HomeScreenState extends State<HomeScreen> {
           return Padding(
               padding: const EdgeInsets.all(0.0),
               child: InkWell(
-                onTap: () => Scaffold.of(context).openDrawer(),
+                onTap: () => context.push("/user"),
                 child: Padding(
                   padding: const EdgeInsets.all(12),
                   child: CircleAvatar(
@@ -273,10 +219,6 @@ class _HomeScreenState extends State<HomeScreen> {
     ;
   }
 }
-
-
-
-
 
 class HomePage extends StatelessWidget {
   @override
@@ -294,60 +236,3 @@ class HomePage extends StatelessWidget {
     );
   }
 }
-
-class TestWidgetOne extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    print("WidgetOne build()");
-
-    return Container(
-      color: Colors.grey,
-      child: Center(
-        child: Text('Widget One'),
-      ),
-    );
-  }
-}
-
-class TestWidgetTwo extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    print("WidgetTwo build()");
-
-    return Container(
-      color: Colors.blueGrey,
-      child: Center(
-        child: Text('Widget Two'),
-      ),
-    );
-  }
-}
-
-class TestWidgetThree extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    print("WidgetThree build()");
-
-    return Container(
-      color: Colors.teal,
-      child: Center(
-        child: Text('Widget Three'),
-      ),
-    );
-  }
-}
-
-class TestWidgetFour extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    print("WidgetFour build()");
-
-    return Container(
-      color: Colors.brown,
-      child: Center(
-        child: Text('Widget Four'),
-      ),
-    );
-  }
-}
-
