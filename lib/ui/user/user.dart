@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+/// This screen appears when user click on their profile picture on the top-left of the home-screen.
 class UserScreen extends StatefulWidget {
   const UserScreen({super.key});
 

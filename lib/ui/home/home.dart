@@ -3,13 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:yiddishconnect/ui/auth/dev_signin_signup/dev_home.dart';
-import 'package:yiddishconnect/ui/chat/chat.dart';
-import 'package:yiddishconnect/ui/friend/friend.dart';
 import 'package:yiddishconnect/ui/home/event/eventPage.dart';
 import 'package:yiddishconnect/ui/home/match/bottomFilter.dart';
 import 'package:yiddishconnect/ui/home/match/matchPage.dart';
 import 'package:yiddishconnect/ui/home/match/matchPageProvider.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
+
+import 'chat/chat.dart';
+import 'friend/friend.dart';
 
 /// The home-screen.
 /// It contains 5 tabs: home, events, match, friends, chat
