@@ -74,6 +74,7 @@ class _Step1State extends State<_Step1> {
       .minLength(10)
       .maxLength(50)
       .regExp(new RegExp("[\p{Lu}\p{Lt}]"), passwordReqirements)
+      .regExp(new RegExp("[^A-Za-z0-9]"), passwordReqirements)
       .build();
 
   final AuthService _auth = AuthService();
