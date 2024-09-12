@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'dart:ui';
+import 'dart:html' as html;
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:universal_io/io.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
 import 'package:yiddishconnect/widgets/yd_multi_steps.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -15,6 +18,11 @@ import 'package:provider/provider.dart';
 import 'package:yiddishconnect/utils/image_helper.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:io' if (dart.library.html) 'dart:html' as html;
+import 'package:flutter/foundation.dart';
 
 class PreferenceProvider extends ChangeNotifier {
   String _name = "";
@@ -281,12 +289,11 @@ class _Step4 extends StatefulWidget {
 
 class _Step4State extends State<_Step4> {
   List<File?> _images = List<File?>.filled(6, null); // List for app images
-  List<String?> _webImages = List<String?>.filled(6, null); // List for web images
+  List<Uint8List?> _webImages = List<Uint8List?>.filled(6, null); // List for web images
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      // color: Color.fromRGBO(253, 247, 253, 1),
       child: SingleChildScrollView(
         padding: EdgeInsets.all(16), // Add padding to avoid edge issues
         child: Column(
@@ -316,7 +323,7 @@ class _Step4State extends State<_Step4> {
                               onImageSelected: (file) {
                                 setState(() {
                                   if (kIsWeb) {
-                                    _webImages[index] = file.path;
+                                    _webImages[index] = file;
                                   } else {
                                     _images[index] = file;
                                   }
@@ -339,12 +346,11 @@ class _Step4State extends State<_Step4> {
   }
 }
 
-
 // Image upload helper widget
 class ImageTile extends StatelessWidget {
   final File? imageFile;
-  final String? webImage; // Add a field for web image
-  final ValueChanged<File> onImageSelected;
+  final Uint8List? webImage; // Add a field for web image
+  final ValueChanged<dynamic> onImageSelected;
 
   const ImageTile({
     Key? key,
@@ -353,24 +359,32 @@ class ImageTile extends StatelessWidget {
     required this.onImageSelected,
   }) : super(key: key);
 
-  Future<void> uploadImage(File file) async {
+  Future<void> uploadImage(dynamic file, String userId) async {
     try {
       String fileName = DateTime.now().millisecondsSinceEpoch.toString();
       // get a reference to storage root
-      Reference storageRef = FirebaseStorage.instance.ref().child('user_1/$fileName');
-      //get a reference for image to be stored
-      UploadTask uploadTask = storageRef.putFile(file);
+      Reference storageRef = FirebaseStorage.instance.ref().child('user_$userId/$fileName');
 
+      UploadTask uploadTask;
+
+      if (kIsWeb) {
+        // For web, handle as Uint8List
+        Uint8List fileBytes = file;
+        uploadTask = storageRef.putData(fileBytes);
+      } else {
+        // For mobile, handle as File
+        File mobileFile = file;
+        uploadTask = storageRef.putFile(mobileFile);
+      }
+  
       TaskSnapshot taskSnapshot = await uploadTask;
       String downloadUrl = await taskSnapshot.ref.getDownloadURL();
-
-      // Save the download URL to Firestore
-      await FirebaseFirestore.instance.collection('profiles').add({
-        'imageUrl': downloadUrl,
-        // Add other user profile details here
+  
+      await FirebaseFirestore.instance.collection('profiles').doc(userId).update({
+        'imageUrls': FieldValue.arrayUnion([downloadUrl]),
       });
     } catch (e) {
-      print('$e');
+      print('Error: $e');
     }
   }
 
@@ -387,7 +401,7 @@ class ImageTile extends StatelessWidget {
           if (kIsWeb && webImage != null)  // Check if it's web and web image is available
             ClipRRect(
               borderRadius: BorderRadius.circular(20),
-              child: Image.network(
+              child: Image.memory(
                 webImage!,
                 fit: BoxFit.cover,
                 width: double.infinity,
@@ -418,9 +432,20 @@ class ImageTile extends StatelessWidget {
                         context: context,
                       );
                       if (croppedFile != null) {
-                        File imageFile = File(croppedFile.path);
-                        onImageSelected(File(croppedFile.path));
-                        await uploadImage(imageFile);
+                        // to be fixed
+                        User? user = FirebaseAuth.instance.currentUser;
+                        if (user != null) {
+                          String userId = user.uid;
+                          if (kIsWeb) {
+                            Uint8List fileBytes = await files.first.readAsBytes();
+                            onImageSelected(fileBytes);
+                            await uploadImage(fileBytes, userId);
+                          } else {
+                            File imageFile = File(croppedFile.path);
+                            onImageSelected(imageFile);
+                            await uploadImage(imageFile, userId);
+                          }
+                        }
                       }
                     }
                   } catch (e) {
