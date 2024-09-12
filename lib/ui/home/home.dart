@@ -9,7 +9,7 @@ import 'package:yiddishconnect/ui/home/match/matchPage.dart';
 import 'package:yiddishconnect/ui/home/match/matchPageProvider.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
 
-import 'chat/chat.dart';
+import 'chat/chat_homepage.dart';
 import 'friend/friend.dart';
 
 /// The home-screen.
@@ -124,7 +124,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               1 => EventPage(),
                               2 => MatchPage(),
                               3 => FriendPage(),
-                              4 => ChatPage(),
+                              4 => ChatHomepage(),
                               _ => Placeholder(),
                             };
                           }
