@@ -24,6 +24,7 @@ dependencies:
   email_validator: ^3.0.0
   form_validator: ^2.1.1
   firebase_messaging: ^14.9.4
+  flutter_local_notifications: ^17.2.2
 
 
 dev_dependencies:
