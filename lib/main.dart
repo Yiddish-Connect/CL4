@@ -6,16 +6,58 @@ import 'package:yiddishconnect/router.dart';
 import 'firebase_options.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
+//the message handeler for push notifications
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  print("Handling a background message: ${message.messageId}");
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  var token = FirebaseMessaging.instance.getToken().then((onValue) => {
+        print("token $onValue")
+      }); //the then statement prints the fcm token to the console
+
   runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  //setup notifictaions
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
+  @override
+  void initState() {
+    super.initState();
+    requestPermission();
+    listenToMessages();
+  }
+
+  void requestPermission() async {
+    await messaging.requestPermission(
+      alert: true,
+      announcement: false,
+      badge: true,
+      carPlay: false,
+      criticalAlert: false,
+      provisional: false,
+      sound: true,
+    );
+  }
+
+  void listenToMessages() {
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      print('Received a message: ${message.notification?.title}');
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
