@@ -6,7 +6,6 @@ import 'package:yiddishconnect/router.dart';
 import 'firebase_options.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
-//the message handeler for push notifications
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   print("Handling a background message: ${message.messageId}");
 }
@@ -16,10 +15,12 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-  var token = FirebaseMessaging.instance.getToken().then((onValue) => {
+
+  FirebaseMessaging.instance.getToken().then((onValue) => {
         print("token $onValue")
       }); //the then statement prints the fcm token to the console
+
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   runApp(MyApp());
 }

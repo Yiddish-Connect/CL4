@@ -25,6 +25,7 @@ dependencies:
   form_validator: ^2.1.1
   firebase_messaging: ^14.9.4
   flutter_local_notifications: ^17.2.2
+  firebase_analytics: ^10.10.7
 
 
 dev_dependencies:
