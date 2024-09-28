@@ -1,14 +1,13 @@
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:yiddishconnect/models/notification_controller.dart';
 import 'package:yiddishconnect/router.dart';
 import 'firebase_options.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  print("Handling a background message: ${message.messageId}");
-}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,7 +19,31 @@ void main() async {
         print("token $onValue")
       }); //the then statement prints the fcm token to the console
 
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  await AwesomeNotifications().initialize(
+      null, //this value will serve as the default icon you pass in a custom icon when working or null
+      //this is a list of actual notification channels 3:20 to hear more about it
+      [
+        NotificationChannel(
+          channelGroupKey: "Basic", //this value is optional but helps
+          channelKey: "Basic Channel",
+          channelName: "Basic Notifications",
+          channelDescription: "Basic Notifications",
+          //you can also give styling but it is ok
+        )
+      ],
+      //this is optional but is usefull for grouping nots 5:00
+      channelGroups: [
+        NotificationChannelGroup(
+          channelGroupKey: "Basic",
+          channelGroupName: "Basic Notifcations",
+        )
+      ]);
+
+  //these lines are to check if we have not permissions
+  bool isAllowed = await AwesomeNotifications().isNotificationAllowed();
+  if (!isAllowed) {
+    AwesomeNotifications().requestPermissionToSendNotifications();
+  }
 
   runApp(MyApp());
 }
@@ -35,28 +58,38 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   //setup notifictaions
   FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
+
   @override
   void initState() {
     super.initState();
-    requestPermission();
     listenToMessages();
-  }
-
-  void requestPermission() async {
-    await messaging.requestPermission(
-      alert: true,
-      announcement: false,
-      badge: true,
-      carPlay: false,
-      criticalAlert: false,
-      provisional: false,
-      sound: true,
+    AwesomeNotifications().setListeners(
+      onActionReceivedMethod: NotificationController.onActionReceivedMethod,
+      onNotificationCreatedMethod:
+          NotificationController.onNotificationCreatedMethod,
+      onNotificationDisplayedMethod:
+          NotificationController.onNotificationDisplayedMethod,
+      onDismissActionReceivedMethod:
+          NotificationController.onDismissActionMethod,
     );
   }
 
   void listenToMessages() {
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      //get awsome notifications to listen when firebase recives a message
       print('Received a message: ${message.notification?.title}');
+      AwesomeNotifications().createNotification(
+        content: NotificationContent(
+          id: 1,
+          //this must be initialized befor app run
+          channelKey: "Basic Channel",
+          title: message.notification?.title,
+          body: "HI SHatoria",
+        ),
+      );
     });
   }
 
