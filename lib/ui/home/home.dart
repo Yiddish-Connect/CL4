@@ -205,7 +205,8 @@ class _HomeScreenState extends State<HomeScreen> {
           return Padding(
               padding: const EdgeInsets.all(0.0),
               child: InkWell(
-                onTap: () => context.push("/user"),
+                onTap: () => context.push("/user",
+                  extra: {'profileImage': "https://picsum.photos/250"},), // Passing profile image as extra data
                 child: Padding(
                   padding: const EdgeInsets.all(12),
                   child: CircleAvatar(
