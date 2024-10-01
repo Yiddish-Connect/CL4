@@ -7,7 +7,11 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:yiddishconnect/models/notification_controller.dart';
 import 'package:yiddishconnect/router.dart';
 import 'firebase_options.dart';
+<<<<<<< HEAD
 import 'package:firebase_messaging/firebase_messaging.dart';
+=======
+import 'package:firebase_core/firebase_core.dart';
+>>>>>>> 1bedd4f01831c5003b0fcc465ead408ce7d7bcf5
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -176,4 +180,8 @@ class _MyAppState extends State<MyApp> {
 
 class MyAppState extends ChangeNotifier {
   var current = WordPair.random(); // a random word
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 1bedd4f01831c5003b0fcc465ead408ce7d7bcf5
