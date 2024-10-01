@@ -87,7 +87,7 @@ Please read the [documentation here](https://pub.dev/packages/provider).
 - google_sign_in: ^6.2.1
 
 ## File Structure (As of 6/27/2024)
-```dart
+
 CL4/
 ├── .dart_tool/    
 ├── .idea/    
