@@ -12,6 +12,12 @@ class MatchPage extends StatefulWidget {
 
 class _MatchPageState extends State<MatchPage> {
   @override
+  void initState() {
+    print("MatchPage initState()... (This should only happen once)");
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     print("MatchPage build()");
     return Container(
