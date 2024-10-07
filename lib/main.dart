@@ -1,17 +1,13 @@
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:yiddishconnect/models/notification_controller.dart';
 import 'package:yiddishconnect/router.dart';
+import 'package:yiddishconnect/utils/web_notification.dart';
 import 'firebase_options.dart';
-<<<<<<< HEAD
 import 'package:firebase_messaging/firebase_messaging.dart';
-=======
-import 'package:firebase_core/firebase_core.dart';
->>>>>>> 1bedd4f01831c5003b0fcc465ead408ce7d7bcf5
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -62,9 +58,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   //setup notifictaions
   FirebaseMessaging messaging = FirebaseMessaging.instance;
-
-  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
+  OverlayEntry? entry;
 
   @override
   void initState() {
@@ -94,7 +88,17 @@ class _MyAppState extends State<MyApp> {
           body: "HI SHatoria",
         ),
       );
+
+      // if (kIsWeb) {
+      //   //showWebNotification(message);
+      // }
     });
+  }
+
+  void showWebNotification(RemoteMessage message) {
+    RemoteNotification? notification = message.notification;
+    print(notification?.title.toString());
+    showNotification(entry, context, notification?.title.toString(), "");
   }
 
   @override
@@ -180,8 +184,4 @@ class _MyAppState extends State<MyApp> {
 
 class MyAppState extends ChangeNotifier {
   var current = WordPair.random(); // a random word
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 1bedd4f01831c5003b0fcc465ead408ce7d7bcf5
