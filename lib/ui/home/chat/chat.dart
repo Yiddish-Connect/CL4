@@ -19,16 +19,23 @@ class _ChatPageState extends State<ChatPage> {
   void initState() {
     super.initState();
     currentUser = ChatUser(
-      id: '1',
+      id: '8',
       firstName: 'Jichun',
       lastName: 'Q',
       
     );
 
     otherUser = ChatUser(
-      id: '2',
+      id: '9',
       firstName: 'Alan',
       lastName: 'Turing',
+      customProperties: {'avatar': 'https://www.wrappixel.com/ampleadmin/assets/images/users/4.jpg'},
+    );
+
+    otherUser = ChatUser(
+      id: widget.chatUser,
+      firstName: 'Leo', // Replace with actual friend's first name
+      lastName: '', // Replace with actual friend's last name
       customProperties: {'avatar': 'https://www.wrappixel.com/ampleadmin/assets/images/users/4.jpg'},
     );
 
@@ -45,19 +52,28 @@ class _ChatPageState extends State<ChatPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: CircleAvatar(
-          backgroundImage: otherUser.customProperties?['avatar'] != null
-              ? NetworkImage(otherUser.customProperties!['avatar']!)
-              : null,
-          child: otherUser.customProperties?['avatar'] == null
-              ? Icon(Icons.person)
-              : null,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+          },
         ),
-
-        title: Text("${otherUser.firstName} ${otherUser.lastName}"),
+        title: Row(
+          children: [
+            CircleAvatar(
+              backgroundImage: otherUser.customProperties?['avatar'] != null
+                  ? NetworkImage(otherUser.customProperties!['avatar']!)
+                  : null,
+              child: otherUser.customProperties?['avatar'] == null
+                  ? Icon(Icons.person)
+                  : null,
+            ),
+            SizedBox(width: 10), // Add some space between the avatar and the name
+            Text("${otherUser.firstName} ${otherUser.lastName}"),
+          ],
+        ),
         backgroundColor: Colors.orangeAccent,
       ),
-
       body: Container(
         color: Colors.white, // Set the background color here
         child: DashChat(
@@ -67,8 +83,6 @@ class _ChatPageState extends State<ChatPage> {
               messages.insert(0, m);
             });
           },
-
-
           messages: messages,
         ),
       ),
