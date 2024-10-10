@@ -5,8 +5,8 @@ import 'chat_service.dart';
 
 class ChatPage extends StatefulWidget {
   final String chatUser;
-
-  const ChatPage({super.key, required this.chatUser});
+  final String userId;
+  const ChatPage({super.key, required this.userId ,required this.chatUser});
 
   @override
   State<ChatPage> createState() => _ChatPageState();
@@ -23,14 +23,14 @@ class _ChatPageState extends State<ChatPage> {
     super.initState();
 
     currentUser = ChatUser(
-      id: '12',
-      firstName: 'Bie',
+      id: '10',
+      firstName: 'Leo',
       lastName: '',
     );
 
     otherUser = ChatUser(
-      id: '10',
-      firstName: 'Leo',
+      id: widget.userId,
+      firstName: widget.chatUser,
       lastName: '',
       customProperties: {'avatar': 'https://www.wrappixel.com/ampleadmin/assets/images/users/4.jpg'},
     );

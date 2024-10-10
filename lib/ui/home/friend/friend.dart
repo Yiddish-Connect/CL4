@@ -12,11 +12,9 @@ class FriendPage extends StatefulWidget {
 
 class _FriendPageState extends State<FriendPage> {
   final List<Map<String, String>> friends = [
-    {'id': '1', 'name': 'Leo', 'imageUrl': 'https://example.com/leo.jpg'},
-    {'id': '2', 'name': 'Bie', 'imageUrl': 'https://example.com/bie.jpg'},
-    {'id': '3', 'name': 'Bie1', 'imageUrl': 'https://example.com/bie.jpg'},
-    {'id': '4', 'name': 'Bie2', 'imageUrl': 'https://example.com/bie.jpg'},
-    {'id': '5', 'name': 'Bie3', 'imageUrl': 'https://example.com/bie.jpg'},
+    {'id': '10', 'name': 'Leo', 'imageUrl': 'https://example.com/leo.jpg'},
+    {'id': '12', 'name': 'Bie', 'imageUrl': 'https://example.com/bie.jpg'},
+    {'id': '11', 'name': 'Alan', 'imageUrl': 'https://example.com/bie.jpg'},
     // Add more friends here
   ];
 
@@ -45,7 +43,7 @@ class _FriendPageState extends State<FriendPage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ChatPage(chatUser: friendName),
+        builder: (context) => ChatPage(userId: friendId, chatUser: friendName),
       ),
     );
   }
