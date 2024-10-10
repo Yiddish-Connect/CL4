@@ -7,10 +7,23 @@ class ChatService {
 
 // Define the currentUser variable
   final ChatUser currentUser = ChatUser(
-    id: '12',
-    firstName: 'Bie',
+    id: '10',
+    firstName: 'Leo',
     lastName: '',
   );
+
+  //function to return the sender id from firebase and the last message
+  Stream<List<Map<String, dynamic>>> getChatRooms() {
+    return _firestore.collection('chat_rooms').snapshots().map((snapshot) {
+      return snapshot.docs.map((doc) {
+        var data = doc.data() as Map<String, dynamic>;
+        return {
+          'senderID': data['senderID'],
+          'lastMessage': data['lastMessage'],
+        };
+      }).toList();
+    });
+  }
 
   //function to generate a chat room id
   String generateChatRoomId(String userId, String receiverId) {
@@ -18,6 +31,8 @@ class ChatService {
     roomId.sort();
     return roomId.join('_');
   }
+
+  //function to get messages from firebase
   Stream<List<ChatMessage>> getMessages(String userId, String receiverId) {
     // Build a chat room id for the two users
     String chatRoomId = generateChatRoomId(userId, receiverId);
@@ -40,7 +55,7 @@ class ChatService {
     });
   }
 
-
+  //function to send a message to firebase
   Future<void> sendMessage(String message, receiverId) async {
     final timestamp = Timestamp.now();
     //create a new message
