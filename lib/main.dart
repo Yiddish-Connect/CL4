@@ -1,6 +1,8 @@
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:english_words/english_words.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:yiddishconnect/models/notification_controller.dart';
@@ -8,6 +10,7 @@ import 'package:yiddishconnect/router.dart';
 import 'package:yiddishconnect/utils/web_notification.dart';
 import 'firebase_options.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:universal_html/js.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -76,29 +79,25 @@ class _MyAppState extends State<MyApp> {
   }
 
   void listenToMessages() {
+    print("Fired..");
+
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       //get awsome notifications to listen when firebase recives a message
       print('Received a message: ${message.notification?.title}');
+
       AwesomeNotifications().createNotification(
-        content: NotificationContent(
-          id: 1,
-          //this must be initialized befor app run
-          channelKey: "Basic Channel",
-          title: message.notification?.title,
-          body: "HI SHatoria",
-        ),
-      );
+          content: NotificationContent(
+        id: 1,
+        //this must be initialized befor app run
+        channelKey: "Basic Channel",
+        title: message.notification?.title,
+        body: "HI SHatoria",
+      ));
 
-      // if (kIsWeb) {
-      //   //showWebNotification(message);
-      // }
+      if (kIsWeb) {
+        print("web");
+      }
     });
-  }
-
-  void showWebNotification(RemoteMessage message) {
-    RemoteNotification? notification = message.notification;
-    print(notification?.title.toString());
-    showNotification(entry, context, notification?.title.toString(), "");
   }
 
   @override
