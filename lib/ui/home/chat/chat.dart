@@ -1,5 +1,7 @@
 import 'package:dash_chat_2/dash_chat_2.dart';
 import 'package:flutter/material.dart';
+import 'chat_service.dart';
+
 
 class ChatPage extends StatefulWidget {
   final String chatUser;
@@ -13,41 +15,45 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   late ChatUser currentUser;
   late ChatUser otherUser;
-  late List<ChatMessage> messages;
-
+  final ChatService _chatService = ChatService();
+  final TextEditingController _messageControler = TextEditingController();
+  List<ChatMessage> messages = [];
  @override
   void initState() {
     super.initState();
+
     currentUser = ChatUser(
-      id: '8',
-      firstName: 'Jichun',
-      lastName: 'Q',
-      
+      id: '12',
+      firstName: 'Bie',
+      lastName: '',
     );
 
     otherUser = ChatUser(
-      id: '9',
-      firstName: 'Alan',
-      lastName: 'Turing',
+      id: '10',
+      firstName: 'Leo',
+      lastName: '',
       customProperties: {'avatar': 'https://www.wrappixel.com/ampleadmin/assets/images/users/4.jpg'},
     );
+    _fetchMessages();
+ }
 
-    otherUser = ChatUser(
-      id: widget.chatUser,
-      firstName: 'Leo', // Replace with actual friend's first name
-      lastName: '', // Replace with actual friend's last name
-      customProperties: {'avatar': 'https://www.wrappixel.com/ampleadmin/assets/images/users/4.jpg'},
-    );
-
-    messages = <ChatMessage>[
-      ChatMessage(
-        text: 'Hey!',
-        user: otherUser, // The message is from the other user
-        createdAt: DateTime.now(),
-      ),
-    ];
+  void _fetchMessages() {
+    _chatService.getMessages(currentUser.id, otherUser.id).listen((event) {
+      setState(() {
+        messages = event;
+      });
+    });
   }
-
+  void sendMessage() async {
+   if (_messageControler.text.isNotEmpty) {
+     print('Sending message: ${_messageControler.text}');
+      await _chatService.sendMessage(_messageControler.text, otherUser.id);
+      _messageControler.clear();
+   }
+   else {
+     print('Message is empty');
+   }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -81,6 +87,8 @@ class _ChatPageState extends State<ChatPage> {
           onSend: (ChatMessage m) {
             setState(() {
               messages.insert(0, m);
+              _messageControler.text = m.text;
+              sendMessage();
             });
           },
           messages: messages,
