@@ -4,8 +4,8 @@ import 'chat.dart';
 
 class ChatHomepage extends StatelessWidget {
   final List<Map<String, String>> chats = [
-    {'username': 'Alan Turing', 'lastMessage': 'Hey!'},
-    {'username': 'Jichun Q', 'lastMessage': 'Hello!'},
+    {'username': 'Leo', 'lastMessage': ''},
+    {'username': 'Alan', 'lastMessage': ''},
     // Add more chats here
   ];
 
