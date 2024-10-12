@@ -1111,7 +1111,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.7.3"
-
   video_player_avfoundation:
     dependency: transitive
     description:
