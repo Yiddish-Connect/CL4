@@ -87,7 +87,7 @@ Please read the [documentation here](https://pub.dev/packages/provider).
 - google_sign_in: ^6.2.1
 
 ## File Structure (As of 6/27/2024)
-```dart
+
 CL4/
 ├── .dart_tool/    
 ├── .idea/    
@@ -117,7 +117,6 @@ CL4/
 ├── pubspec.lock     // Lock file containing the exact versions of the dependencies used. Similar to package-lock.json
 ├── pubspec.yaml     // Configuration file for the Dart project, specifying dependencies and other project details. Similar to package.json
 └── README.md     // You are currently reading
-```
 
 # UI
 ## UI Related Packages
@@ -129,10 +128,9 @@ CL4/
 ## Theme
 We have a set of TextTheme and ColorScheme to share colors and font styles. See `main.dart`
 
-Usage: 
-```dart
+Usage:
 color: Theme.of(context).ColorScheme.primary,
 style: Theme.of(context).TextTheme.bodyLarge
-```
+
 
 For more information, please read the [documentation here](https://docs.flutter.dev/cookbook/design/themes)
