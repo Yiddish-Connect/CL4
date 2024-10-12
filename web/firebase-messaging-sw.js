@@ -13,7 +13,7 @@ firebase.initializeApp({
 });
 // Necessary to receive background messages:
 const messaging = firebase.messaging();
-firebase.usePublicVapidKey('BKk6MPwuyDAuPyLQu_6j0ydnyu6-Q4nNkAcu87lfBJMgqv6QwRN99alsh7iyneWp6JgehZBMJyV6c6K42l-DwWM');
+//firebase.usePublicVapidKey('BKk6MPwuyDAuPyLQu_6j0ydnyu6-Q4nNkAcu87lfBJMgqv6QwRN99alsh7iyneWp6JgehZBMJyV6c6K42l-DwWM');
 
 
 // Optional:
