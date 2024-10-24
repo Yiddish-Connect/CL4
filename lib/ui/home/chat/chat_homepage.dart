@@ -1,57 +1,109 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'chat.dart';
+import 'package:yiddishconnect/services/firebaseAuthentication.dart';
+import 'package:go_router/go_router.dart';
 
-class ChatHomepage extends StatelessWidget {
-  final List<Map<String, String>> chats = [
-    {'username': 'Leo', 'lastMessage': ''},
-    {'username': 'Alan', 'lastMessage': ''},
-    // Add more chats here
-  ];
+class ChatHomepage extends StatefulWidget {
+  @override
+  _ChatHomepageState createState() => _ChatHomepageState();
+}
+
+class _ChatHomepageState extends State<ChatHomepage> {
+  final String currentUserId = AuthService.getCurrentUserId(); // Replace with the actual current user ID
 
   @override
   Widget build(BuildContext context) {
-    // Sort chats alphabetically by username
-    chats.sort((a, b) => a['username']!.compareTo(b['username']!));
+    bool isAnonymous = AuthService().isAnonymous();
 
     return Scaffold(
       appBar: AppBar(
         title: Text('Chats'),
       ),
-      body: AnimationLimiter(
-        child: ListView.builder(
-          itemCount: chats.length,
-          itemBuilder: (context, index) {
-            return AnimationConfiguration.staggeredList(
-              position: index,
-              duration: const Duration(milliseconds: 500),
-              child: SlideAnimation(
-                verticalOffset: 50.0,
-                child: FadeInAnimation(
-                  child: GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ChatPage(
-                            chatUser: chats[index]['username']!,
+      body: isAnonymous
+          ? Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('You need to sign in to view chats'),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                context.go('/auth');
+              },
+              child: Text('Sign in'),
+            ),
+          ],
+        ),
+      )
+          : StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance.collection('chat_rooms').snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          }
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            return Center(child: Text('No chats available'));
+          }
+
+          final chatRooms = snapshot.data!.docs.where((doc) => doc.id.split('_').contains(currentUserId)).toList();
+
+          return AnimationLimiter(
+            child: ListView.builder(
+              itemCount: chatRooms.length,
+              itemBuilder: (context, index) {
+                var chatRoom = chatRooms[index];
+                var receiverId = chatRoom.id.split('_').firstWhere((id) => id != currentUserId);
+
+                return StreamBuilder<QuerySnapshot>(
+                  stream: chatRoom.reference.collection('chats').orderBy('timestamp', descending: true).limit(1).snapshots(),
+                  builder: (context, messageSnapshot) {
+                    if (!messageSnapshot.hasData || messageSnapshot.data!.docs.isEmpty) {
+                      return ListTile(
+                        title: Text(receiverId),
+                        subtitle: Text('No messages yet'),
+                      );
+                    }
+
+                    var lastMessage = messageSnapshot.data!.docs.first.data() as Map<String, dynamic>;
+                    return AnimationConfiguration.staggeredList(
+                      position: index,
+                      duration: const Duration(milliseconds: 500),
+                      child: SlideAnimation(
+                        verticalOffset: 50.0,
+                        child: FadeInAnimation(
+                          child: GestureDetector(
+                            onTap: () async {
+                              await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ChatPage(
+                                    chatUser: receiverId,
+                                    userId: receiverId,
+                                  ),
+                                ),
+                              );
+                              setState(() {}); // Refresh the UI when returning from ChatPage
+                            },
+                            child: Card(
+                              margin: EdgeInsets.all(8.0),
+                              child: ListTile(
+                                title: Text(receiverId),
+                                subtitle: Text(lastMessage['message']),
+                              ),
+                            ),
                           ),
                         ),
-                      );
-                    },
-                    child: Card(
-                      margin: EdgeInsets.all(8.0),
-                      child: ListTile(
-                        title: Text(chats[index]['username']!),
-                        subtitle: Text(chats[index]['lastMessage']!),
                       ),
-                    ),
-                  ),
-                ),
-              ),
-            );
-          },
-        ),
+                    );
+                  },
+                );
+              },
+            ),
+          );
+        },
       ),
     );
   }

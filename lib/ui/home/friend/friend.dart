@@ -1,7 +1,8 @@
-// lib/ui/home/friend/friend.dart
 import 'package:flutter/material.dart';
 import 'friendTitle.dart';
 import '../chat/chat.dart';
+import 'package:yiddishconnect/services/firebaseAuthentication.dart';
+import 'package:go_router/go_router.dart';
 
 class FriendPage extends StatefulWidget {
   const FriendPage({super.key});
@@ -50,6 +51,8 @@ class _FriendPageState extends State<FriendPage> {
 
   @override
   Widget build(BuildContext context) {
+    bool isAnonymous = AuthService().isAnonymous();
+
     List filteredFriends = friends.where((friend) {
       return friend['name']!.toLowerCase().contains(_searchText.toLowerCase());
     }).toList();
@@ -64,7 +67,8 @@ class _FriendPageState extends State<FriendPage> {
         },
         child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Column(
+          child: !isAnonymous
+              ? Column(
             children: [
               TextField(
                 controller: _searchController,
@@ -99,6 +103,22 @@ class _FriendPageState extends State<FriendPage> {
                 ),
               ),
             ],
+          )
+              : Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('You need to sign in to view friends'),
+                SizedBox(height: 20),
+                ElevatedButton(
+                  // Sign in => SignInPage
+                  onPressed: () {
+                    context.go("/auth");
+                  },
+                  child: Text('Sign in'),
+                ),
+              ],
+            ),
           ),
         ),
       ),

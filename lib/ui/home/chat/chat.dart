@@ -1,12 +1,12 @@
 import 'package:dash_chat_2/dash_chat_2.dart';
 import 'package:flutter/material.dart';
 import 'chat_service.dart';
-
+import 'package:yiddishconnect/services/firebaseAuthentication.dart';
 
 class ChatPage extends StatefulWidget {
   final String chatUser;
   final String userId;
-  const ChatPage({super.key, required this.userId ,required this.chatUser});
+  const ChatPage({super.key, required this.userId, required this.chatUser});
 
   @override
   State<ChatPage> createState() => _ChatPageState();
@@ -18,12 +18,15 @@ class _ChatPageState extends State<ChatPage> {
   final ChatService _chatService = ChatService();
   final TextEditingController _messageControler = TextEditingController();
   List<ChatMessage> messages = [];
- @override
+
+  @override
   void initState() {
     super.initState();
 
+    String currentUserId = AuthService.getCurrentUserId();
+
     currentUser = ChatUser(
-      id: '10',
+      id: currentUserId,
       firstName: 'Leo',
       lastName: '',
     );
@@ -35,25 +38,25 @@ class _ChatPageState extends State<ChatPage> {
       customProperties: {'avatar': 'https://www.wrappixel.com/ampleadmin/assets/images/users/4.jpg'},
     );
     _fetchMessages();
- }
+  }
 
   void _fetchMessages() {
     _chatService.getMessages(currentUser.id, otherUser.id).listen((event) {
-      setState(() {
-        messages = event;
-      });
+      if (mounted) {
+        setState(() {
+          messages = event;
+        });
+      }
     });
   }
+
   void sendMessage() async {
-   if (_messageControler.text.isNotEmpty) {
-     print('Sending message: ${_messageControler.text}');
+    if (_messageControler.text.isNotEmpty) {
       await _chatService.sendMessage(_messageControler.text, otherUser.id);
       _messageControler.clear();
-   }
-   else {
-     print('Message is empty');
-   }
+    }
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
