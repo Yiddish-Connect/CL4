@@ -1,40 +1,20 @@
 import 'package:dash_chat_2/dash_chat_2.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'message.dart';
+import 'package:yiddishconnect/services/firebaseAuthentication.dart';
 
 class ChatService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-// Define the currentUser variable
-  final ChatUser currentUser = ChatUser(
-    id: '10',
-    firstName: 'Leo',
-    lastName: '',
-  );
-
-  //function to return the sender id from firebase and the last message
-  Stream<List<Map<String, dynamic>>> getChatRooms() {
-    return _firestore.collection('chat_rooms').snapshots().map((snapshot) {
-      return snapshot.docs.map((doc) {
-        var data = doc.data() as Map<String, dynamic>;
-        return {
-          'senderID': data['senderID'],
-          'lastMessage': data['lastMessage'],
-        };
-      }).toList();
-    });
-  }
-
-  //function to generate a chat room id
+  // Function to generate a chat room id
   String generateChatRoomId(String userId, String receiverId) {
     List<String> roomId = [userId, receiverId];
     roomId.sort();
     return roomId.join('_');
   }
 
-  //function to get messages from firebase
+  // Function to get messages from Firebase
   Stream<List<ChatMessage>> getMessages(String userId, String receiverId) {
-    // Build a chat room id for the two users
     String chatRoomId = generateChatRoomId(userId, receiverId);
 
     return _firestore
@@ -48,30 +28,27 @@ class ChatService {
         var data = doc.data() as Map<String, dynamic>;
         return ChatMessage(
           text: data['message'],
-          user: data['senderID'] == currentUser.id ? currentUser : ChatUser(id: data['senderID']),
+          user: data['senderID'] == userId ? ChatUser(id: userId) : ChatUser(id: data['senderID']),
           createdAt: (data['timestamp'] as Timestamp).toDate(),
         );
       }).toList();
     });
   }
 
-  //function to send a message to firebase
-  Future<void> sendMessage(String message, receiverId) async {
+  // Function to send a message to Firebase
+  Future<void> sendMessage(String message, String receiverId) async {
+    String userId = AuthService.getCurrentUserId();
     final timestamp = Timestamp.now();
-    //create a new message
     Message newMessage = Message(
-      senderID: currentUser.id,
+      senderID: userId,
       receiverID: receiverId,
       message: message,
       timestamp: timestamp,
     );
-    //make a chatroom id by softing the user id to make it unique
-    String chatRoomId = generateChatRoomId(currentUser.id, receiverId);
+    String chatRoomId = generateChatRoomId(userId, receiverId);
     try {
-      //check if the chat room exists
       DocumentSnapshot chatRoomSnapshot = await _firestore.collection('chat_rooms').doc(chatRoomId).get();
       if (!chatRoomSnapshot.exists) {
-        //create a new chat room
         await _firestore.collection('chat_rooms').doc(chatRoomId).set({});
       }
       await _firestore.collection('chat_rooms').doc(chatRoomId)
