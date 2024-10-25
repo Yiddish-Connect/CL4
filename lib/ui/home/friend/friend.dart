@@ -1,7 +1,8 @@
-// lib/ui/home/friend/friend.dart
 import 'package:flutter/material.dart';
 import 'friendTitle.dart';
 import '../chat/chat.dart';
+import 'package:yiddishconnect/services/firebaseAuthentication.dart';
+import 'package:go_router/go_router.dart';
 
 class FriendPage extends StatefulWidget {
   const FriendPage({super.key});
@@ -12,11 +13,9 @@ class FriendPage extends StatefulWidget {
 
 class _FriendPageState extends State<FriendPage> {
   final List<Map<String, String>> friends = [
-    {'id': '1', 'name': 'Leo', 'imageUrl': 'https://example.com/leo.jpg'},
-    {'id': '2', 'name': 'Bie', 'imageUrl': 'https://example.com/bie.jpg'},
-    {'id': '3', 'name': 'Bie1', 'imageUrl': 'https://example.com/bie.jpg'},
-    {'id': '4', 'name': 'Bie2', 'imageUrl': 'https://example.com/bie.jpg'},
-    {'id': '5', 'name': 'Bie3', 'imageUrl': 'https://example.com/bie.jpg'},
+    {'id': '10', 'name': 'Leo', 'imageUrl': 'https://example.com/leo.jpg'},
+    {'id': '12', 'name': 'Bie', 'imageUrl': 'https://example.com/bie.jpg'},
+    {'id': '11', 'name': 'Alan', 'imageUrl': 'https://example.com/bie.jpg'},
     // Add more friends here
   ];
 
@@ -45,13 +44,15 @@ class _FriendPageState extends State<FriendPage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => ChatPage(chatUser: friendName),
+        builder: (context) => ChatPage(userId: friendId, chatUser: friendName),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    bool isAnonymous = AuthService().isAnonymous();
+
     List filteredFriends = friends.where((friend) {
       return friend['name']!.toLowerCase().contains(_searchText.toLowerCase());
     }).toList();
@@ -66,7 +67,8 @@ class _FriendPageState extends State<FriendPage> {
         },
         child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Column(
+          child: !isAnonymous
+              ? Column(
             children: [
               TextField(
                 controller: _searchController,
@@ -101,6 +103,22 @@ class _FriendPageState extends State<FriendPage> {
                 ),
               ),
             ],
+          )
+              : Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('You need to sign in to view friends'),
+                SizedBox(height: 20),
+                ElevatedButton(
+                  // Sign in => SignInPage
+                  onPressed: () {
+                    context.go("/auth");
+                  },
+                  child: Text('Sign in'),
+                ),
+              ],
+            ),
           ),
         ),
       ),

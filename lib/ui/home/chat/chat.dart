@@ -1,10 +1,12 @@
 import 'package:dash_chat_2/dash_chat_2.dart';
 import 'package:flutter/material.dart';
+import 'chat_service.dart';
+import 'package:yiddishconnect/services/firebaseAuthentication.dart';
 
 class ChatPage extends StatefulWidget {
   final String chatUser;
-
-  const ChatPage({super.key, required this.chatUser});
+  final String userId;
+  const ChatPage({super.key, required this.userId, required this.chatUser});
 
   @override
   State<ChatPage> createState() => _ChatPageState();
@@ -13,39 +15,46 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   late ChatUser currentUser;
   late ChatUser otherUser;
-  late List<ChatMessage> messages;
+  final ChatService _chatService = ChatService();
+  final TextEditingController _messageControler = TextEditingController();
+  List<ChatMessage> messages = [];
 
- @override
+  @override
   void initState() {
     super.initState();
+
+    String currentUserId = AuthService.getCurrentUserId();
+
     currentUser = ChatUser(
-      id: '8',
-      firstName: 'Jichun',
-      lastName: 'Q',
-      
+      id: currentUserId,
+      firstName: 'Leo',
+      lastName: '',
     );
 
     otherUser = ChatUser(
-      id: '9',
-      firstName: 'Alan',
-      lastName: 'Turing',
+      id: widget.userId,
+      firstName: widget.chatUser,
+      lastName: '',
       customProperties: {'avatar': 'https://www.wrappixel.com/ampleadmin/assets/images/users/4.jpg'},
     );
+    _fetchMessages();
+  }
 
-    otherUser = ChatUser(
-      id: widget.chatUser,
-      firstName: 'Leo', // Replace with actual friend's first name
-      lastName: '', // Replace with actual friend's last name
-      customProperties: {'avatar': 'https://www.wrappixel.com/ampleadmin/assets/images/users/4.jpg'},
-    );
+  void _fetchMessages() {
+    _chatService.getMessages(currentUser.id, otherUser.id).listen((event) {
+      if (mounted) {
+        setState(() {
+          messages = event;
+        });
+      }
+    });
+  }
 
-    messages = <ChatMessage>[
-      ChatMessage(
-        text: 'Hey!',
-        user: otherUser, // The message is from the other user
-        createdAt: DateTime.now(),
-      ),
-    ];
+  void sendMessage() async {
+    if (_messageControler.text.isNotEmpty) {
+      await _chatService.sendMessage(_messageControler.text, otherUser.id);
+      _messageControler.clear();
+    }
   }
 
   @override
@@ -81,6 +90,8 @@ class _ChatPageState extends State<ChatPage> {
           onSend: (ChatMessage m) {
             setState(() {
               messages.insert(0, m);
+              _messageControler.text = m.text;
+              sendMessage();
             });
           },
           messages: messages,
