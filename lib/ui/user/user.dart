@@ -12,6 +12,27 @@ class _UserScreenState extends State<UserScreen> {
   final pinkColor = Color(0xFFF02E65); // Custom pink color
   final lightGrayColor = Color(0xFFEFEFEF); // Light gray for background
 
+  // Track the rotation state and text for each section
+  bool isBioExpanded = false;
+  bool isHobbiesExpanded = false;
+  bool isSkillsExpanded = false;
+
+  String bio = "This is a sample bio.";  // Bio content
+  String hobbies = "Reading, Traveling";  // Hobbies content
+  String skills = "Flutter, React, Node.js";  // Skills content
+
+  TextEditingController bioController = TextEditingController();
+  TextEditingController hobbiesController = TextEditingController();
+  TextEditingController skillsController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    bioController.text = bio;  // Initialize text field with bio content
+    hobbiesController.text = hobbies;  // Initialize text field with hobbies content
+    skillsController.text = skills;  // Initialize text field with skills content
+  }
+
   @override
   Widget build(BuildContext context) {
     final extraData = GoRouterState.of(context).extra;
@@ -106,6 +127,7 @@ class _UserScreenState extends State<UserScreen> {
     );
   }
 
+  // Build expandable sections for bio, hobbies, and skills
   Widget _buildEditableProfileInfoSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -115,47 +137,113 @@ class _UserScreenState extends State<UserScreen> {
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         SizedBox(height: 10),
-        _editableProfileInfo("Bio", "This is a sample bio."),
-        _editableProfileInfo("Hobbies", "Reading, Traveling"),
-        _editableProfileInfo("Skills", "Flutter, React, Node.js"),
+        // Use appropriate icons for each section
+        _buildExpandableSection("Bio", bio, bioController, isBioExpanded, () {
+          setState(() {
+            isBioExpanded = !isBioExpanded;
+          });
+        }, Icons.person),  // Bio icon
+
+        _buildExpandableSection("Hobbies", hobbies, hobbiesController, isHobbiesExpanded, () {
+          setState(() {
+            isHobbiesExpanded = !isHobbiesExpanded;
+          });
+        }, Icons.spa),  // Hobbies icon
+
+        _buildExpandableSection("Skills", skills, skillsController, isSkillsExpanded, () {
+          setState(() {
+            isSkillsExpanded = !isSkillsExpanded;
+          });
+        }, Icons.code),  // Skills icon
       ],
     );
   }
 
-  Widget _editableProfileInfo(String title, String value) {
+  // Build expandable section for bio, hobbies, skills with icons
+  Widget _buildExpandableSection(String title, String content, TextEditingController controller, bool isExpanded, VoidCallback onExpand, IconData icon) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
+          Row(
+            children: [
+              Icon(icon, color: pinkColor, size: 24),
+              SizedBox(width: 8),
+              Expanded(
+                child: Text(
                   title,
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black, // Ensure text is visible
+                    color: Colors.black,
                   ),
                 ),
-                SizedBox(height: 5),
-                Text(
-                  value,
-                  style: TextStyle(fontSize: 16, color: Colors.black),
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
+              ),
+              IconButton(
+                icon: AnimatedRotation(
+                  turns: isExpanded ? 0.25 : 0,  // Rotate to down when expanded
+                  duration: Duration(milliseconds: 200),
+                  child: Icon(Icons.chevron_right, color: pinkColor),
+                ),
+                onPressed: onExpand,
+              ),
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 32.0),
+            child: Text(
+              controller.text,
+              style: TextStyle(fontSize: 16, color: Colors.black),
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          if (isExpanded) ...[
+            SizedBox(height: 10),
+            TextField(
+              controller: controller,
+              decoration: InputDecoration(
+                labelText: 'Edit $title',
+                border: OutlineInputBorder(),
+              ),
+              maxLines: 3,
+            ),
+            SizedBox(height: 10),
+            Row(
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      if (title == "Bio") bio = controller.text;
+                      if (title == "Hobbies") hobbies = controller.text;
+                      if (title == "Skills") skills = controller.text;
+                      onExpand();
+                    });
+                  },
+                  child: Text("Save"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+                SizedBox(width: 10),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      controller.text = content;  // Reset to current content
+                      onExpand();  // Collapse without saving
+                    });
+                  },
+                  child: Text("Cancel"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    foregroundColor: Colors.white,
+                  ),
                 ),
               ],
             ),
-          ),
-          IconButton(
-            icon: Icon(Icons.edit, color: pinkColor),
-            onPressed: () {
-              // TODO: Implement info editing
-            },
-          ),
+          ]
         ],
       ),
     );
