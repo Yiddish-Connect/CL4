@@ -53,7 +53,11 @@ class AuthService {
   /*
    Below are the auth methods. Beware that most are async functions.
   */
-
+  // Static method to get the current user ID
+  static String getCurrentUserId() {
+    final User? user = FirebaseAuth.instance.currentUser;
+    return user?.uid ?? '';
+  }
 
   User? getUser() {
     return _auth.currentUser;
@@ -224,6 +228,11 @@ class AuthService {
           throw Exception("Unknown error.");
       }
     }
+  }
+
+  //check if user is signed in anonymously
+  bool isAnonymous() {
+    return _auth.currentUser!.isAnonymous;
   }
 
   // TODO: Convert the anonymous user to permanent user

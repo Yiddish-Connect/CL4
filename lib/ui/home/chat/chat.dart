@@ -1,10 +1,12 @@
 import 'package:dash_chat_2/dash_chat_2.dart';
 import 'package:flutter/material.dart';
+import 'chat_service.dart';
+import 'package:yiddishconnect/services/firebaseAuthentication.dart';
 
 class ChatPage extends StatefulWidget {
   final String chatUser;
-
-  const ChatPage({super.key, required this.chatUser});
+  final String userId;
+  const ChatPage({super.key, required this.userId, required this.chatUser});
 
   @override
   State<ChatPage> createState() => _ChatPageState();
@@ -13,51 +15,74 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   late ChatUser currentUser;
   late ChatUser otherUser;
-  late List<ChatMessage> messages;
+  final ChatService _chatService = ChatService();
+  final TextEditingController _messageControler = TextEditingController();
+  List<ChatMessage> messages = [];
 
- @override
+  @override
   void initState() {
     super.initState();
+
+    String currentUserId = AuthService.getCurrentUserId();
+
     currentUser = ChatUser(
-      id: '1',
-      firstName: 'Jichun',
-      lastName: 'Q',
-      
+      id: currentUserId,
+      firstName: 'Leo',
+      lastName: '',
     );
 
     otherUser = ChatUser(
-      id: '2',
-      firstName: 'Alan',
-      lastName: 'Turing',
+      id: widget.userId,
+      firstName: widget.chatUser,
+      lastName: '',
       customProperties: {'avatar': 'https://www.wrappixel.com/ampleadmin/assets/images/users/4.jpg'},
     );
+    _fetchMessages();
+  }
 
-    messages = <ChatMessage>[
-      ChatMessage(
-        text: 'Hey!',
-        user: otherUser, // The message is from the other user
-        createdAt: DateTime.now(),
-      ),
-    ];
+  void _fetchMessages() {
+    _chatService.getMessages(currentUser.id, otherUser.id).listen((event) {
+      if (mounted) {
+        setState(() {
+          messages = event;
+        });
+      }
+    });
+  }
+
+  void sendMessage() async {
+    if (_messageControler.text.isNotEmpty) {
+      await _chatService.sendMessage(_messageControler.text, otherUser.id);
+      _messageControler.clear();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: CircleAvatar(
-          backgroundImage: otherUser.customProperties?['avatar'] != null
-              ? NetworkImage(otherUser.customProperties!['avatar']!)
-              : null,
-          child: otherUser.customProperties?['avatar'] == null
-              ? Icon(Icons.person)
-              : null,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+          },
         ),
-
-        title: Text("${otherUser.firstName} ${otherUser.lastName}"),
+        title: Row(
+          children: [
+            CircleAvatar(
+              backgroundImage: otherUser.customProperties?['avatar'] != null
+                  ? NetworkImage(otherUser.customProperties!['avatar']!)
+                  : null,
+              child: otherUser.customProperties?['avatar'] == null
+                  ? Icon(Icons.person)
+                  : null,
+            ),
+            SizedBox(width: 10), // Add some space between the avatar and the name
+            Text("${otherUser.firstName} ${otherUser.lastName}"),
+          ],
+        ),
         backgroundColor: Colors.orangeAccent,
       ),
-
       body: Container(
         color: Colors.white, // Set the background color here
         child: DashChat(
@@ -65,10 +90,10 @@ class _ChatPageState extends State<ChatPage> {
           onSend: (ChatMessage m) {
             setState(() {
               messages.insert(0, m);
+              _messageControler.text = m.text;
+              sendMessage();
             });
           },
-
-
           messages: messages,
         ),
       ),

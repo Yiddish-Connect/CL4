@@ -127,6 +127,7 @@ class _UserScreenState extends State<UserScreen> {
     );
   }
 
+  // Build expandable sections for bio, hobbies, and skills
   Widget _buildEditableProfileInfoSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -158,7 +159,7 @@ class _UserScreenState extends State<UserScreen> {
     );
   }
 
-  // Build expandable sections for bio, hobbies, and skills with individual icons
+  // Build expandable section for bio, hobbies, skills with icons
   Widget _buildExpandableSection(String title, String content, TextEditingController controller, bool isExpanded, VoidCallback onExpand, IconData icon) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -167,7 +168,7 @@ class _UserScreenState extends State<UserScreen> {
         children: [
           Row(
             children: [
-              Icon(icon, color: pinkColor, size: 24),  // Use the passed icon
+              Icon(icon, color: pinkColor, size: 24),
               SizedBox(width: 8),
               Expanded(
                 child: Text(
@@ -189,11 +190,10 @@ class _UserScreenState extends State<UserScreen> {
               ),
             ],
           ),
-          // Always visible content
           Padding(
             padding: const EdgeInsets.only(left: 32.0),
             child: Text(
-              controller.text, // Always show the updated content
+              controller.text,
               style: TextStyle(fontSize: 16, color: Colors.black),
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
@@ -231,7 +231,7 @@ class _UserScreenState extends State<UserScreen> {
                 ElevatedButton(
                   onPressed: () {
                     setState(() {
-                      controller.text = content; // Reset the text field to current content
+                      controller.text = content;  // Reset to current content
                       onExpand();  // Collapse without saving
                     });
                   },
@@ -249,4 +249,3 @@ class _UserScreenState extends State<UserScreen> {
     );
   }
 }
-
