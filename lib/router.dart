@@ -52,8 +52,8 @@ final ydRouter = GoRouter(
             name: "userScreen",
             path: "user",
             builder: (context, state) => UserScreen(),
-          )
-        ]
+          ),
+        ],
     ),
   ],
 
@@ -70,7 +70,8 @@ final ydRouter = GoRouter(
 
     // if the user is logged in but still on the login page, send them to
     // the home page
-    if (loggedIn && loggingIn) return '/';
+    // If the user is logged in but still on the login page, send them to the home page
+    if (loggedIn && loggingIn && !AuthService().isAnonymous()) return '/'; //check if user not login as anonymous
 
     // no need to redirect at all
     return null;

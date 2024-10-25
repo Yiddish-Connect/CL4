@@ -148,76 +148,59 @@ class _HomeScreenState extends State<HomeScreen> {
   // Get the "actions" of the Scaffold.appbar from given index
   List<Widget> _createActions(BuildContext context, int index) {
     List<Widget> matchPageActions = [
-      Builder(
-        builder: (context) {
-          return Padding(
-            // color: Colors.red,
-            padding: const EdgeInsets.all(8),
-            child: IconButton(
-                onPressed: () => toast(context, "TODO: search"),
-                icon: Icon(Icons.search, size: 28.0,),
-                iconSize: 28.0
-            ),
-          );
-        }
+      Padding(
+        padding: const EdgeInsets.all(8),
+        child: IconButton(
+            onPressed: () => toast(context, "TODO: search"),
+            icon: Icon(Icons.search, size: 28.0),
+            iconSize: 28.0
+        ),
       ),
-      Builder(
-        builder: (context) {
-          return Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: IconButton(
-                onPressed: () => showFilter(context),
-                icon: Icon(Icons.filter_list, size: 28.0),
-                iconSize: 28.0
-            ),
-          );
-        }
+      Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: IconButton(
+            onPressed: () => showFilter(context),
+            icon: Icon(Icons.filter_list, size: 28.0),
+            iconSize: 28.0
+        ),
       ),
     ];
 
     List<Widget> otherPageActions = [
-      Builder(
-        builder: (context) {
-          return Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: IconButton(
-                onPressed: () => toast(context, "TODO: notifications"),
-                icon: Icon(Icons.notifications_outlined, size: 28.0),
-                iconSize: 28.0
-            ),
-          );
-        }
+      Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: IconButton(
+            onPressed: () => toast(context, "TODO: notifications"),
+            icon: Icon(Icons.notifications_outlined, size: 28.0),
+            iconSize: 28.0
+        ),
       ),
     ];
 
-    return switch (index) {
-      0 || 1 || 3 || 4 => otherPageActions,
-      2 => matchPageActions,
-      _ => [Container()]
-    };
+    return (index == 0 || index == 1 || index == 3 || index == 4)
+        ? otherPageActions
+        : matchPageActions;
   }
 
   // Get the "leading" of the Scaffold.appbar from given index
   Widget _createLeading(BuildContext context, int index) {
     // The leading will always be the user's profile picture
-    return Builder(
-        builder: (context) {
-          return Padding(
-              padding: const EdgeInsets.all(0.0),
-              child: InkWell(
-                onTap: () => context.push("/user",
-                  extra: {'profileImage': "https://picsum.photos/250"},), // Passing profile image as extra data
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: CircleAvatar(
-                      backgroundImage: NetworkImage("https://picsum.photos/250"),
-                      radius: 50
-                  ),
-                ),
-              ));
-        }
-    )
-    ;
+    return Padding(
+      padding: const EdgeInsets.all(0.0),
+      child: InkWell(
+        onTap: () => context.push(
+          "/user",
+          extra: {'profileImage': "https://picsum.photos/250"},
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: CircleAvatar(
+              backgroundImage: NetworkImage("https://picsum.photos/250"),
+              radius: 50
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -237,3 +220,4 @@ class HomePage extends StatelessWidget {
     );
   }
 }
+
