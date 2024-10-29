@@ -10,6 +10,8 @@ import '../../../services/firebaseAuthentication.dart';
 import '../../../widgets/ErrorHandlers.dart';
 import '../../../widgets/yd_multi_steps.dart';
 
+import 'package:yiddishconnect/services/firestoreService.dart';
+
 /// The Email sign-up screen using Firebase Authentication (Email)
 /// Route: '/auth/email/sign-up'
 class EmailSignUpScreen extends StatelessWidget {
@@ -231,6 +233,9 @@ class _Step2 extends StatelessWidget {
                               toast(context, "Verification Failed");
                             } else {
                               context.go("/");
+                              //create user document in Firestore
+                              FirestoreService()
+                                  .createUserDocument(_auth.getUser()!.uid);
                             }
                           },
                           child: Text("I have verified my Email")),

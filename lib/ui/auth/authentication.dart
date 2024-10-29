@@ -8,6 +8,7 @@ import '../../widgets/yd_animated_curve.dart';
 import '../../widgets/yd_label.dart';
 import 'package:yiddishconnect/widgets/ErrorHandlers.dart';
 import 'dev_signin_signup/dev_home.dart';
+import 'package:yiddishconnect/services/firestoreService.dart';
 
 /// This screen when user clicks on "Login" in the landing page
 /// The authentication main screen showing all 3 methods: phone, email, Google/Apple
@@ -264,6 +265,8 @@ class AuthScreen extends StatelessWidget {
             User? user = await _auth.signInWithGoogle();
             if (user != null) {
               toast(context, "Successfully signed in with Google");
+              //create a new user in the database
+              FirestoreService().createUserDocument(user.uid);
               context.go("/");
             } else {
               toast(context, "Something went wrong (null)");
