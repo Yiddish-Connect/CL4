@@ -11,6 +11,7 @@ import 'package:yiddishconnect/utils/helpers.dart';
 
 import 'chat/chat_homepage.dart';
 import 'friend/friend.dart';
+import 'package:yiddishconnect/ui/notification/notification.dart';
 
 /// The home-screen.
 /// It contains 5 tabs: home, events, match, friends, chat
@@ -20,6 +21,7 @@ class HomeScreen extends StatefulWidget {
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
+
 }
 
 class _HomeScreenState extends State<HomeScreen> {
@@ -170,7 +172,7 @@ class _HomeScreenState extends State<HomeScreen> {
       Padding(
         padding: const EdgeInsets.all(8.0),
         child: IconButton(
-            onPressed: () => toast(context, "TODO: notifications"),
+            onPressed: () => showNotification(context),
             icon: Icon(Icons.notifications_outlined, size: 28.0),
             iconSize: 28.0
         ),

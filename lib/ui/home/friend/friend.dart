@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'friendTitle.dart';
 import '../chat/chat.dart';
 import 'package:yiddishconnect/services/firebaseAuthentication.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:go_router/go_router.dart';
 
 class FriendPage extends StatefulWidget {
@@ -12,25 +13,20 @@ class FriendPage extends StatefulWidget {
 }
 
 class _FriendPageState extends State<FriendPage> {
-  final List<Map<String, String>> friends = [
-    {'id': '10', 'name': 'Leo', 'imageUrl': 'https://example.com/leo.jpg'},
-    {'id': '12', 'name': 'Bie', 'imageUrl': 'https://example.com/bie.jpg'},
-    {'id': '11', 'name': 'Alan', 'imageUrl': 'https://example.com/bie.jpg'},
-    // Add more friends here
-  ];
-
+  List<Map<String, String>> friends = [];
   TextEditingController _searchController = TextEditingController();
   FocusNode _searchFocusNode = FocusNode();
   String _searchText = "";
 
   @override
   void initState() {
+    super.initState();
     _searchController.addListener(() {
       setState(() {
         _searchText = _searchController.text;
       });
     });
-    super.initState();
+    _fetchFriends();
   }
 
   @override
@@ -38,6 +34,25 @@ class _FriendPageState extends State<FriendPage> {
     _searchController.dispose();
     _searchFocusNode.dispose();
     super.dispose();
+  }
+
+  Future<void> _fetchFriends() async {
+    final userId = AuthService.getCurrentUserId(); // Accessing the static method correctly
+    final userDoc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
+    final friendIds = List<String>.from(userDoc['friends'] ?? []);
+
+    final friendsData = await Future.wait(friendIds.map((id) async {
+      final friendDoc = await FirebaseFirestore.instance.collection('users').doc(id).get();
+      return {
+        'id': friendDoc.id,
+        'name': friendDoc['name'],
+        'imageUrl': friendDoc['imageUrl'],
+      };
+    }));
+
+    setState(() {
+      friends = friendsData.cast<Map<String, String>>(); // Casting to the correct type
+    });
   }
 
   void _navigateToChat(String friendId, String friendName) {
@@ -111,7 +126,6 @@ class _FriendPageState extends State<FriendPage> {
                 Text('You need to sign in to view friends'),
                 SizedBox(height: 20),
                 ElevatedButton(
-                  // Sign in => SignInPage
                   onPressed: () {
                     context.go("/auth");
                   },
