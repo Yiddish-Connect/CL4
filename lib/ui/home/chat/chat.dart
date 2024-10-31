@@ -27,7 +27,7 @@ class _ChatPageState extends State<ChatPage> {
 
     currentUser = ChatUser(
       id: currentUserId,
-      firstName: 'Leo',
+      firstName: '',
       lastName: '',
     );
 
