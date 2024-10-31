@@ -11,7 +11,7 @@ import 'package:yiddishconnect/utils/helpers.dart';
 
 import 'chat/chat_homepage.dart';
 import 'friend/friend.dart';
-import 'package:yiddishconnect/ui/notification/notification.dart';
+import 'package:yiddishconnect/ui/notification/notificationPage.dart';
 
 /// The home-screen.
 /// It contains 5 tabs: home, events, match, friends, chat
@@ -172,9 +172,14 @@ class _HomeScreenState extends State<HomeScreen> {
       Padding(
         padding: const EdgeInsets.all(8.0),
         child: IconButton(
-            onPressed: () => showNotification(context),
-            icon: Icon(Icons.notifications_outlined, size: 28.0),
-            iconSize: 28.0
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => NotificationPage()),
+            );
+          },
+          icon: Icon(Icons.notifications_outlined, size: 28.0),
+          iconSize: 28.0,
         ),
       ),
     ];
