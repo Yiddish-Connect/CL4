@@ -147,14 +147,17 @@ class _Step1State extends State<_Step1> {
                               } else {
                                 toast(context, "Something went wrong (null)");
                               }
-                            } catch (e) {
-                              emailError(context, "invalid-email");
-                            }
-                          } else {
-                            emailError(context, "invalid-email");
-                          }
+                            } on FirebaseAuthException catch (e) {//modify this to include the case email-already-in-use
+                                if (e.code == 'email-already-in-use') {
+                                  emailError(context, "email-already-in-use");
+                                } else {
+                                  toast(context, "Something went wrong (null)");
+                                }
+                              }
+                        } else {
+                            emailError(context, "invalid-email");}
                         } catch (e) {
-                          toast(context, e.toString());
+                        toast(context, e.toString());
                         }
                       },
                       child: Text('Register'),
@@ -164,7 +167,8 @@ class _Step1State extends State<_Step1> {
               ),
             ],
           ),
-        ));
+        ),
+    );
   }
 }
 
