@@ -12,7 +12,7 @@ class ChatHomepage extends StatefulWidget {
 }
 
 class _ChatHomepageState extends State<ChatHomepage> {
-  final String currentUserId = AuthService.getCurrentUserId(); // Replace with the actual current user ID
+  final String currentUserId = AuthService.getCurrentUserId();
 
   @override
   Widget build(BuildContext context) {
@@ -57,46 +57,59 @@ class _ChatHomepageState extends State<ChatHomepage> {
                 var chatRoom = chatRooms[index];
                 var receiverId = chatRoom.id.split('_').firstWhere((id) => id != currentUserId);
 
-                return StreamBuilder<QuerySnapshot>(
-                  stream: chatRoom.reference.collection('chats').orderBy('timestamp', descending: true).limit(1).snapshots(),
-                  builder: (context, messageSnapshot) {
-                    if (!messageSnapshot.hasData || messageSnapshot.data!.docs.isEmpty) {
+                return FutureBuilder<DocumentSnapshot>(
+                  future: FirebaseFirestore.instance.collection('users').doc(receiverId).get(),
+                  builder: (context, userSnapshot) {
+                    if (!userSnapshot.hasData) {
                       return ListTile(
-                        title: Text(receiverId),
+                        title: Text('Loading...'),
                         subtitle: Text('No messages yet'),
                       );
                     }
 
-                    var lastMessage = messageSnapshot.data!.docs.first.data() as Map<String, dynamic>;
-                    return AnimationConfiguration.staggeredList(
-                      position: index,
-                      duration: const Duration(milliseconds: 500),
-                      child: SlideAnimation(
-                        verticalOffset: 50.0,
-                        child: FadeInAnimation(
-                          child: GestureDetector(
-                            onTap: () async {
-                              await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => ChatPage(
-                                    chatUser: receiverId,
-                                    userId: receiverId,
+                    var receiverName = userSnapshot.data!['displayName'] ?? 'Unknown';
+
+                    return StreamBuilder<QuerySnapshot>(
+                      stream: chatRoom.reference.collection('chats').orderBy('timestamp', descending: true).limit(1).snapshots(),
+                      builder: (context, messageSnapshot) {
+                        if (!messageSnapshot.hasData || messageSnapshot.data!.docs.isEmpty) {
+                          return ListTile(
+                            title: Text(receiverName),
+                            subtitle: Text('No messages yet'),
+                          );
+                        }
+
+                        var lastMessage = messageSnapshot.data!.docs.first.data() as Map<String, dynamic>;
+                        return AnimationConfiguration.staggeredList(
+                          position: index,
+                          duration: const Duration(milliseconds: 500),
+                          child: SlideAnimation(
+                            verticalOffset: 50.0,
+                            child: FadeInAnimation(
+                              child: GestureDetector(
+                                onTap: () async {
+                                  await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => ChatPage(
+                                        chatUser: receiverName,
+                                        userId: receiverId,
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child: Card(
+                                  margin: EdgeInsets.all(8.0),
+                                  child: ListTile(
+                                    title: Text(receiverName),
+                                    subtitle: Text(lastMessage['message']),
                                   ),
                                 ),
-                              );
-                              setState(() {}); // Refresh the UI when returning from ChatPage
-                            },
-                            child: Card(
-                              margin: EdgeInsets.all(8.0),
-                              child: ListTile(
-                                title: Text(receiverId),
-                                subtitle: Text(lastMessage['message']),
                               ),
                             ),
                           ),
-                        ),
-                      ),
+                        );
+                      },
                     );
                   },
                 );
