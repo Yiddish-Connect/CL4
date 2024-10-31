@@ -43,15 +43,16 @@ class _FriendPageState extends State<FriendPage> {
 
     final friendsData = await Future.wait(friendIds.map((id) async {
       final friendDoc = await FirebaseFirestore.instance.collection('users').doc(id).get();
+      final friendData = friendDoc.data() as Map<String, dynamic>;
       return {
-        'id': friendDoc.id,
-        'name': friendDoc['name'],
-        'imageUrl': friendDoc['imageUrl'],
+        'id': id,
+        'name': friendData['displayName'] ?? 'Unknown', // Handle missing 'displayName' field
+        'imageUrl': friendData['imageUrl'] ?? '', // Handle missing 'imageUrl' field
       };
     }));
 
     setState(() {
-      friends = friendsData.cast<Map<String, String>>(); // Casting to the correct type
+      friends = friendsData.map((friend) => friend.cast<String, String>()).toList();
     });
   }
 

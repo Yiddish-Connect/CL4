@@ -9,7 +9,7 @@ class FirestoreService {
   /// Creates a user document in Firestore if it does not already exist.
   ///
   /// \param userId The unique identifier of the user.
-  Future<void> createUserDocument(String userId) async {
+  Future<void> createUserDocument(String userId, String displayName) async {
     // Reference to the user document in the 'users' collection
     DocumentReference userDocRef = _firestore.collection('users').doc(userId);
 
@@ -18,6 +18,7 @@ class FirestoreService {
     if (!docSnapshot.exists && !AuthService().isAnonymous()) {
       // Create the document if it does not exist
       await userDocRef.set({
+        'displayName': displayName, // Add display name as a field
         'userId': userId, // Add user ID as a field
         'friends': [], // Initialize an empty friends array
       });

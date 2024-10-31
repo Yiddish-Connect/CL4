@@ -266,7 +266,7 @@ class AuthScreen extends StatelessWidget {
             if (user != null) {
               toast(context, "Successfully signed in with Google");
               //create a new user in the database
-              FirestoreService().createUserDocument(user.uid);
+              FirestoreService().createUserDocument(user.uid, user.displayName ?? user.uid);
               context.go("/");
             } else {
               toast(context, "Something went wrong (null)");

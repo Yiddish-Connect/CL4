@@ -11,8 +11,8 @@ class FriendService {
   /// \param receiverId The unique identifier of the receiver.
   Future<void> sendFriendRequest(String senderId, String receiverId) async {
     await _firestore.collection('friendRequests').add({
-      'senderId': senderId, // ID of the user sending the request
-      'receiverId': receiverId, // ID of the user receiving the request
+      'senderID': senderId, // ID of the user sending the request
+      'receiverID': receiverId, // ID of the user receiving the request
       'timestamp': FieldValue.serverTimestamp(), // Timestamp of the request
     });
   }
@@ -35,8 +35,23 @@ class FriendService {
     // Remove the friend request
     var requestSnapshot = await _firestore
         .collection('friendRequests')
-        .where('senderId', isEqualTo: senderId) // Filter by sender ID
-        .where('receiverId', isEqualTo: receiverId) // Filter by receiver ID
+        .where('senderID', isEqualTo: senderId) // Filter by sender ID
+        .where('receiverID', isEqualTo: receiverId) // Filter by receiver ID
+        .get();
+
+    // Delete each friend request document
+    for (var doc in requestSnapshot.docs) {
+      await doc.reference.delete();
+    }
+  }
+
+  /// Rejects a friend request and removes it from the database.
+  Future<void> rejectFriendRequest(String senderId, String receiverId) async {
+    // Remove the friend request
+    var requestSnapshot = await _firestore
+        .collection('friendRequests')
+        .where('senderID', isEqualTo: senderId) // Filter by sender ID
+        .where('receiverID', isEqualTo: receiverId) // Filter by receiver ID
         .get();
 
     // Delete each friend request document

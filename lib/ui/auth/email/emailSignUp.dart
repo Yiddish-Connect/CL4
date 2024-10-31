@@ -235,7 +235,7 @@ class _Step2 extends StatelessWidget {
                               context.go("/");
                               //create user document in Firestore
                               FirestoreService()
-                                  .createUserDocument(_auth.getUser()!.uid);
+                                  .createUserDocument(_auth.getUser()!.uid, _auth.getUser()!.displayName ?? _auth.getUser()!.uid);
                             }
                           },
                           child: Text("I have verified my Email")),
