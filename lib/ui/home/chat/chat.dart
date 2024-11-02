@@ -2,6 +2,7 @@ import 'package:dash_chat_2/dash_chat_2.dart';
 import 'package:flutter/material.dart';
 import 'chat_service.dart';
 import 'package:yiddishconnect/services/firebaseAuthentication.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ChatPage extends StatefulWidget {
   final String chatUser;
@@ -57,13 +58,22 @@ class _ChatPageState extends State<ChatPage> {
     }
   }
 
+  Future<void> _updateLastReadTimestamp() async {
+    String chatRoomId = _chatService.generateChatRoomId(currentUser.id, otherUser.id);
+    DocumentReference chatRoomRef = FirebaseFirestore.instance.collection('chat_rooms').doc(chatRoomId);
+    await chatRoomRef.update({
+      'lastReadTimestamps.${currentUser.id}': FieldValue.serverTimestamp(),
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
-          onPressed: () {
+          onPressed: () async {
+            await _updateLastReadTimestamp();
             Navigator.pop(context);
           },
         ),

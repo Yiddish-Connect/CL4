@@ -49,7 +49,12 @@ class ChatService {
     try {
       DocumentSnapshot chatRoomSnapshot = await _firestore.collection('chat_rooms').doc(chatRoomId).get();
       if (!chatRoomSnapshot.exists) {
-        await _firestore.collection('chat_rooms').doc(chatRoomId).set({});
+        await _firestore.collection('chat_rooms').doc(chatRoomId).set({
+          'lastReadTimestamps': {
+            userId: FieldValue.serverTimestamp(),
+            receiverId: FieldValue.serverTimestamp(),
+          }
+        });
       }
       await _firestore.collection('chat_rooms').doc(chatRoomId)
           .collection('chats').add(newMessage.toMap());
