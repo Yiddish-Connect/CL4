@@ -80,6 +80,11 @@ class _ChatHomepageState extends State<ChatHomepage> {
                         }
 
                         var lastMessage = messageSnapshot.data!.docs.first.data() as Map<String, dynamic>;
+                        var lastMessageTimestamp = lastMessage['timestamp'] as Timestamp;
+
+                        bool isNewMessage = lastMessage['senderID'] != currentUserId &&
+                            lastMessageTimestamp.compareTo(chatRoom['lastReadTimestamps'][currentUserId]) > 0;
+
                         return AnimationConfiguration.staggeredList(
                           position: index,
                           duration: const Duration(milliseconds: 500),
@@ -101,8 +106,18 @@ class _ChatHomepageState extends State<ChatHomepage> {
                                 child: Card(
                                   margin: EdgeInsets.all(8.0),
                                   child: ListTile(
-                                    title: Text(receiverName),
-                                    subtitle: Text(lastMessage['message']),
+                                    title: Text(
+                                      receiverName,
+                                      style: TextStyle(
+                                        fontWeight: isNewMessage ? FontWeight.bold : FontWeight.normal,
+                                      ),
+                                    ),
+                                    subtitle: Text(
+                                      lastMessage['message'],
+                                      style: TextStyle(
+                                        fontWeight: isNewMessage ? FontWeight.bold : FontWeight.normal,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
