@@ -83,7 +83,9 @@ class _ChatHomepageState extends State<ChatHomepage> {
                         var lastMessageTimestamp = lastMessage['timestamp'] as Timestamp;
 
                         bool isNewMessage = lastMessage['senderID'] != currentUserId &&
-                            lastMessageTimestamp.compareTo(chatRoom['lastReadTimestamps'][currentUserId]) > 0;
+                            (chatRoom['lastReadTimestamps'] == null ||
+                                chatRoom['lastReadTimestamps'][currentUserId] == null ||
+                                lastMessageTimestamp.compareTo(chatRoom['lastReadTimestamps'][currentUserId]) > 0);
 
                         return AnimationConfiguration.staggeredList(
                           position: index,
