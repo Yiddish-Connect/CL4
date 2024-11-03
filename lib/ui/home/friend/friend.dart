@@ -4,6 +4,7 @@ import '../chat/chat.dart';
 import 'package:yiddishconnect/services/firebaseAuthentication.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:go_router/go_router.dart';
+import 'friendFunction.dart';
 
 class FriendPage extends StatefulWidget {
   const FriendPage({super.key});
@@ -13,7 +14,6 @@ class FriendPage extends StatefulWidget {
 }
 
 class _FriendPageState extends State<FriendPage> {
-  List<Map<String, String>> friends = [];
   TextEditingController _searchController = TextEditingController();
   FocusNode _searchFocusNode = FocusNode();
   String _searchText = "";
@@ -26,7 +26,6 @@ class _FriendPageState extends State<FriendPage> {
         _searchText = _searchController.text;
       });
     });
-    _fetchFriends();
   }
 
   @override
@@ -36,42 +35,10 @@ class _FriendPageState extends State<FriendPage> {
     super.dispose();
   }
 
-  Future<void> _fetchFriends() async {
-    final userId = AuthService.getCurrentUserId(); // Accessing the static method correctly
-    final userDoc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
-    final friendIds = List<String>.from(userDoc['friends'] ?? []);
-
-    final friendsData = await Future.wait(friendIds.map((id) async {
-      final friendDoc = await FirebaseFirestore.instance.collection('users').doc(id).get();
-      final friendData = friendDoc.data() as Map<String, dynamic>;
-      return {
-        'id': id,
-        'name': friendData['displayName'] ?? 'Unknown', // Handle missing 'displayName' field
-        'imageUrl': friendData['imageUrl'] ?? '', // Handle missing 'imageUrl' field
-      };
-    }));
-
-    setState(() {
-      friends = friendsData.map((friend) => friend.cast<String, String>()).toList();
-    });
-  }
-
-  void _navigateToChat(String friendId, String friendName) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ChatPage(userId: friendId, chatUser: friendName),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     bool isAnonymous = AuthService().isAnonymous();
-
-    List filteredFriends = friends.where((friend) {
-      return friend['name']!.toLowerCase().contains(_searchText.toLowerCase());
-    }).toList();
+    final userId = AuthService.getCurrentUserId();
 
     return Scaffold(
       appBar: AppBar(
@@ -96,22 +63,70 @@ class _FriendPageState extends State<FriendPage> {
               ),
               SizedBox(height: 10),
               Expanded(
-                child: GridView.builder(
-                  gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent: 200,
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10,
-                    childAspectRatio: 1,
-                  ),
-                  itemCount: filteredFriends.length,
-                  itemBuilder: (context, index) {
-                    return FriendTile(
-                      name: filteredFriends[index]['name']!,
-                      imageUrl: filteredFriends[index]['imageUrl']!,
-                      onTap: () {
-                        _navigateToChat(
-                          filteredFriends[index]['id']!,
-                          filteredFriends[index]['name']!,
+                child: StreamBuilder<DocumentSnapshot>(
+                  stream: FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(userId)
+                      .snapshots(),
+                  builder: (context, userSnapshot) {
+                    if (!userSnapshot.hasData) {
+                      return Center(child: CircularProgressIndicator());
+                    }
+
+                    final friendIds = List<String>.from(userSnapshot.data!['friends'] ?? []);
+
+                    if (friendIds.isEmpty) {
+                      return Center(
+                        child: Text('You have no friends.'),
+                      );
+                    }
+
+                    return StreamBuilder<QuerySnapshot>(
+                      stream: FirebaseFirestore.instance
+                          .collection('users')
+                          .where(FieldPath.documentId, whereIn: friendIds)
+                          .snapshots(),
+                      builder: (context, friendsSnapshot) {
+                        if (!friendsSnapshot.hasData) {
+                          return Center(child: CircularProgressIndicator());
+                        }
+
+                        final friends = friendsSnapshot.data!.docs.map((doc) {
+                          final friendData = doc.data() as Map<String, dynamic>;
+                          return {
+                            'id': doc.id,
+                            'name': friendData['displayName'] ?? 'Unknown',
+                            'imageUrl': friendData['imageUrl'] ?? '',
+                          };
+                        }).toList();
+
+                        final filteredFriends = friends.where((friend) {
+                          return friend['name']!.toLowerCase().contains(_searchText.toLowerCase());
+                        }).toList();
+
+                        return GridView.builder(
+                          gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                            maxCrossAxisExtent: 200,
+                            crossAxisSpacing: 10,
+                            mainAxisSpacing: 10,
+                            childAspectRatio: 1,
+                          ),
+                          itemCount: filteredFriends.length,
+                          itemBuilder: (context, index) {
+                            return FriendTile(
+                              name: filteredFriends[index]['name']!,
+                              imageUrl: filteredFriends[index]['imageUrl']!,
+                              onTap: () {
+                                _navigateToChat(
+                                  filteredFriends[index]['id']!,
+                                  filteredFriends[index]['name']!,
+                                );
+                              },
+                              onDelete: () async {
+                                await FriendService().deleteFriend(userId, filteredFriends[index]['id']!);
+                              },
+                            );
+                          },
                         );
                       },
                     );
@@ -136,6 +151,15 @@ class _FriendPageState extends State<FriendPage> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  void _navigateToChat(String friendId, String friendName) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ChatPage(userId: friendId, chatUser: friendName),
       ),
     );
   }
