@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:yiddishconnect/ui/home/friend/friendFunction.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:yiddishconnect/services/firebaseAuthentication.dart';
+import 'package:intl/intl.dart';
 
 class NotificationPage extends StatelessWidget {
   @override
@@ -21,11 +23,15 @@ class NotificationList extends StatefulWidget {
 
 class _NotificationListState extends State<NotificationList> {
   List<FriendRequest> notifications = [];
+  final String currentUserId = AuthService.getCurrentUserId();
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance.collection('friendRequests').snapshots(),
+      stream: FirebaseFirestore.instance
+          .collection('friendRequests')
+          .where('receiverID', isEqualTo: currentUserId)
+          .snapshots(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return Center(child: CircularProgressIndicator());
@@ -35,7 +41,7 @@ class _NotificationListState extends State<NotificationList> {
           return FriendRequest(
             senderId: doc['senderID'],
             receiverId: doc['receiverID'],
-            time: doc['timestamp'].toDate().toString(),
+            time: _formatTimestamp(doc['timestamp'].toDate()),
           );
         }).toList();
 
@@ -43,60 +49,80 @@ class _NotificationListState extends State<NotificationList> {
           itemCount: notifications.length,
           itemBuilder: (context, index) {
             final item = notifications[index];
-            return ListTile(
-              title: Text(item.senderId),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(item.time),
-                  Row(
+            return FutureBuilder<DocumentSnapshot>(
+              future: FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(item.senderId)
+                  .get(),
+              builder: (context, userSnapshot) {
+                if (!userSnapshot.hasData) {
+                  return ListTile(
+                    title: Text('Loading...'),
+                    subtitle: Text(item.time),
+                  );
+                }
+
+                final senderName = userSnapshot.data!['displayName'];
+                return ListTile(
+                  title: Text(senderName),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        margin: EdgeInsets.only(right: 8.0),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.primary,
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                        child: TextButton(
-                          onPressed: () async {
-                            await _acceptFriendRequest(index);
-                            setState(() {
-                              notifications.removeAt(index);
-                            });
-                          },
-                          child: Text(
-                            'Accept',
-                            style: TextStyle(color: Colors.white),
+                      Text(item.time),
+                      Row(
+                        children: [
+                          Container(
+                            margin: EdgeInsets.only(right: 8.0),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.primary,
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                            child: TextButton(
+                              onPressed: () async {
+                                await _acceptFriendRequest(index);
+                                setState(() {
+                                  notifications.removeAt(index);
+                                });
+                              },
+                              child: Text(
+                                'Accept',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.secondary,
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                        child: TextButton(
-                          onPressed: () async {
-                            await _declineFriendRequest(index);
-                            setState(() {
-                              notifications.removeAt(index);
-                            });
-                          },
-                          child: Text(
-                            'Decline',
-                            style: TextStyle(color: Colors.white),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.secondary,
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                            child: TextButton(
+                              onPressed: () async {
+                                await _declineFriendRequest(index);
+                                setState(() {
+                                  notifications.removeAt(index);
+                                });
+                              },
+                              child: Text(
+                                'Decline',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
                           ),
-                        ),
+                        ],
                       ),
                     ],
                   ),
-                ],
-              ),
+                );
+              },
             );
           },
         );
       },
     );
+  }
+
+  String _formatTimestamp(DateTime timestamp) {
+    return DateFormat('dd/MM/yyyy HH:mm').format(timestamp);
   }
 
   Future<void> _acceptFriendRequest(int index) async {

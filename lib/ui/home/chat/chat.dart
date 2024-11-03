@@ -61,9 +61,15 @@ class _ChatPageState extends State<ChatPage> {
   Future<void> _updateLastReadTimestamp() async {
     String chatRoomId = _chatService.generateChatRoomId(currentUser.id, otherUser.id);
     DocumentReference chatRoomRef = FirebaseFirestore.instance.collection('chat_rooms').doc(chatRoomId);
-    await chatRoomRef.update({
-      'lastReadTimestamps.${currentUser.id}': FieldValue.serverTimestamp(),
-    });
+
+    // Check if the document exists
+    DocumentSnapshot docSnapshot = await chatRoomRef.get();
+    if (docSnapshot.exists) {
+      // Update the last read timestamp if the document exists
+      await chatRoomRef.update({
+        'lastReadTimestamps.${currentUser.id}': FieldValue.serverTimestamp(),
+      });
+    }
   }
 
   @override

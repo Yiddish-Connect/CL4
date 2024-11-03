@@ -63,4 +63,10 @@ class ChatService {
       print('Failed to send message: $e');
     }
   }
+
+  // delete chat room that is used when user deletes a friend
+  Future<void> deleteChatRoom(String userId, String friendId) async {
+    String chatRoomId = generateChatRoomId(userId, friendId);
+    await _firestore.collection('chat_rooms').doc(chatRoomId).delete();
+  }
 }

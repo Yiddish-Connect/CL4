@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:yiddishconnect/ui/home/chat/chat_service.dart';
 
 /// A service class to handle friend-related operations in Firestore.
 class FriendService {
@@ -10,7 +11,10 @@ class FriendService {
   /// \param senderId The unique identifier of the sender.
   /// \param receiverId The unique identifier of the receiver.
   Future<void> sendFriendRequest(String senderId, String receiverId) async {
-    await _firestore.collection('friendRequests').add({
+    await _firestore
+        .collection('friendRequests')
+        .doc(senderId)
+        .set({
       'senderID': senderId, // ID of the user sending the request
       'receiverID': receiverId, // ID of the user receiving the request
       'timestamp': FieldValue.serverTimestamp(), // Timestamp of the request
@@ -24,39 +28,35 @@ class FriendService {
   Future<void> acceptFriendRequest(String senderId, String receiverId) async {
     // Add sender to receiver's friend list
     await _firestore.collection('users').doc(receiverId).update({
-      'friends': FieldValue.arrayUnion([senderId]), // Add sender ID to receiver's friends list
+      'friends': FieldValue.arrayUnion([senderId]),
+      // Add sender ID to receiver's friends list
     });
 
     // Add receiver to sender's friend list
     await _firestore.collection('users').doc(senderId).update({
-      'friends': FieldValue.arrayUnion([receiverId]), // Add receiver ID to sender's friends list
+      'friends': FieldValue.arrayUnion([receiverId]),
+      // Add receiver ID to sender's friends list
     });
 
-    // Remove the friend request
-    var requestSnapshot = await _firestore
-        .collection('friendRequests')
-        .where('senderID', isEqualTo: senderId) // Filter by sender ID
-        .where('receiverID', isEqualTo: receiverId) // Filter by receiver ID
-        .get();
-
-    // Delete each friend request document
-    for (var doc in requestSnapshot.docs) {
-      await doc.reference.delete();
-    }
+    // Remove the specific friend request document
+    await _firestore.collection('friendRequests').doc(senderId).delete();
   }
 
   /// Rejects a friend request and removes it from the database.
   Future<void> rejectFriendRequest(String senderId, String receiverId) async {
-    // Remove the friend request
-    var requestSnapshot = await _firestore
-        .collection('friendRequests')
-        .where('senderID', isEqualTo: senderId) // Filter by sender ID
-        .where('receiverID', isEqualTo: receiverId) // Filter by receiver ID
-        .get();
+    // Remove the specific friend request document
+    await _firestore.collection('friendRequests').doc(senderId).delete();
+  }
 
-    // Delete each friend request document
-    for (var doc in requestSnapshot.docs) {
-      await doc.reference.delete();
-    }
+  /// Deletes a friend from the user's friend list.
+  Future<void> deleteFriend(String userId, String friendId) async {
+    await _firestore.collection('users').doc(userId).update({
+      'friends': FieldValue.arrayRemove([friendId]),
+    });
+    await _firestore.collection('users').doc(friendId).update({
+      'friends': FieldValue.arrayRemove([userId]),
+    });
+    // delete the chat room
+    ChatService().deleteChatRoom(userId, friendId);
   }
 }
