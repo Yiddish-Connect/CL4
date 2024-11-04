@@ -64,9 +64,17 @@ class ChatService {
     }
   }
 
-  // delete chat room that is used when user deletes a friend
   Future<void> deleteChatRoom(String userId, String friendId) async {
     String chatRoomId = generateChatRoomId(userId, friendId);
+    CollectionReference chatsRef = _firestore.collection('chat_rooms').doc(chatRoomId).collection('chats');
+
+    // Delete all documents in the 'chats' sub-collection
+    QuerySnapshot chatsSnapshot = await chatsRef.get();
+    for (DocumentSnapshot doc in chatsSnapshot.docs) {
+      await doc.reference.delete();
+    }
+
+    // Delete the chat room document
     await _firestore.collection('chat_rooms').doc(chatRoomId).delete();
   }
 }
