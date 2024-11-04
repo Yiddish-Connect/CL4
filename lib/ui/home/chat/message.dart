@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+/// A class to represent a message in a chat room.
+/// This class is used to store messages in Firestore.
 class Message {
   final String senderID;
   //final String senderEmail;

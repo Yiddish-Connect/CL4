@@ -6,6 +6,9 @@ import 'chat.dart';
 import 'package:yiddishconnect/services/firebaseAuthentication.dart';
 import 'package:go_router/go_router.dart';
 
+
+/// A page to display the user's chats.
+/// This page displays a list of the user's chats.
 class ChatHomepage extends StatefulWidget {
   @override
   _ChatHomepageState createState() => _ChatHomepageState();

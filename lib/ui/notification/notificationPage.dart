@@ -4,6 +4,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:yiddishconnect/services/firebaseAuthentication.dart';
 import 'package:intl/intl.dart';
 
+/// A page to display the user's notifications.
+/// This page displays a list of the user's notifications.
+/// The user can accept or decline friend requests.
 class NotificationPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {

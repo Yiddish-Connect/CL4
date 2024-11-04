@@ -4,6 +4,7 @@ import 'chat_service.dart';
 import 'package:yiddishconnect/services/firebaseAuthentication.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+/// A page to display a chat between two users.
 class ChatPage extends StatefulWidget {
   final String chatUser;
   final String userId;

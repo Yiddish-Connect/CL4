@@ -3,6 +3,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'message.dart';
 import 'package:yiddishconnect/services/firebaseAuthentication.dart';
 
+/// This class is used to store chat rooms in Firestore.
+/// A chat room is a collection of messages between two users.
+/// Each chat room has a unique identifier.
+/// The chat room document contains a sub-collection of messages.
+/// The chat room document also contains the last read timestamps for each user.
+/// The last read timestamps are used to determine which messages are unread.
 class ChatService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+/// A tile to display a friend's name and image.
 class FriendTile extends StatelessWidget {
   final String name;
   final String imageUrl;
