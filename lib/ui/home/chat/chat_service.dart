@@ -58,7 +58,6 @@ class ChatService {
         await _firestore.collection('chat_rooms').doc(chatRoomId).set({
           'lastReadTimestamps': {
             userId: FieldValue.serverTimestamp(),
-            receiverId: FieldValue.serverTimestamp(),
           }
         });
       }
