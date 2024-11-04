@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:yiddishconnect/ui/home/chat/chat_service.dart';
 
 /// A service class to handle friend-related operations in Firestore.
+/// This class is responsible for sending, accepting, and rejecting friend requests,
 class FriendService {
   // Instance of Firestore
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -43,12 +44,18 @@ class FriendService {
   }
 
   /// Rejects a friend request and removes it from the database.
+  ///
+  /// \param senderId The unique identifier of the sender.
+  /// \param receiverId The unique identifier of the receiver.
   Future<void> rejectFriendRequest(String senderId, String receiverId) async {
     // Remove the specific friend request document
     await _firestore.collection('friendRequests').doc(senderId).delete();
   }
 
   /// Deletes a friend from the user's friend list.
+  ///
+  /// \param userId The unique identifier of the user.
+  /// \param friendId The unique identifier of the friend to be deleted.
   Future<void> deleteFriend(String userId, String friendId) async {
     await _firestore.collection('users').doc(userId).update({
       'friends': FieldValue.arrayRemove([friendId]),

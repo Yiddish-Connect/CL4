@@ -6,6 +6,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:go_router/go_router.dart';
 import 'friendFunction.dart';
 
+/// A page to display the user's friends.
+/// This page displays a list of the user's friends and allows the user to search for friends.
+/// The user can also delete friends from their friends list.
+/// If the user is not signed in, they will be prompted to sign in.
+/// If the user has no friends, a message will be displayed.
 class FriendPage extends StatefulWidget {
   const FriendPage({super.key});
 
@@ -155,6 +160,10 @@ class _FriendPageState extends State<FriendPage> {
     );
   }
 
+  /// Navigates to the chat page with the given friend ID and name.
+  ///
+  /// \param friendId The unique identifier of the friend.
+  /// \param friendName The name of the friend.
   void _navigateToChat(String friendId, String friendName) {
     Navigator.push(
       context,
