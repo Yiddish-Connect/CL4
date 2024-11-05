@@ -8,6 +8,7 @@ import 'package:yiddishconnect/utils/helpers.dart';
 import '../../../services/firebaseAuthentication.dart';
 import '../../../widgets/ErrorHandlers.dart';
 
+import 'package:yiddishconnect/services/firestoreService.dart';
 /// The Email sign-in screen using Firebase Authentication (Email)
 /// Route: '/auth/email/sign-in'
 class EmailSignInScreen extends StatefulWidget {
@@ -126,7 +127,14 @@ class _EmailSignInScreenState extends State<EmailSignInScreen> {
                                     if (user != null) {
                                       toast(context,
                                           "Successfully signed in with Email");
+                                      //create user document in Firestore
+                                      //since I already had an account with the email so I have to call the function
+                                      //to create the user document in Firestore, in the future, we can remove this and only
+                                      //create the user document when the user signs up
+                                      FirestoreService()
+                                          .createUserDocument(_auth.getUser()!.uid, _auth.getUser()!.displayName ?? _auth.getUser()!.uid);
                                       context.go("/");
+
                                     } else {
                                       toast(context,
                                           "Something went wrong (null)");

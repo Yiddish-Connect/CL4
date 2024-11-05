@@ -3,6 +3,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'message.dart';
 import 'package:yiddishconnect/services/firebaseAuthentication.dart';
 
+/// This class is used to store chat rooms in Firestore.
+/// A chat room is a collection of messages between two users.
+/// Each chat room has a unique identifier.
+/// The chat room document contains a sub-collection of messages.
+/// The chat room document also contains the last read timestamps for each user.
+/// The last read timestamps are used to determine which messages are unread.
 class ChatService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -49,7 +55,11 @@ class ChatService {
     try {
       DocumentSnapshot chatRoomSnapshot = await _firestore.collection('chat_rooms').doc(chatRoomId).get();
       if (!chatRoomSnapshot.exists) {
-        await _firestore.collection('chat_rooms').doc(chatRoomId).set({});
+        await _firestore.collection('chat_rooms').doc(chatRoomId).set({
+          'lastReadTimestamps': {
+            userId: FieldValue.serverTimestamp(),
+          }
+        });
       }
       await _firestore.collection('chat_rooms').doc(chatRoomId)
           .collection('chats').add(newMessage.toMap());
@@ -57,5 +67,19 @@ class ChatService {
     } catch (e) {
       print('Failed to send message: $e');
     }
+  }
+
+  Future<void> deleteChatRoom(String userId, String friendId) async {
+    String chatRoomId = generateChatRoomId(userId, friendId);
+    CollectionReference chatsRef = _firestore.collection('chat_rooms').doc(chatRoomId).collection('chats');
+
+    // Delete all documents in the 'chats' sub-collection
+    QuerySnapshot chatsSnapshot = await chatsRef.get();
+    for (DocumentSnapshot doc in chatsSnapshot.docs) {
+      await doc.reference.delete();
+    }
+
+    // Delete the chat room document
+    await _firestore.collection('chat_rooms').doc(chatRoomId).delete();
   }
 }
