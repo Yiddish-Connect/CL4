@@ -8,10 +8,11 @@ import 'package:yiddishconnect/ui/home/match/bottomFilter.dart';
 import 'package:yiddishconnect/ui/home/match/matchPage.dart';
 import 'package:yiddishconnect/ui/home/match/matchPageProvider.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
-
+import 'package:firebase_auth/firebase_auth.dart';
 import 'chat/chat_homepage.dart';
 import 'friend/friend.dart';
 import 'package:yiddishconnect/ui/notification/notificationPage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// The home-screen.
 /// It contains 5 tabs: home, events, match, friends, chat
@@ -171,15 +172,39 @@ class _HomeScreenState extends State<HomeScreen> {
     List<Widget> otherPageActions = [
       Padding(
         padding: const EdgeInsets.all(8.0),
-        child: IconButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => NotificationPage()),
-            );
+        child: StreamBuilder<QuerySnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection('friendRequests')
+              .where('receiverID', isEqualTo: FirebaseAuth.instance.currentUser?.uid)
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
+              // New notifications available
+              return IconButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => NotificationPage()),
+                  );
+                },
+                icon: Icon(Icons.notifications_active_outlined, size: 28.0),
+                color: Colors.red,
+                iconSize: 28.0,
+              );
+            } else {
+              // No new notifications
+              return IconButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => NotificationPage()),
+                  );
+                },
+                icon: Icon(Icons.notifications_outlined, size: 28.0),
+                iconSize: 28.0,
+              );
+            }
           },
-          icon: Icon(Icons.notifications_outlined, size: 28.0),
-          iconSize: 28.0,
         ),
       ),
     ];
