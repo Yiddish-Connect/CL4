@@ -15,6 +15,8 @@ void emailError(BuildContext context, String message) {
         return "Sorry! The email you have entered is not an email";
       case "invalid-credential":
         return "Sorry! Your email or password is inccorect!";
+      case "email-already-in-use"://add case for email-already-in-use
+        return "Sorry! There exists an account with this email!";
       default:
         return "Sorry! Your email or password is inccorect!";
     }
