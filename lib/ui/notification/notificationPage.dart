@@ -3,6 +3,7 @@ import 'package:yiddishconnect/ui/home/friend/friendFunction.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:yiddishconnect/services/firebaseAuthentication.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 /// A page to display the user's notifications.
 /// This page displays a list of the user's notifications.
@@ -27,100 +28,110 @@ class NotificationList extends StatefulWidget {
 class _NotificationListState extends State<NotificationList> {
   List<FriendRequest> notifications = [];
   final String currentUserId = AuthService.getCurrentUserId();
+  late Stream<QuerySnapshot> _notificationStream;
+
+  @override
+  void initState() {
+    super.initState();
+    _notificationStream = FirebaseFirestore.instance
+        .collection('friendRequests')
+        .where('receiverID', isEqualTo: currentUserId)
+        .snapshots();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('friendRequests')
-          .where('receiverID', isEqualTo: currentUserId)
-          .snapshots(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return Center(child: CircularProgressIndicator());
-        }
+    return StreamProvider<QuerySnapshot?>.value(
+      value: _notificationStream,
+      initialData: null,
+      child: Consumer<QuerySnapshot?>(
+        builder: (context, snapshot, child) {
+          if (snapshot == null || snapshot.docs.isEmpty) {
+            return Center(child: CircularProgressIndicator());
+          }
 
-        notifications = snapshot.data!.docs.map((doc) {
-          return FriendRequest(
-            senderId: doc['senderID'],
-            receiverId: doc['receiverID'],
-            time: _formatTimestamp(doc['timestamp'].toDate()),
-          );
-        }).toList();
-
-        return ListView.builder(
-          itemCount: notifications.length,
-          itemBuilder: (context, index) {
-            final item = notifications[index];
-            return FutureBuilder<DocumentSnapshot>(
-              future: FirebaseFirestore.instance
-                  .collection('users')
-                  .doc(item.senderId)
-                  .get(),
-              builder: (context, userSnapshot) {
-                if (!userSnapshot.hasData) {
-                  return ListTile(
-                    title: Text('Loading...'),
-                    subtitle: Text(item.time),
-                  );
-                }
-
-                final senderName = userSnapshot.data!['displayName'];
-                return ListTile(
-                  title: Text(senderName),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(item.time),
-                      Row(
-                        children: [
-                          Container(
-                            margin: EdgeInsets.only(right: 8.0),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.primary,
-                              borderRadius: BorderRadius.circular(8.0),
-                            ),
-                            child: TextButton(
-                              onPressed: () async {
-                                await _acceptFriendRequest(index);
-                                setState(() {
-                                  notifications.removeAt(index);
-                                });
-                              },
-                              child: Text(
-                                'Accept',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ),
-                          ),
-                          Container(
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.secondary,
-                              borderRadius: BorderRadius.circular(8.0),
-                            ),
-                            child: TextButton(
-                              onPressed: () async {
-                                await _declineFriendRequest(index);
-                                setState(() {
-                                  notifications.removeAt(index);
-                                });
-                              },
-                              child: Text(
-                                'Decline',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                );
-              },
+          notifications = snapshot.docs.map((doc) {
+            return FriendRequest(
+              senderId: doc['senderID'],
+              receiverId: doc['receiverID'],
+              time: _formatTimestamp(doc['timestamp'].toDate()),
             );
-          },
-        );
-      },
+          }).toList();
+
+          return ListView.builder(
+            itemCount: notifications.length,
+            itemBuilder: (context, index) {
+              final item = notifications[index];
+              return FutureBuilder<DocumentSnapshot>(
+                future: FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(item.senderId)
+                    .get(),
+                builder: (context, userSnapshot) {
+                  if (!userSnapshot.hasData) {
+                    return ListTile(
+                      title: Text('Loading...'),
+                      subtitle: Text(item.time),
+                    );
+                  }
+
+                  final senderName = userSnapshot.data!['displayName'];
+                  return ListTile(
+                    title: Text(senderName),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(item.time),
+                        Row(
+                          children: [
+                            Container(
+                              margin: EdgeInsets.only(right: 8.0),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.primary,
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                              child: TextButton(
+                                onPressed: () async {
+                                  await _acceptFriendRequest(index);
+                                  setState(() {
+                                    notifications.removeAt(index);
+                                  });
+                                },
+                                child: Text(
+                                  'Accept',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ),
+                            ),
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.secondary,
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                              child: TextButton(
+                                onPressed: () async {
+                                  await _declineFriendRequest(index);
+                                  setState(() {
+                                    notifications.removeAt(index);
+                                  });
+                                },
+                                child: Text(
+                                  'Decline',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              );
+            },
+          );
+        },
+      ),
     );
   }
 
