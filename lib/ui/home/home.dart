@@ -49,7 +49,6 @@ class _HomeScreenState extends State<HomeScreen> {
         .collection('friendRequests')
         .where('receiverID', isEqualTo: FirebaseAuth.instance.currentUser?.uid)
         .snapshots();
-    print("Stream initialized");
     super.initState();
   }
 
