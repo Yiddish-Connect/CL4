@@ -39,10 +39,17 @@ class _HomeScreenState extends State<HomeScreen> {
   HashSet<int> _loaded = HashSet();
   bool _soundPlayed = false;
   int _previousNotificationCount = 0;
+  late Stream<QuerySnapshot?> _notificationStream;
+
   @override
   void initState() {
     _loaded.add(0);
     _pages[0] = HomePage();
+    _notificationStream = FirebaseFirestore.instance
+        .collection('friendRequests')
+        .where('receiverID', isEqualTo: FirebaseAuth.instance.currentUser?.uid)
+        .snapshots();
+    print("Stream initialized");
     super.initState();
   }
 
@@ -50,103 +57,100 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     print("Home-Screen build()...");
     return MultiProvider(
-        providers: [
-          ChangeNotifierProvider(create: (context) => MatchPageProvider()),
-          StreamProvider<QuerySnapshot?>(
-            create: (context) => FirebaseFirestore.instance
-                .collection('friendRequests')
-                .where('receiverID', isEqualTo: FirebaseAuth.instance.currentUser?.uid)
-                .snapshots(),
-            initialData: null,
-          ),
-        ],
-        child: Builder(
-            builder: (context) {
-              return Scaffold(
-                  appBar: AppBar(
-                    actions: _createActions(context, _index),
-                    leading: _createLeading(context, _index),
-                    toolbarHeight: 70,
-                    leadingWidth: 90,
-                  ),
-                  body: IndexedStack(
-                    index: _index,
-                    children: _pages,
-                  ),
-                  bottomNavigationBar: FractionallySizedBox(
-                    widthFactor: 0.9,
-                    child: Container(
-                      margin: EdgeInsets.only(top: 10, bottom: 20, left: 10, right: 10),
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(30)),
-                          boxShadow: [
-                            BoxShadow(color: Colors.black38, spreadRadius: 0, blurRadius: 10),
-                          ],
-                          color: Theme.of(context).colorScheme.surface
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.all(Radius.circular(30)),
-                        child: SizedBox(
-                          height: 60,
-                          child: BottomNavigationBar(
-                            items: [
-                              BottomNavigationBarItem(
-                                icon: Icon(Icons.home_outlined),
-                                label: "Home",
-                                backgroundColor: Theme.of(context).colorScheme.surface,
-                              ),
-                              BottomNavigationBarItem(
-                                icon: Icon(Icons.explore_outlined),
-                                label: "Explore",
-                                backgroundColor: Theme.of(context).colorScheme.surface,
-                              ),
-                              BottomNavigationBarItem(
-                                icon: Icon(Icons.add),
-                                label: "Match",
-                                backgroundColor: Theme.of(context).colorScheme.surface,
-                              ),
-                              BottomNavigationBarItem(
-                                icon: Icon(Icons.people_outline),
-                                label: "Friends",
-                                backgroundColor: Theme.of(context).colorScheme.surface,
-                              ),
-                              BottomNavigationBarItem(
-                                icon: Icon(Icons.chat_bubble_outline),
-                                label: "Chat",
-                                backgroundColor: Theme.of(context).colorScheme.surface,
-                              ),
-                            ],
-                            currentIndex: _index,
-                            onTap: (int selectedIndex) {
-                              setState(() {
-                                if (_loaded.contains(selectedIndex)) {
-                                  _index = selectedIndex;
-                                } else {
-                                  _index = selectedIndex;
-                                  _loaded.add(_index);
-                                  _pages[_index] = switch (_index) {
-                                    0 => HomePage(),
-                                    1 => EventPage(),
-                                    2 => MatchPage(),
-                                    3 => FriendPage(),
-                                    4 => ChatHomepage(),
-                                    _ => Placeholder(),
-                                  };
-                                }
-                              });
-                            },
-                            selectedItemColor: Theme.of(context).colorScheme.primary,
-                            unselectedItemColor: Theme.of(context).colorScheme.secondary,
-                            elevation: 0,
-                            type: BottomNavigationBarType.shifting, // default
-                          ),
+      providers: [
+        ChangeNotifierProvider(create: (context) => MatchPageProvider()),
+        StreamProvider<QuerySnapshot?>.value(
+          value: _notificationStream,
+          initialData: null,
+        ),
+      ],
+      child: Builder(
+        builder: (context) {
+          return Scaffold(
+            appBar: AppBar(
+              actions: _createActions(context, _index),
+              leading: _createLeading(context, _index),
+              toolbarHeight: 70,
+              leadingWidth: 90,
+            ),
+            body: IndexedStack(
+              index: _index,
+              children: _pages,
+            ),
+            bottomNavigationBar: FractionallySizedBox(
+              widthFactor: 0.9,
+              child: Container(
+                margin: EdgeInsets.only(top: 10, bottom: 20, left: 10, right: 10),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.all(Radius.circular(30)),
+                  boxShadow: [
+                    BoxShadow(color: Colors.black38, spreadRadius: 0, blurRadius: 10),
+                  ],
+                  color: Theme.of(context).colorScheme.surface,
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.all(Radius.circular(30)),
+                  child: SizedBox(
+                    height: 60,
+                    child: BottomNavigationBar(
+                      items: [
+                        BottomNavigationBarItem(
+                          icon: Icon(Icons.home_outlined),
+                          label: "Home",
+                          backgroundColor: Theme.of(context).colorScheme.surface,
                         ),
-                      ),
+                        BottomNavigationBarItem(
+                          icon: Icon(Icons.explore_outlined),
+                          label: "Explore",
+                          backgroundColor: Theme.of(context).colorScheme.surface,
+                        ),
+                        BottomNavigationBarItem(
+                          icon: Icon(Icons.add),
+                          label: "Match",
+                          backgroundColor: Theme.of(context).colorScheme.surface,
+                        ),
+                        BottomNavigationBarItem(
+                          icon: Icon(Icons.people_outline),
+                          label: "Friends",
+                          backgroundColor: Theme.of(context).colorScheme.surface,
+                        ),
+                        BottomNavigationBarItem(
+                          icon: Icon(Icons.chat_bubble_outline),
+                          label: "Chat",
+                          backgroundColor: Theme.of(context).colorScheme.surface,
+                        ),
+                      ],
+                      currentIndex: _index,
+                      onTap: (int selectedIndex) {
+                        setState(() {
+                          if (_loaded.contains(selectedIndex)) {
+                            _index = selectedIndex;
+                          } else {
+                            _index = selectedIndex;
+                            _loaded.add(_index);
+                            _pages[_index] = switch (_index) {
+                              0 => HomePage(),
+                              1 => EventPage(),
+                              2 => MatchPage(),
+                              3 => FriendPage(),
+                              4 => ChatHomepage(),
+                              _ => Placeholder(),
+                            };
+                          }
+                        });
+                      },
+                      selectedItemColor: Theme.of(context).colorScheme.primary,
+                      unselectedItemColor: Theme.of(context).colorScheme.secondary,
+                      elevation: 0,
+                      type: BottomNavigationBarType.shifting, // default
                     ),
-                  )
-              );
-            }
-        )
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -155,17 +159,17 @@ class _HomeScreenState extends State<HomeScreen> {
       Padding(
         padding: const EdgeInsets.all(8),
         child: IconButton(
-            onPressed: () => toast(context, "TODO: search"),
-            icon: Icon(Icons.search, size: 28.0),
-            iconSize: 28.0
+          onPressed: () => toast(context, "TODO: search"),
+          icon: Icon(Icons.search, size: 28.0),
+          iconSize: 28.0,
         ),
       ),
       Padding(
         padding: const EdgeInsets.all(8.0),
         child: IconButton(
-            onPressed: () => showFilter(context),
-            icon: Icon(Icons.filter_list, size: 28.0),
-            iconSize: 28.0
+          onPressed: () => showFilter(context),
+          icon: Icon(Icons.filter_list, size: 28.0),
+          iconSize: 28.0,
         ),
       ),
     ];
@@ -239,8 +243,8 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: CircleAvatar(
-              backgroundImage: NetworkImage("https://picsum.photos/250"),
-              radius: 50
+            backgroundImage: NetworkImage("https://picsum.photos/250"),
+            radius: 50,
           ),
         ),
       ),
