@@ -6,7 +6,6 @@ import 'chat.dart';
 import 'package:yiddishconnect/services/firebaseAuthentication.dart';
 import 'package:go_router/go_router.dart';
 
-
 /// A page to display the user's chats.
 /// This page displays a list of the user's chats.
 class ChatHomepage extends StatefulWidget {
@@ -16,6 +15,13 @@ class ChatHomepage extends StatefulWidget {
 
 class _ChatHomepageState extends State<ChatHomepage> {
   final String currentUserId = AuthService.getCurrentUserId();
+  late Stream<QuerySnapshot> _chatRoomsStream;
+
+  @override
+  void initState() {
+    super.initState();
+    _chatRoomsStream = FirebaseFirestore.instance.collection('chat_rooms').snapshots();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +48,7 @@ class _ChatHomepageState extends State<ChatHomepage> {
         ),
       )
           : StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance.collection('chat_rooms').snapshots(),
+        stream: _chatRoomsStream,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
