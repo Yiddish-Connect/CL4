@@ -12,9 +12,10 @@ class FriendService {
   /// \param senderId The unique identifier of the sender.
   /// \param receiverId The unique identifier of the receiver.
   Future<void> sendFriendRequest(String senderId, String receiverId) async {
+    String requestId = '$senderId\_$receiverId';
     await _firestore
         .collection('friendRequests')
-        .doc(senderId)
+        .doc(requestId)
         .set({
       'senderID': senderId, // ID of the user sending the request
       'receiverID': receiverId, // ID of the user receiving the request
@@ -38,9 +39,9 @@ class FriendService {
       'friends': FieldValue.arrayUnion([receiverId]),
       // Add receiver ID to sender's friends list
     });
-
+    String requestId = '$senderId\_$receiverId';
     // Remove the specific friend request document
-    await _firestore.collection('friendRequests').doc(senderId).delete();
+    await _firestore.collection('friendRequests').doc(requestId).delete();
   }
 
   /// Rejects a friend request and removes it from the database.
@@ -48,8 +49,9 @@ class FriendService {
   /// \param senderId The unique identifier of the sender.
   /// \param receiverId The unique identifier of the receiver.
   Future<void> rejectFriendRequest(String senderId, String receiverId) async {
+    String requestId = '$senderId\_$receiverId';
     // Remove the specific friend request document
-    await _firestore.collection('friendRequests').doc(senderId).delete();
+    await _firestore.collection('friendRequests').doc(requestId).delete();
   }
 
   /// Deletes a friend from the user's friend list.
