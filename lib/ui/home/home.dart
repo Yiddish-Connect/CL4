@@ -8,12 +8,11 @@ import 'package:yiddishconnect/ui/home/match/bottomFilter.dart';
 import 'package:yiddishconnect/ui/home/match/matchPage.dart';
 import 'package:yiddishconnect/ui/home/match/matchPageProvider.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'chat/chat_homepage.dart';
 import 'friend/friend.dart';
 import 'package:yiddishconnect/ui/notification/notificationPage.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:yiddishconnect/ui/notification/notificationProvider.dart';
 
 /// The home-screen.
 /// It contains 5 tabs: home, events, match, friends, chat
@@ -39,16 +38,11 @@ class _HomeScreenState extends State<HomeScreen> {
   HashSet<int> _loaded = HashSet();
   bool _soundPlayed = false;
   int _previousNotificationCount = 0;
-  late Stream<QuerySnapshot?> _notificationStream;
 
   @override
   void initState() {
     _loaded.add(0);
     _pages[0] = HomePage();
-    _notificationStream = FirebaseFirestore.instance
-        .collection('friendRequests')
-        .where('receiverID', isEqualTo: FirebaseAuth.instance.currentUser?.uid)
-        .snapshots();
     super.initState();
   }
 
@@ -58,10 +52,6 @@ class _HomeScreenState extends State<HomeScreen> {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => MatchPageProvider()),
-        StreamProvider<QuerySnapshot?>.value(
-          value: _notificationStream,
-          initialData: null,
-        ),
       ],
       child: Builder(
         builder: (context) {
@@ -182,45 +172,35 @@ class _HomeScreenState extends State<HomeScreen> {
     List<Widget> otherPageActions = [
       Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Consumer<QuerySnapshot?>(
-          builder: (context, snapshot, child) {
-            if (snapshot != null && snapshot.docs.isNotEmpty) {
-              int currentNotificationCount = snapshot.docs.length;
-              if (currentNotificationCount > _previousNotificationCount) {
-                _soundPlayed = false;
-              }
-              _previousNotificationCount = currentNotificationCount;
-
-              if (!_soundPlayed) {
-                _playNotificationSound();
-                _soundPlayed = true;
-              }
-
-              return IconButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => NotificationPage()),
-                  );
-                },
-                icon: Icon(Icons.notifications_active_outlined, size: 28.0),
-                color: Colors.red,
-                iconSize: 28.0,
-              );
-            } else {
+        child: Consumer<NotificationProvider>(
+          builder: (context, notificationProvider, child) {
+            int currentNotificationCount = notificationProvider.notifications.length;
+            if (currentNotificationCount > _previousNotificationCount) {
               _soundPlayed = false;
-              _previousNotificationCount = 0; // Reset the count when there are no notifications
-              return IconButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => NotificationPage()),
-                  );
-                },
-                icon: Icon(Icons.notifications_outlined, size: 28.0),
-                iconSize: 28.0,
-              );
             }
+            _previousNotificationCount = currentNotificationCount;
+
+            if (!_soundPlayed) {
+              _playNotificationSound();
+              _soundPlayed = true;
+            }
+
+            return IconButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => NotificationPage()),
+                );
+              },
+              icon: Icon(
+                currentNotificationCount > 0
+                    ? Icons.notifications_active_outlined
+                    : Icons.notifications_outlined,
+                size: 28.0,
+              ),
+              color: currentNotificationCount > 0 ? Colors.red : null,
+              iconSize: 28.0,
+            );
           },
         ),
       ),
@@ -267,4 +247,3 @@ class HomePage extends StatelessWidget {
     );
   }
 }
-

@@ -4,7 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:yiddishconnect/router.dart';
 import 'firebase_options.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:yiddishconnect/ui/notification/notificationProvider.dart';
+import 'package:yiddishconnect/ui/home/match/matchPageProvider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,8 +20,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => MyAppState(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => MyAppState()),
+        ChangeNotifierProvider(create: (context) => NotificationProvider()),
+        ChangeNotifierProvider(create: (context) => MatchPageProvider()),
+      ],
       child: MaterialApp.router(
         title: 'Yiddish Connect',
         debugShowCheckedModeBanner: false,
