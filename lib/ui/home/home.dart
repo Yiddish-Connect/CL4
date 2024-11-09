@@ -180,7 +180,7 @@ class _HomeScreenState extends State<HomeScreen> {
             }
             _previousNotificationCount = currentNotificationCount;
 
-            if (!_soundPlayed) {
+            if (currentNotificationCount > 0 && !_soundPlayed) {
               _playNotificationSound();
               _soundPlayed = true;
             }
