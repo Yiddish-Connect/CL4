@@ -1,21 +1,85 @@
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:yiddishconnect/models/notification_controller.dart';
 import 'package:yiddishconnect/router.dart';
 import 'firebase_options.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  FirebaseMessaging.instance.getToken().then((onValue) => {
+    print("token $onValue")
+  }); // The then statement prints the FCM token to the console
+
+  await AwesomeNotifications().initialize(
+      null,
+      [
+        NotificationChannel(
+          channelGroupKey: "Basic",
+          channelKey: "Basic Channel",
+          channelName: "Basic Notifications",
+          channelDescription: "Basic Notifications",
+        )
+      ],
+      channelGroups: [
+        NotificationChannelGroup(
+          channelGroupKey: "Basic",
+          channelGroupName: "Basic Notifications",
+        )
+      ]);
+
+  bool isAllowed = await AwesomeNotifications().isNotificationAllowed();
+  if (!isAllowed) {
+    AwesomeNotifications().requestPermissionToSendNotifications();
+  }
+
   runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+
+  @override
+  void initState() {
+    super.initState();
+    listenToMessages();
+    AwesomeNotifications().setListeners(
+      onActionReceivedMethod: NotificationController.onActionReceivedMethod,
+      onNotificationCreatedMethod: NotificationController.onNotificationCreatedMethod,
+      onNotificationDisplayedMethod: NotificationController.onNotificationDisplayedMethod,
+      onDismissActionReceivedMethod: NotificationController.onDismissActionMethod,
+    );
+  }
+
+  void listenToMessages() {
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      print('Received a message: ${message.notification?.title}');
+      AwesomeNotifications().createNotification(
+        content: NotificationContent(
+          id: 1,
+          channelKey: "Basic Channel",
+          title: message.notification?.title,
+          body: "HI SHatoria",
+        ),
+      );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +90,7 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(seedColor: Color(0xfff3dbab)), // Same to https://yiddishlandcalifornia.org/
+          colorScheme: ColorScheme.fromSeed(seedColor: Color(0xfff3dbab)),
           textTheme: TextTheme(
             displayLarge: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w900, fontSize: 57.0),
             displayMedium: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w800, fontSize: 45.0),
