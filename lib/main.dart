@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:yiddishconnect/geo.dart';
 import 'package:yiddishconnect/models/notification_controller.dart';
 import 'package:yiddishconnect/router.dart';
 import 'package:yiddishconnect/utils/web_notification.dart';
@@ -48,6 +49,7 @@ void main() async {
     AwesomeNotifications().requestPermissionToSendNotifications();
   }
 
+  geoLocation();
   runApp(MyApp());
 }
 
