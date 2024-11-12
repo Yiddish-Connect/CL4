@@ -2,6 +2,7 @@ import 'package:email_validator/email_validator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:form_validator/form_validator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
 
@@ -21,6 +22,14 @@ class _EmailSignInScreenState extends State<EmailSignInScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final formKey = GlobalKey<FormState>();
+  static const passwordReqirements =
+      "Password must include:\n1 special character & 1 capital letter";
+  final passwordValidator = ValidationBuilder()
+      .minLength(10)
+      .maxLength(50)
+      .regExp(new RegExp("[\p{Lu}\p{Lt}]"), passwordReqirements)
+      .regExp(new RegExp("[^A-Za-z0-9]"), passwordReqirements)
+      .build();
 
   @override
   void dispose() {
@@ -73,7 +82,7 @@ class _EmailSignInScreenState extends State<EmailSignInScreen> {
                       padding: EdgeInsets.all(5),
                       child: SizedBox(
                         height: 80,
-                        child: TextField(
+                        child: TextFormField(
                           controller: _passwordController,
                           decoration: InputDecoration(labelText: 'Password'),
                           obscureText: true,
