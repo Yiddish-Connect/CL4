@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
 
 var testEnpoint = 'https://jsonplaceholder.typicode.com/albums/1';
 var testApiEndpoint =
@@ -74,7 +75,8 @@ Future<Position> _determinePosition() async {
 
   // When we reach here, permissions are granted and we can
   // continue accessing the position of the device.
-  return await Geolocator.getCurrentPosition();
+  return await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.best);
 }
 
 //https://www.geeksforgeeks.org/http-get-response-in-flutter/
@@ -87,8 +89,12 @@ Future<void> geoLocation() async {
 
   //var result = album;
 
+  //this is how you get select values result.toJson()["longitude"]
   var result = await _determinePosition();
 
+  List<Placemark> placemarks = await placemarkFromCoordinates(
+      result.toJson()["latitude"], result.toJson()["longitude"]);
   //convert data
-  print('HI ${result.toJson()["longitude"]}');
+  //placemarks.map((f) => f.street)}
+  print('HI ${placemarks.map((f) => f.street)}}');
 }
