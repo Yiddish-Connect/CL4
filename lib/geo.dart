@@ -90,5 +90,5 @@ Future<void> geoLocation() async {
   var result = await _determinePosition();
 
   //convert data
-  print('HI ${result}');
+  print('HI ${result.toJson()["longitude"]}');
 }
