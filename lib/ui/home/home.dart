@@ -13,7 +13,8 @@ import 'friend/friend.dart';
 import 'package:yiddishconnect/ui/notification/notificationPage.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:yiddishconnect/ui/notification/notificationProvider.dart';
-
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:yiddishconnect/services/firestoreService.dart';
 /// The home-screen.
 /// It contains 5 tabs: home, events, match, friends, chat
 /// Route: '/home'
@@ -38,12 +39,19 @@ class _HomeScreenState extends State<HomeScreen> {
   HashSet<int> _loaded = HashSet();
   bool _soundPlayed = false;
   int _previousNotificationCount = 0;
-
+  FirestoreService _firestoreService = FirestoreService();
   @override
   void initState() {
     _loaded.add(0);
     _pages[0] = HomePage();
     super.initState();
+    //get token
+    FirebaseMessaging.instance.getToken().then((String? onValue) {
+      if (onValue != null) {
+        print("token $onValue");
+        _firestoreService.addToken(onValue);
+      }
+    });
   }
 
   @override

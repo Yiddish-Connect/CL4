@@ -16,9 +16,9 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  FirebaseMessaging.instance.getToken().then((onValue) => {
-    print("token $onValue")
-  }); // The then statement prints the FCM token to the console
+  //FirebaseMessaging.instance.getToken().then((onValue) => {
+    //print("token $onValue")
+  //}); // The then statement prints the FCM token to the console
 
   await AwesomeNotifications().initialize(
       null,
