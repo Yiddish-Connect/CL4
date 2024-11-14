@@ -21,17 +21,22 @@
 </head>
 <body>
 <script>
-  window.addEventListener('load', function(ev) {
-    _flutter.loader.loadEntrypoint({
-      serviceWorker: {
-        serviceWorkerVersion: serviceWorkerVersion,
-      },
-      onEntrypointLoaded: function(engineInitializer) {
-        engineInitializer.initializeEngine().then(function(appRunner) {
-          appRunner.runApp();
-        });
-      }
-    });
+  window.addEventListener('load', async function(ev) {
+    try {
+      const registration = await navigator.serviceWorker.register('firebase-messaging-sw.js');
+      console.log('ServiceWorker registered with scope:', registration.scope);
+
+      const engineInitializer = await _flutter.loader.loadEntrypoint({
+        serviceWorker: {
+          serviceWorkerVersion: serviceWorkerVersion,
+        }
+      });
+
+      const appRunner = await engineInitializer.initializeEngine();
+      appRunner.runApp();
+    } catch (error) {
+      console.error('ServiceWorker registration or Flutter initialization failed:', error);
+    }
   });
 </script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
