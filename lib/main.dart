@@ -76,7 +76,7 @@ class _MyAppState extends State<MyApp> {
           id: 1,
           channelKey: "Basic Channel",
           title: message.notification?.title,
-          body: "HI SHatoria",
+          body: message.notification?.body,
         ),
       );
     });
