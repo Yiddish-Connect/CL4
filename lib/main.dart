@@ -9,7 +9,7 @@ import 'package:yiddishconnect/router.dart';
 import 'firebase_options.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:yiddishconnect/ui/notification/notificationProvider.dart';
-
+import 'package:flutter/foundation.dart' show kIsWeb;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
@@ -38,7 +38,7 @@ void main() async {
       ]);
 
   bool isAllowed = await AwesomeNotifications().isNotificationAllowed();
-  if (!isAllowed) {
+  if (!isAllowed && !kIsWeb) {
     AwesomeNotifications().requestPermissionToSendNotifications();
   }
 
