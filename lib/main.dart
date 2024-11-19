@@ -37,11 +37,12 @@ void main() async {
         )
       ]);
 
-  bool isAllowed = await AwesomeNotifications().isNotificationAllowed();
-  if (!isAllowed && !kIsWeb) {
-    AwesomeNotifications().requestPermissionToSendNotifications();
+  if(!kIsWeb) {
+    bool isAllowed = await AwesomeNotifications().isNotificationAllowed();
+    if (!isAllowed) {
+      AwesomeNotifications().requestPermissionToSendNotifications();
+    }
   }
-
   runApp(MyApp());
 }
 

@@ -33,7 +33,7 @@ class NotificationProvider extends ChangeNotifier {
   }
 
   String _formatTimestamp(DateTime timestamp) {
-    return DateFormat('dd/MM/yyyy HH:mm').format(timestamp);
+    return DateFormat('MM/dd/yyyy HH:mm').format(timestamp);
   }
 }
 
