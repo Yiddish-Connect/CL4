@@ -71,7 +71,6 @@ class _MyAppState extends State<MyApp> {
 
   void listenToMessages() {
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      print('Received a message: ${message.notification?.title}');
       AwesomeNotifications().createNotification(
         content: NotificationContent(
           id: 1,
