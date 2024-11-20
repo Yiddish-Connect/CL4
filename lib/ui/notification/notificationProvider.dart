@@ -43,4 +43,8 @@ class FriendRequest {
   final String time;
 
   FriendRequest({required this.senderId, required this.receiverId, required this.time});
+
+  String toString() {
+    return 'FriendRequest(senderId: $senderId, receiverId: $receiverId, time: $time)';
+  }
 }
