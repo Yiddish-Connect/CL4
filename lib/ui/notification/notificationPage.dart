@@ -25,6 +25,7 @@ class NotificationList extends StatelessWidget {
     return Consumer<NotificationProvider>(
       builder: (context, notificationProvider, child) {
         final notifications = notificationProvider.notifications;
+        print('notifications: $notifications');
         return notifications.isEmpty
             ? Center(child: Text("Don't have any notifications yet"))
             : ListView.builder(
@@ -101,8 +102,7 @@ class NotificationList extends StatelessWidget {
     final notificationProvider = Provider.of<NotificationProvider>(context, listen: false);
     final friendRequest = notificationProvider.notifications[index];
     await FriendService().acceptFriendRequest(friendRequest.senderId, friendRequest.receiverId);
-    notificationProvider.notifications.removeAt(index);
-    notificationProvider.notifyListeners();
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Accepted ${friendRequest.senderId}')),
     );
@@ -112,8 +112,7 @@ class NotificationList extends StatelessWidget {
     final notificationProvider = Provider.of<NotificationProvider>(context, listen: false);
     final friendRequest = notificationProvider.notifications[index];
     await FriendService().rejectFriendRequest(friendRequest.senderId, friendRequest.receiverId);
-    notificationProvider.notifications.removeAt(index);
-    notificationProvider.notifyListeners();
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Declined ${friendRequest.senderId}')),
     );
