@@ -6,7 +6,6 @@ import 'chat.dart';
 import 'package:yiddishconnect/services/firebaseAuthentication.dart';
 import 'package:go_router/go_router.dart';
 
-
 /// A page to display the user's chats.
 /// This page displays a list of the user's chats.
 class ChatHomepage extends StatefulWidget {
@@ -16,6 +15,30 @@ class ChatHomepage extends StatefulWidget {
 
 class _ChatHomepageState extends State<ChatHomepage> {
   final String currentUserId = AuthService.getCurrentUserId();
+  late Stream<QuerySnapshot> _chatRoomsStream;
+  Map<String, String> userNames = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _chatRoomsStream = FirebaseFirestore.instance.collection('chat_rooms').snapshots();
+    _fetchUserNames();
+  }
+
+  Future<void> _fetchUserNames() async {
+    final chatRoomsSnapshot = await FirebaseFirestore.instance.collection('chat_rooms').get();
+    final userIds = chatRoomsSnapshot.docs
+        .expand((doc) => doc.id.split('_'))
+        .where((id) => id != currentUserId)
+        .toSet();
+
+    for (var userId in userIds) {
+      final userSnapshot = await FirebaseFirestore.instance.collection('users').doc(userId).get();
+      userNames[userId] = userSnapshot['displayName'] ?? 'Unknown';
+    }
+
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +65,7 @@ class _ChatHomepageState extends State<ChatHomepage> {
         ),
       )
           : StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance.collection('chat_rooms').snapshots(),
+        stream: _chatRoomsStream,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
@@ -53,83 +76,74 @@ class _ChatHomepageState extends State<ChatHomepage> {
 
           final chatRooms = snapshot.data!.docs.where((doc) => doc.id.split('_').contains(currentUserId)).toList();
 
+          if (chatRooms.isEmpty) {
+            return Center(child: Text('No chats available'));
+          }
+
           return AnimationLimiter(
             child: ListView.builder(
               itemCount: chatRooms.length,
               itemBuilder: (context, index) {
                 var chatRoom = chatRooms[index];
                 var receiverId = chatRoom.id.split('_').firstWhere((id) => id != currentUserId);
+                var receiverName = userNames[receiverId] ?? 'Unknown';
 
-                return FutureBuilder<DocumentSnapshot>(
-                  future: FirebaseFirestore.instance.collection('users').doc(receiverId).get(),
-                  builder: (context, userSnapshot) {
-                    if (!userSnapshot.hasData) {
+                return StreamBuilder<QuerySnapshot>(
+                  stream: chatRoom.reference.collection('chats').orderBy('timestamp', descending: true).limit(1).snapshots(),
+                  builder: (context, messageSnapshot) {
+                    if (!messageSnapshot.hasData || messageSnapshot.data!.docs.isEmpty) {
                       return ListTile(
-                        title: Text('Loading...'),
+                        title: Text(receiverName),
                         subtitle: Text('No messages yet'),
                       );
                     }
 
-                    var receiverName = userSnapshot.data!['displayName'] ?? 'Unknown';
+                    var lastMessage = messageSnapshot.data!.docs.first.data() as Map<String, dynamic>;
+                    var lastMessageTimestamp = lastMessage['timestamp'] as Timestamp;
 
-                    return StreamBuilder<QuerySnapshot>(
-                      stream: chatRoom.reference.collection('chats').orderBy('timestamp', descending: true).limit(1).snapshots(),
-                      builder: (context, messageSnapshot) {
-                        if (!messageSnapshot.hasData || messageSnapshot.data!.docs.isEmpty) {
-                          return ListTile(
-                            title: Text(receiverName),
-                            subtitle: Text('No messages yet'),
-                          );
-                        }
+                    bool isNewMessage = lastMessage['senderID'] != currentUserId &&
+                        (chatRoom['lastReadTimestamps'] == null ||
+                            chatRoom['lastReadTimestamps'][currentUserId] == null ||
+                            lastMessageTimestamp.compareTo(chatRoom['lastReadTimestamps'][currentUserId]) > 0);
 
-                        var lastMessage = messageSnapshot.data!.docs.first.data() as Map<String, dynamic>;
-                        var lastMessageTimestamp = lastMessage['timestamp'] as Timestamp;
-
-                        bool isNewMessage = lastMessage['senderID'] != currentUserId &&
-                            (chatRoom['lastReadTimestamps'] == null ||
-                                chatRoom['lastReadTimestamps'][currentUserId] == null ||
-                                lastMessageTimestamp.compareTo(chatRoom['lastReadTimestamps'][currentUserId]) > 0);
-
-                        return AnimationConfiguration.staggeredList(
-                          position: index,
-                          duration: const Duration(milliseconds: 500),
-                          child: SlideAnimation(
-                            verticalOffset: 50.0,
-                            child: FadeInAnimation(
-                              child: GestureDetector(
-                                onTap: () async {
-                                  await Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => ChatPage(
-                                        chatUser: receiverName,
-                                        userId: receiverId,
-                                      ),
-                                    ),
-                                  );
-                                },
-                                child: Card(
-                                  margin: EdgeInsets.all(8.0),
-                                  child: ListTile(
-                                    title: Text(
-                                      receiverName,
-                                      style: TextStyle(
-                                        fontWeight: isNewMessage ? FontWeight.bold : FontWeight.normal,
-                                      ),
-                                    ),
-                                    subtitle: Text(
-                                      lastMessage['message'],
-                                      style: TextStyle(
-                                        fontWeight: isNewMessage ? FontWeight.bold : FontWeight.normal,
-                                      ),
-                                    ),
+                    return AnimationConfiguration.staggeredList(
+                      position: index,
+                      duration: const Duration(milliseconds: 500),
+                      child: SlideAnimation(
+                        verticalOffset: 50.0,
+                        child: FadeInAnimation(
+                          child: GestureDetector(
+                            onTap: () async {
+                              await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ChatPage(
+                                    chatUser: receiverName,
+                                    userId: receiverId,
+                                  ),
+                                ),
+                              );
+                            },
+                            child: Card(
+                              margin: EdgeInsets.all(8.0),
+                              child: ListTile(
+                                title: Text(
+                                  receiverName,
+                                  style: TextStyle(
+                                    fontWeight: isNewMessage ? FontWeight.bold : FontWeight.normal,
+                                  ),
+                                ),
+                                subtitle: Text(
+                                  lastMessage['message'],
+                                  style: TextStyle(
+                                    fontWeight: isNewMessage ? FontWeight.bold : FontWeight.normal,
                                   ),
                                 ),
                               ),
                             ),
                           ),
-                        );
-                      },
+                        ),
+                      ),
                     );
                   },
                 );
