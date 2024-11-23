@@ -8,16 +8,17 @@ import 'package:yiddishconnect/models/notification_controller.dart';
 import 'package:yiddishconnect/router.dart';
 import 'firebase_options.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-
+import 'package:yiddishconnect/ui/notification/notificationProvider.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  FirebaseMessaging.instance.getToken().then((onValue) => {
-    print("token $onValue")
-  }); // The then statement prints the FCM token to the console
+  //FirebaseMessaging.instance.getToken().then((onValue) => {
+    //print("token $onValue")
+  //}); // The then statement prints the FCM token to the console
 
   await AwesomeNotifications().initialize(
       null,
@@ -36,11 +37,12 @@ void main() async {
         )
       ]);
 
-  bool isAllowed = await AwesomeNotifications().isNotificationAllowed();
-  if (!isAllowed) {
-    AwesomeNotifications().requestPermissionToSendNotifications();
+  if(!kIsWeb) {
+    bool isAllowed = await AwesomeNotifications().isNotificationAllowed();
+    if (!isAllowed) {
+      AwesomeNotifications().requestPermissionToSendNotifications();
+    }
   }
-
   runApp(MyApp());
 }
 
@@ -69,13 +71,12 @@ class _MyAppState extends State<MyApp> {
 
   void listenToMessages() {
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      print('Received a message: ${message.notification?.title}');
       AwesomeNotifications().createNotification(
         content: NotificationContent(
           id: 1,
           channelKey: "Basic Channel",
           title: message.notification?.title,
-          body: "HI SHatoria",
+          body: message.notification?.body,
         ),
       );
     });
@@ -83,8 +84,11 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => MyAppState(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => NotificationProvider()),
+        ChangeNotifierProvider(create: (context) => MyAppState()),
+      ],
       child: MaterialApp.router(
         title: 'Yiddish Connect',
         debugShowCheckedModeBanner: false,

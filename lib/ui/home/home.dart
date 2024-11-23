@@ -8,28 +8,27 @@ import 'package:yiddishconnect/ui/home/match/bottomFilter.dart';
 import 'package:yiddishconnect/ui/home/match/matchPage.dart';
 import 'package:yiddishconnect/ui/home/match/matchPageProvider.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
-
 import 'chat/chat_homepage.dart';
 import 'friend/friend.dart';
 import 'package:yiddishconnect/ui/notification/notificationPage.dart';
-
+import 'package:audioplayers/audioplayers.dart';
+import 'package:yiddishconnect/ui/notification/notificationProvider.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:yiddishconnect/services/firestoreService.dart';
 /// The home-screen.
 /// It contains 5 tabs: home, events, match, friends, chat
 /// Route: '/home'
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
-
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // Index of the selected drawer option (profile/settings)
   int _drawerIndex = 0;
-  // Index of the selected page (home/event/match/friends/chat)
   int _index = 0;
-  // All children pages, lazy loading.
   List<Widget> _pages = [
     Placeholder(),
     Placeholder(),
@@ -37,17 +36,22 @@ class _HomeScreenState extends State<HomeScreen> {
     Placeholder(),
     Placeholder(),
   ];
-  // Lazy loading. A HashSet storing the index of page.
-  // A page will only load at the first time the user enters it. (via BottomNavigationBar).
-  // And it will not unnecessarily rebuild when the user switches pages.
   HashSet<int> _loaded = HashSet();
-
+  bool _soundPlayed = false;
+  int _previousNotificationCount = 0;
+  FirestoreService _firestoreService = FirestoreService();
   @override
   void initState() {
-    // Initially only the HomePage is loaded.
     _loaded.add(0);
     _pages[0] = HomePage();
     super.initState();
+    //get token
+    FirebaseMessaging.instance.getToken().then((String? onValue) {
+      if (onValue != null) {
+        print("token $onValue");
+        _firestoreService.addToken(onValue);
+      }
+    });
   }
 
   @override
@@ -55,9 +59,9 @@ class _HomeScreenState extends State<HomeScreen> {
     print("Home-Screen build()...");
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => MatchPageProvider())
+        ChangeNotifierProvider(create: (context) => MatchPageProvider()),
       ],
-      child: Builder( // Use a Builder() here to ensure that provider is properly initialized before building the UI.
+      child: Builder(
         builder: (context) {
           return Scaffold(
             appBar: AppBar(
@@ -75,11 +79,11 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Container(
                 margin: EdgeInsets.only(top: 10, bottom: 20, left: 10, right: 10),
                 decoration: BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(30)),
-                    boxShadow: [
-                      BoxShadow(color: Colors.black38, spreadRadius: 0, blurRadius: 10),
-                    ],
-                    color: Theme.of(context).colorScheme.surface
+                  borderRadius: BorderRadius.all(Radius.circular(30)),
+                  boxShadow: [
+                    BoxShadow(color: Colors.black38, spreadRadius: 0, blurRadius: 10),
+                  ],
+                  color: Theme.of(context).colorScheme.surface,
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.all(Radius.circular(30)),
@@ -140,46 +144,72 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
               ),
-            )
+            ),
           );
-        }
-      )
+        },
+      ),
     );
   }
 
-  // Get the "actions" of the Scaffold.appbar from given index
   List<Widget> _createActions(BuildContext context, int index) {
     List<Widget> matchPageActions = [
       Padding(
         padding: const EdgeInsets.all(8),
         child: IconButton(
-            onPressed: () => toast(context, "TODO: search"),
-            icon: Icon(Icons.search, size: 28.0),
-            iconSize: 28.0
+          onPressed: () => toast(context, "TODO: search"),
+          icon: Icon(Icons.search, size: 28.0),
+          iconSize: 28.0,
         ),
       ),
       Padding(
         padding: const EdgeInsets.all(8.0),
         child: IconButton(
-            onPressed: () => showFilter(context),
-            icon: Icon(Icons.filter_list, size: 28.0),
-            iconSize: 28.0
+          onPressed: () => showFilter(context),
+          icon: Icon(Icons.filter_list, size: 28.0),
+          iconSize: 28.0,
         ),
       ),
     ];
 
+    Future<void> _playNotificationSound() async {
+      AudioCache.instance = AudioCache(prefix: '');
+      final audioPlayer = AudioPlayer();
+      await audioPlayer.play(AssetSource('notification_sound.mp3'));
+    }
+
     List<Widget> otherPageActions = [
       Padding(
         padding: const EdgeInsets.all(8.0),
-        child: IconButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => NotificationPage()),
+        child: Consumer<NotificationProvider>(
+          builder: (context, notificationProvider, child) {
+            int currentNotificationCount = notificationProvider.notifications.length;
+            if (currentNotificationCount > _previousNotificationCount) {
+              _soundPlayed = false;
+            }
+            _previousNotificationCount = currentNotificationCount;
+
+            if (currentNotificationCount > 0 && !_soundPlayed) {
+              _playNotificationSound();
+              _soundPlayed = true;
+            }
+
+            return IconButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => NotificationPage()),
+                );
+              },
+              icon: Icon(
+                currentNotificationCount > 0
+                    ? Icons.notifications_active_outlined
+                    : Icons.notifications_outlined,
+                size: 28.0,
+              ),
+              color: currentNotificationCount > 0 ? Colors.red : null,
+              iconSize: 28.0,
             );
           },
-          icon: Icon(Icons.notifications_outlined, size: 28.0),
-          iconSize: 28.0,
         ),
       ),
     ];
@@ -189,9 +219,7 @@ class _HomeScreenState extends State<HomeScreen> {
         : matchPageActions;
   }
 
-  // Get the "leading" of the Scaffold.appbar from given index
   Widget _createLeading(BuildContext context, int index) {
-    // The leading will always be the user's profile picture
     return Padding(
       padding: const EdgeInsets.all(0.0),
       child: InkWell(
@@ -202,8 +230,8 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: CircleAvatar(
-              backgroundImage: NetworkImage("https://picsum.photos/250"),
-              radius: 50
+            backgroundImage: NetworkImage("https://picsum.photos/250"),
+            radius: 50,
           ),
         ),
       ),
@@ -227,4 +255,3 @@ class HomePage extends StatelessWidget {
     );
   }
 }
-

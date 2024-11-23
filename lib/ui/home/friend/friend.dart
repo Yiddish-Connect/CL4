@@ -22,10 +22,14 @@ class _FriendPageState extends State<FriendPage> {
   TextEditingController _searchController = TextEditingController();
   FocusNode _searchFocusNode = FocusNode();
   String _searchText = "";
+  late Stream<DocumentSnapshot> _userStream;
+  late Stream<QuerySnapshot> _friendsStream;
 
   @override
   void initState() {
     super.initState();
+    final userId = AuthService.getCurrentUserId();
+    _userStream = FirebaseFirestore.instance.collection('users').doc(userId).snapshots();
     _searchController.addListener(() {
       setState(() {
         _searchText = _searchController.text;
@@ -69,10 +73,7 @@ class _FriendPageState extends State<FriendPage> {
               SizedBox(height: 10),
               Expanded(
                 child: StreamBuilder<DocumentSnapshot>(
-                  stream: FirebaseFirestore.instance
-                      .collection('users')
-                      .doc(userId)
-                      .snapshots(),
+                  stream: _userStream,
                   builder: (context, userSnapshot) {
                     if (!userSnapshot.hasData) {
                       return Center(child: CircularProgressIndicator());
@@ -86,11 +87,13 @@ class _FriendPageState extends State<FriendPage> {
                       );
                     }
 
+                    _friendsStream = FirebaseFirestore.instance
+                        .collection('users')
+                        .where(FieldPath.documentId, whereIn: friendIds)
+                        .snapshots();
+
                     return StreamBuilder<QuerySnapshot>(
-                      stream: FirebaseFirestore.instance
-                          .collection('users')
-                          .where(FieldPath.documentId, whereIn: friendIds)
-                          .snapshots(),
+                      stream: _friendsStream,
                       builder: (context, friendsSnapshot) {
                         if (!friendsSnapshot.hasData) {
                           return Center(child: CircularProgressIndicator());
