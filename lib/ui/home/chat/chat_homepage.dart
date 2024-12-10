@@ -1,57 +1,156 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'chat.dart';
+import 'package:yiddishconnect/services/firebaseAuthentication.dart';
+import 'package:go_router/go_router.dart';
 
-class ChatHomepage extends StatelessWidget {
-  final List<Map<String, String>> chats = [
-    {'username': 'Alan Turing', 'lastMessage': 'Hey!'},
-    {'username': 'Jichun Q', 'lastMessage': 'Hello!'},
-    // Add more chats here
-  ];
+/// A page to display the user's chats.
+/// This page displays a list of the user's chats.
+class ChatHomepage extends StatefulWidget {
+  @override
+  _ChatHomepageState createState() => _ChatHomepageState();
+}
+
+class _ChatHomepageState extends State<ChatHomepage> {
+  final String currentUserId = AuthService.getCurrentUserId();
+  late Stream<QuerySnapshot> _chatRoomsStream;
+  Map<String, String> userNames = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _chatRoomsStream = FirebaseFirestore.instance.collection('chat_rooms').snapshots();
+    _fetchUserNames();
+  }
+
+  Future<void> _fetchUserNames() async {
+    final chatRoomsSnapshot = await FirebaseFirestore.instance.collection('chat_rooms').get();
+    final userIds = chatRoomsSnapshot.docs
+        .expand((doc) => doc.id.split('_'))
+        .where((id) => id != currentUserId)
+        .toSet();
+
+    for (var userId in userIds) {
+      final userSnapshot = await FirebaseFirestore.instance.collection('users').doc(userId).get();
+      userNames[userId] = userSnapshot['displayName'] ?? 'Unknown';
+    }
+
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Sort chats alphabetically by username
-    chats.sort((a, b) => a['username']!.compareTo(b['username']!));
+    bool isAnonymous = AuthService().isAnonymous();
 
     return Scaffold(
       appBar: AppBar(
         title: Text('Chats'),
       ),
-      body: AnimationLimiter(
-        child: ListView.builder(
-          itemCount: chats.length,
-          itemBuilder: (context, index) {
-            return AnimationConfiguration.staggeredList(
-              position: index,
-              duration: const Duration(milliseconds: 500),
-              child: SlideAnimation(
-                verticalOffset: 50.0,
-                child: FadeInAnimation(
-                  child: GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ChatPage(
-                            chatUser: chats[index]['username']!,
+      body: isAnonymous
+          ? Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text('You need to sign in to view chats'),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                context.go('/auth');
+              },
+              child: Text('Sign in'),
+            ),
+          ],
+        ),
+      )
+          : StreamBuilder<QuerySnapshot>(
+        stream: _chatRoomsStream,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          }
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            return Center(child: Text('No chats available'));
+          }
+
+          final chatRooms = snapshot.data!.docs.where((doc) => doc.id.split('_').contains(currentUserId)).toList();
+
+          if (chatRooms.isEmpty) {
+            return Center(child: Text('No chats available'));
+          }
+
+          return AnimationLimiter(
+            child: ListView.builder(
+              itemCount: chatRooms.length,
+              itemBuilder: (context, index) {
+                var chatRoom = chatRooms[index];
+                var receiverId = chatRoom.id.split('_').firstWhere((id) => id != currentUserId);
+                var receiverName = userNames[receiverId] ?? 'Unknown';
+
+                return StreamBuilder<QuerySnapshot>(
+                  stream: chatRoom.reference.collection('chats').orderBy('timestamp', descending: true).limit(1).snapshots(),
+                  builder: (context, messageSnapshot) {
+                    if (!messageSnapshot.hasData || messageSnapshot.data!.docs.isEmpty) {
+                      return ListTile(
+                        title: Text(receiverName),
+                        subtitle: Text('No messages yet'),
+                      );
+                    }
+
+                    var lastMessage = messageSnapshot.data!.docs.first.data() as Map<String, dynamic>;
+                    var lastMessageTimestamp = lastMessage['timestamp'] as Timestamp;
+
+                    bool isNewMessage = lastMessage['senderID'] != currentUserId &&
+                        (chatRoom['lastReadTimestamps'] == null ||
+                            chatRoom['lastReadTimestamps'][currentUserId] == null ||
+                            lastMessageTimestamp.compareTo(chatRoom['lastReadTimestamps'][currentUserId]) > 0);
+
+                    return AnimationConfiguration.staggeredList(
+                      position: index,
+                      duration: const Duration(milliseconds: 500),
+                      child: SlideAnimation(
+                        verticalOffset: 50.0,
+                        child: FadeInAnimation(
+                          child: GestureDetector(
+                            onTap: () async {
+                              await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ChatPage(
+                                    chatUser: receiverName,
+                                    userId: receiverId,
+                                  ),
+                                ),
+                              );
+                            },
+                            child: Card(
+                              margin: EdgeInsets.all(8.0),
+                              child: ListTile(
+                                title: Text(
+                                  receiverName,
+                                  style: TextStyle(
+                                    fontWeight: isNewMessage ? FontWeight.bold : FontWeight.normal,
+                                  ),
+                                ),
+                                subtitle: Text(
+                                  lastMessage['message'],
+                                  style: TextStyle(
+                                    fontWeight: isNewMessage ? FontWeight.bold : FontWeight.normal,
+                                  ),
+                                ),
+                              ),
+                            ),
                           ),
                         ),
-                      );
-                    },
-                    child: Card(
-                      margin: EdgeInsets.all(8.0),
-                      child: ListTile(
-                        title: Text(chats[index]['username']!),
-                        subtitle: Text(chats[index]['lastMessage']!),
                       ),
-                    ),
-                  ),
-                ),
-              ),
-            );
-          },
-        ),
+                    );
+                  },
+                );
+              },
+            ),
+          );
+        },
       ),
     );
   }

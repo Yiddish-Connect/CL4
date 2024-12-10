@@ -11,6 +11,8 @@ import '../../../services/firebaseAuthentication.dart';
 import '../../../widgets/ErrorHandlers.dart';
 import '../../../widgets/yd_multi_steps.dart';
 
+import 'package:yiddishconnect/services/firestoreService.dart';
+
 /// The Email sign-up screen using Firebase Authentication (Email)
 /// Route: '/auth/email/sign-up'
 class EmailSignUpScreen extends StatelessWidget {
@@ -157,14 +159,17 @@ class _Step1State extends State<_Step1> {
                               } else {
                                 toast(context, "Something went wrong (null)");
                               }
-                            } catch (e) {
-                              emailError(context, "invalid-email");
-                            }
-                          } else {
-                            emailError(context, "invalid-email");
-                          }
+                            } on FirebaseAuthException catch (e) {//modify this to include the case email-already-in-use
+                                if (e.code == 'email-already-in-use') {
+                                  emailError(context, "email-already-in-use");
+                                } else {
+                                  toast(context, "Something went wrong (null)");
+                                }
+                              }
+                        } else {
+                            emailError(context, "invalid-email");}
                         } catch (e) {
-                          toast(context, e.toString());
+                        toast(context, e.toString());
                         }
                       },
                       child: Text('Register'),
@@ -174,7 +179,8 @@ class _Step1State extends State<_Step1> {
               ),
             ],
           ),
-        ));
+        ),
+    );
   }
 }
 
@@ -243,6 +249,9 @@ class _Step2 extends StatelessWidget {
                               toast(context, "Verification Failed");
                             } else {
                               context.go("/");
+                              //create user document in Firestore
+                              FirestoreService()
+                                  .createUserDocument(_auth.getUser()!.uid, _auth.getUser()!.displayName ?? _auth.getUser()!.uid);
                             }
                           },
                           child: Text("I have verified my Email")),
