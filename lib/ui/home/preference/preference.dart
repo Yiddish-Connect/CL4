@@ -10,6 +10,7 @@ import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:universal_io/io.dart';
+import 'package:intl/intl.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
 import 'package:yiddishconnect/widgets/yd_multi_steps.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -61,6 +62,7 @@ class PreferenceScreen extends StatelessWidget {
         },
         steps: [
           OneStep(title: "What's your name?", builder: (prev, next) => _Step1()),
+          OneStep(title: "When is your Birthday?", builder: (prev, next) => _Step5()),
           OneStep(title: "Location", builder: (prev, next) => _Step2()),
           OneStep(title: "Select up to 5 interests", builder: (prev, next) => _Step3()),
           OneStep(title: "Upload your photos", builder: (prev, next) => _Step4()),
@@ -455,6 +457,54 @@ class ImageTile extends StatelessWidget {
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Step5 extends StatefulWidget  {
+  @override
+  _Step5State createState() => _Step5State();
+}
+
+class _Step5State extends State<_Step5> {
+  DateTime? _selectedDate;
+
+  Future<void> _pickDate(BuildContext context) async {
+    DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+    );
+
+    if (picked != null) {
+      setState(() {
+        _selectedDate = picked;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ElevatedButton(
+            onPressed: () => _pickDate(context),
+            child: Text(
+              _selectedDate == null
+                  ? 'Select Date of Birth '
+                  : 'Date of Birth: ${DateFormat('yyyy-MM-dd').format(_selectedDate!)}',
+            ),
+          ),
+          SizedBox(height: 20),
+
+          // Other widgets can go here
+
         ],
       ),
     );
