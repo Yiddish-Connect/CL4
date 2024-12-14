@@ -1,9 +1,5 @@
 import 'dart:io';
 import 'dart:ui';
-<<<<<<< HEAD
-//import 'dart:html' as html;
-=======
->>>>>>> d8897326d407213b04bf24182ef3ad64d422f415
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
