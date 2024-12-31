@@ -120,6 +120,16 @@ class _UserScreenState extends State<UserScreen> {
                   foregroundColor: Colors.white,
                 ),
               ),
+              ElevatedButton(
+                onPressed: () {
+                  context.push("/about");
+                },
+                child: Text("About"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                ),
+              ),
             ],
           ),
         ),

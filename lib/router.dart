@@ -8,6 +8,7 @@ import 'package:yiddishconnect/ui/home/home.dart';
 import 'package:yiddishconnect/ui/home/preference/preference.dart';
 import 'package:yiddishconnect/ui/landing.dart';
 import 'package:yiddishconnect/ui/user/user.dart';
+import 'package:yiddishconnect/ui/about/about.dart';
 
 final ydRouter = GoRouter(
   routes: [
@@ -53,6 +54,11 @@ final ydRouter = GoRouter(
             path: "user",
             builder: (context, state) => UserScreen(),
           ),
+          GoRoute(
+            name: "aboutScreen",
+            path: "about",
+            builder: (context, state) => AboutScreen(),
+          )
         ],
     ),
   ],
