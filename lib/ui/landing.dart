@@ -1,8 +1,11 @@
+import 'dart:convert';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:yiddishconnect/services/firebaseAuthentication.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
+import 'package:yiddishconnect/utils/paynow.dart';
 import 'package:yiddishconnect/widgets/yd_animated_curve.dart';
 import '../widgets/yd_label.dart';
 
@@ -48,7 +51,8 @@ class LandingScreen extends StatelessWidget {
                           child: Opacity(
                             opacity: 0.8,
                             child: CircleAvatar(
-                              backgroundImage: NetworkImage('https://picsum.photos/200'),
+                              backgroundImage:
+                                  NetworkImage('https://picsum.photos/200'),
                               radius: 50,
                             ),
                           ),
@@ -60,7 +64,8 @@ class LandingScreen extends StatelessWidget {
                           child: Opacity(
                             opacity: 0.8,
                             child: CircleAvatar(
-                              backgroundImage: NetworkImage('https://picsum.photos/200'),
+                              backgroundImage:
+                                  NetworkImage('https://picsum.photos/200'),
                               radius: 50,
                             ),
                           ),
@@ -71,7 +76,8 @@ class LandingScreen extends StatelessWidget {
                           left: 60,
                           child: Label(
                             borderColor: Theme.of(context).colorScheme.primary,
-                            backgroundColor: Theme.of(context).colorScheme.background,
+                            backgroundColor:
+                                Theme.of(context).colorScheme.background,
                             opacity: 0.7,
                             text: "Intermediate",
                             height: 30,
@@ -83,8 +89,10 @@ class LandingScreen extends StatelessWidget {
                           bottom: 120,
                           right: 60,
                           child: Label(
-                            borderColor: Theme.of(context).colorScheme.secondary,
-                            backgroundColor: Theme.of(context).colorScheme.background,
+                            borderColor:
+                                Theme.of(context).colorScheme.secondary,
+                            backgroundColor:
+                                Theme.of(context).colorScheme.background,
                             opacity: 0.7,
                             text: "Proficient",
                             height: 30,
@@ -121,17 +129,21 @@ class LandingScreen extends StatelessWidget {
                             widthFactor: 0.6,
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Theme.of(context).colorScheme.primary,
-                                foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                                backgroundColor:
+                                    Theme.of(context).colorScheme.primary,
+                                foregroundColor:
+                                    Theme.of(context).colorScheme.onPrimary,
                               ),
                               // Continue => Anonymous mode
                               onPressed: () async {
                                 try {
-                                  User? user = await AuthService().signInAnonymously();
+                                  User? user =
+                                      await AuthService().signInAnonymously();
                                   if (user != null) {
                                     context.go("/");
                                   } else {
-                                    toast(context, "Something went wrong (null)");
+                                    toast(
+                                        context, "Something went wrong (null)");
                                   }
                                 } catch (e) {
                                   toast(context, e.toString());
@@ -151,14 +163,51 @@ class LandingScreen extends StatelessWidget {
                             widthFactor: 0.6,
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Theme.of(context).colorScheme.surface,
-                                foregroundColor: Theme.of(context).colorScheme.onSurface,
+                                backgroundColor:
+                                    Theme.of(context).colorScheme.surface,
+                                foregroundColor:
+                                    Theme.of(context).colorScheme.onSurface,
                               ),
                               // Sign in => SignInPage
                               onPressed: () {
                                 context.go("/auth");
                               },
                               child: Text("Login"),
+                            ),
+                          ),
+                        ),
+                      ),
+                      //
+                      //shatoria
+                      //
+                      Padding(
+                        padding: const EdgeInsets.all(5.0),
+                        child: SizedBox(
+                          width: double.infinity,
+                          height: 50,
+                          child: FractionallySizedBox(
+                            widthFactor: 0.6,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor:
+                                    Theme.of(context).colorScheme.surface,
+                                foregroundColor:
+                                    Theme.of(context).colorScheme.onSurface,
+                              ),
+                              // Sign in => SignInPage
+                              onPressed: () {
+                                PayNowService payNow = PayNowService();
+                                //test the endpoint
+                                /*
+                                payNow.testPayNowEndpoint().then((value) => {
+                                      print(jsonDecode(value.body.toString())
+                                          .toString()),
+                                    });
+                                */
+
+                                print(payNow.getAuthToken());
+                              },
+                              child: Text("Pay"),
                             ),
                           ),
                         ),

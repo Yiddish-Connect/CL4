@@ -10,6 +10,7 @@ import 'firebase_options.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:yiddishconnect/ui/notification/notificationProvider.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
@@ -17,27 +18,24 @@ void main() async {
   );
 
   //FirebaseMessaging.instance.getToken().then((onValue) => {
-    //print("token $onValue")
+  //print("token $onValue")
   //}); // The then statement prints the FCM token to the console
 
-  await AwesomeNotifications().initialize(
-      null,
-      [
-        NotificationChannel(
-          channelGroupKey: "Basic",
-          channelKey: "Basic Channel",
-          channelName: "Basic Notifications",
-          channelDescription: "Basic Notifications",
-        )
-      ],
-      channelGroups: [
-        NotificationChannelGroup(
-          channelGroupKey: "Basic",
-          channelGroupName: "Basic Notifications",
-        )
-      ]);
+  await AwesomeNotifications().initialize(null, [
+    NotificationChannel(
+      channelGroupKey: "Basic",
+      channelKey: "Basic Channel",
+      channelName: "Basic Notifications",
+      channelDescription: "Basic Notifications",
+    )
+  ], channelGroups: [
+    NotificationChannelGroup(
+      channelGroupKey: "Basic",
+      channelGroupName: "Basic Notifications",
+    )
+  ]);
 
-  if(!kIsWeb) {
+  if (!kIsWeb) {
     bool isAllowed = await AwesomeNotifications().isNotificationAllowed();
     if (!isAllowed) {
       AwesomeNotifications().requestPermissionToSendNotifications();
@@ -55,7 +53,8 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   FirebaseMessaging messaging = FirebaseMessaging.instance;
-  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
 
   @override
   void initState() {
@@ -63,9 +62,12 @@ class _MyAppState extends State<MyApp> {
     listenToMessages();
     AwesomeNotifications().setListeners(
       onActionReceivedMethod: NotificationController.onActionReceivedMethod,
-      onNotificationCreatedMethod: NotificationController.onNotificationCreatedMethod,
-      onNotificationDisplayedMethod: NotificationController.onNotificationDisplayedMethod,
-      onDismissActionReceivedMethod: NotificationController.onDismissActionMethod,
+      onNotificationCreatedMethod:
+          NotificationController.onNotificationCreatedMethod,
+      onNotificationDisplayedMethod:
+          NotificationController.onNotificationDisplayedMethod,
+      onDismissActionReceivedMethod:
+          NotificationController.onDismissActionMethod,
     );
   }
 
@@ -96,21 +98,66 @@ class _MyAppState extends State<MyApp> {
           useMaterial3: true,
           colorScheme: ColorScheme.fromSeed(seedColor: Color(0xfff3dbab)),
           textTheme: TextTheme(
-            displayLarge: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w900, fontSize: 57.0),
-            displayMedium: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w800, fontSize: 45.0),
-            displaySmall: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w700, fontSize: 36.0),
-            headlineLarge: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600, fontSize: 32.0),
-            headlineMedium: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w500, fontSize: 28.0),
-            headlineSmall: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w400, fontSize: 24.0),
-            titleLarge: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w500, fontSize: 22.0),
-            titleMedium: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w400, fontSize: 16.0),
-            titleSmall: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w300, fontSize: 14.0),
-            bodyLarge: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w400, fontSize: 16.0),
-            bodyMedium: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w300, fontSize: 14.0),
-            bodySmall: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w200, fontSize: 12.0),
-            labelLarge: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w700, fontSize: 14.0),
-            labelMedium: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w600, fontSize: 12.0),
-            labelSmall: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w500, fontSize: 11.0),
+            displayLarge: TextStyle(
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.w900,
+                fontSize: 57.0),
+            displayMedium: TextStyle(
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.w800,
+                fontSize: 45.0),
+            displaySmall: TextStyle(
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.w700,
+                fontSize: 36.0),
+            headlineLarge: TextStyle(
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.w600,
+                fontSize: 32.0),
+            headlineMedium: TextStyle(
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.w500,
+                fontSize: 28.0),
+            headlineSmall: TextStyle(
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.w400,
+                fontSize: 24.0),
+            titleLarge: TextStyle(
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.w500,
+                fontSize: 22.0),
+            titleMedium: TextStyle(
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.w400,
+                fontSize: 16.0),
+            titleSmall: TextStyle(
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.w300,
+                fontSize: 14.0),
+            bodyLarge: TextStyle(
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.w400,
+                fontSize: 16.0),
+            bodyMedium: TextStyle(
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.w300,
+                fontSize: 14.0),
+            bodySmall: TextStyle(
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.w200,
+                fontSize: 12.0),
+            labelLarge: TextStyle(
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.w700,
+                fontSize: 14.0),
+            labelMedium: TextStyle(
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.w600,
+                fontSize: 12.0),
+            labelSmall: TextStyle(
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.w500,
+                fontSize: 11.0),
           ),
         ),
         routerConfig: ydRouter,
