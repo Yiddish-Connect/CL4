@@ -200,12 +200,13 @@ class LandingScreen extends StatelessWidget {
                                 //test the endpoint
                                 /*
                                 payNow.testPayNowEndpoint().then((value) => {
-                                      print(jsonDecode(value.body.toString())
-                                          .toString()),
+                                      print(jsonDecode(value.body.toString()).toString()),
                                     });
                                 */
 
-                                print(payNow.getAuthToken());
+                                print(payNow.getAuthToken().then((value) =>
+                                    print(jsonDecode(value.body.toString())
+                                        .toString())));
                               },
                               child: Text("Pay"),
                             ),

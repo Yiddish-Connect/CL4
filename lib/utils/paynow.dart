@@ -4,7 +4,7 @@ import 'package:http/browser_client.dart';
 import 'package:http/http.dart' as http;
 
 String tempEmail = "shatoriag01@gmail.com";
-String tempPassword = "TORi5576";
+String tempPassword = "Shatoria5576";
 var client = BrowserClient();
 
 class PayNowService {
@@ -18,13 +18,13 @@ class PayNowService {
     return response;
   }
 
-  dynamic getAuthToken() async {
+  Future<http.Response> getAuthToken() async {
     String endpoint = "https://api.nowpayments.io/v1/auth";
     var response = await client.post(
       Uri.parse(endpoint),
       body: {"email": tempEmail, "password": tempPassword},
     );
 
-    return jsonDecode(response.body.toString());
+    return response;
   }
 }
