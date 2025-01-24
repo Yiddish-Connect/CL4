@@ -16,37 +16,53 @@ class DevHomeScreen extends StatelessWidget {
       ),
       body: Column(
         children: [
-          Text("This is the home page", style: Theme.of(context).textTheme.headlineMedium,),
+          Text(
+            "This is the home page",
+            style: Theme.of(context).textTheme.headlineMedium,
+          ),
           Text("user: ${_auth.getUser()}"),
-          SizedBox(width: 100, height: 100, ),
+          SizedBox(
+            width: 100,
+            height: 100,
+          ),
           Text("displayName: ${_auth.getUser()?.displayName}"),
           Text("email: ${_auth.getUser()?.email}"),
           Text("emailVerified?? ${_auth.getUser()?.emailVerified}"),
           ElevatedButton(
-              child: Text("Log out"),
-              onPressed: () async {
-                try {
-                  await AuthService().signOut();
-                } catch (e) {
-                  if (!context.mounted) {
-                    throw Exception("DevHome - Log Out Button: context.mounted is false!!");
-                  }
-                  toast(context, e.toString());
-                }
+            child: Text("Log out"),
+            onPressed: () async {
+              try {
+                await AuthService().signOut();
+              } catch (e) {
                 if (!context.mounted) {
-                  throw Exception("DevHome - Log Out Button: context.mounted is false!!");
+                  throw Exception(
+                      "DevHome - Log Out Button: context.mounted is false!!");
                 }
-                context.go("/");
-              },
+                toast(context, e.toString());
+              }
+              if (!context.mounted) {
+                throw Exception(
+                    "DevHome - Log Out Button: context.mounted is false!!");
+              }
+              context.go("/");
+            },
           ),
           ElevatedButton(
-              child: Text("Select Preference"),
-              onPressed: () async {
-                if (!context.mounted) {
-                  throw Exception("DevHome - Preference Button: context.mounted is false!!");
-                }
-                context.go("/preference");
-              },
+            child: Text("Select Preference"),
+            onPressed: () async {
+              if (!context.mounted) {
+                throw Exception(
+                    "DevHome - Preference Button: context.mounted is false!!");
+              }
+              context.go("/preference");
+            },
+          ),
+          //shatoria
+          ElevatedButton(
+            child: Text("donate"),
+            onPressed: () async {
+              context.go("/dontaion");
+            },
           )
         ],
       ),

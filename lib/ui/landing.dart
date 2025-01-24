@@ -1,11 +1,8 @@
-import 'dart:convert';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:yiddishconnect/services/firebaseAuthentication.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
-import 'package:yiddishconnect/utils/paynow.dart';
 import 'package:yiddishconnect/widgets/yd_animated_curve.dart';
 import '../widgets/yd_label.dart';
 
@@ -173,42 +170,6 @@ class LandingScreen extends StatelessWidget {
                                 context.go("/auth");
                               },
                               child: Text("Login"),
-                            ),
-                          ),
-                        ),
-                      ),
-                      //
-                      //shatoria
-                      //
-                      Padding(
-                        padding: const EdgeInsets.all(5.0),
-                        child: SizedBox(
-                          width: double.infinity,
-                          height: 50,
-                          child: FractionallySizedBox(
-                            widthFactor: 0.6,
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor:
-                                    Theme.of(context).colorScheme.surface,
-                                foregroundColor:
-                                    Theme.of(context).colorScheme.onSurface,
-                              ),
-                              // Sign in => SignInPage
-                              onPressed: () {
-                                PayNowService payNow = PayNowService();
-                                //test the endpoint
-                                /*
-                                payNow.testPayNowEndpoint().then((value) => {
-                                      print(jsonDecode(value.body.toString()).toString()),
-                                    });
-                                */
-
-                                print(payNow.getAuthToken().then((value) =>
-                                    print(jsonDecode(value.body.toString())
-                                        .toString())));
-                              },
-                              child: Text("Pay"),
                             ),
                           ),
                         ),

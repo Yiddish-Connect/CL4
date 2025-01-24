@@ -15,6 +15,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:yiddishconnect/ui/notification/notificationProvider.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:yiddishconnect/services/firestoreService.dart';
+
 /// The home-screen.
 /// It contains 5 tabs: home, events, match, friends, chat
 /// Route: '/home'
@@ -77,11 +78,13 @@ class _HomeScreenState extends State<HomeScreen> {
             bottomNavigationBar: FractionallySizedBox(
               widthFactor: 0.9,
               child: Container(
-                margin: EdgeInsets.only(top: 10, bottom: 20, left: 10, right: 10),
+                margin:
+                    EdgeInsets.only(top: 10, bottom: 20, left: 10, right: 10),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.all(Radius.circular(30)),
                   boxShadow: [
-                    BoxShadow(color: Colors.black38, spreadRadius: 0, blurRadius: 10),
+                    BoxShadow(
+                        color: Colors.black38, spreadRadius: 0, blurRadius: 10),
                   ],
                   color: Theme.of(context).colorScheme.surface,
                 ),
@@ -94,27 +97,32 @@ class _HomeScreenState extends State<HomeScreen> {
                         BottomNavigationBarItem(
                           icon: Icon(Icons.home_outlined),
                           label: "Home",
-                          backgroundColor: Theme.of(context).colorScheme.surface,
+                          backgroundColor:
+                              Theme.of(context).colorScheme.surface,
                         ),
                         BottomNavigationBarItem(
                           icon: Icon(Icons.explore_outlined),
                           label: "Explore",
-                          backgroundColor: Theme.of(context).colorScheme.surface,
+                          backgroundColor:
+                              Theme.of(context).colorScheme.surface,
                         ),
                         BottomNavigationBarItem(
                           icon: Icon(Icons.add),
                           label: "Match",
-                          backgroundColor: Theme.of(context).colorScheme.surface,
+                          backgroundColor:
+                              Theme.of(context).colorScheme.surface,
                         ),
                         BottomNavigationBarItem(
                           icon: Icon(Icons.people_outline),
                           label: "Friends",
-                          backgroundColor: Theme.of(context).colorScheme.surface,
+                          backgroundColor:
+                              Theme.of(context).colorScheme.surface,
                         ),
                         BottomNavigationBarItem(
                           icon: Icon(Icons.chat_bubble_outline),
                           label: "Chat",
-                          backgroundColor: Theme.of(context).colorScheme.surface,
+                          backgroundColor:
+                              Theme.of(context).colorScheme.surface,
                         ),
                       ],
                       currentIndex: _index,
@@ -137,7 +145,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         });
                       },
                       selectedItemColor: Theme.of(context).colorScheme.primary,
-                      unselectedItemColor: Theme.of(context).colorScheme.secondary,
+                      unselectedItemColor:
+                          Theme.of(context).colorScheme.secondary,
                       elevation: 0,
                       type: BottomNavigationBarType.shifting, // default
                     ),
@@ -182,7 +191,8 @@ class _HomeScreenState extends State<HomeScreen> {
         padding: const EdgeInsets.all(8.0),
         child: Consumer<NotificationProvider>(
           builder: (context, notificationProvider, child) {
-            int currentNotificationCount = notificationProvider.notifications.length;
+            int currentNotificationCount =
+                notificationProvider.notifications.length;
             if (currentNotificationCount > _previousNotificationCount) {
               _soundPlayed = false;
             }
