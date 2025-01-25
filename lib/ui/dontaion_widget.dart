@@ -28,6 +28,8 @@ class _DontationScreenState extends State<DontationScreen> {
     );
   }
 }
+//see https://www.youtube.com/watch?v=jRoyx6KOYMU&t=77s
+//you can work on the ios setup with that as webveiw supports ios already
 
 class DonationWidget extends StatelessWidget {
   const DonationWidget({super.key});
