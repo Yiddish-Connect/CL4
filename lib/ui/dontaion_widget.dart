@@ -1,6 +1,6 @@
 //shatoria
 import 'package:flutter/material.dart';
-//import 'package:webview_flutter/webview_flutter.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 var html = '''
   <html>
@@ -45,6 +45,9 @@ class DonationWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Placeholder();
+    return WebView(
+      initialUrl: 'https://www.reddit.com/',
+      javascriptMode: JavascriptMode.unrestricted,
+    );
   }
 }
