@@ -60,9 +60,11 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   FirebaseMessaging messaging = FirebaseMessaging.instance;
-  OverlayEntry? entry;
+  OverlayEntry? entry; // Keep this if it's needed, otherwise remove it.
+  
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
+}
 
   @override
   void initState() {

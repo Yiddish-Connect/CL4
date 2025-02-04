@@ -48,7 +48,8 @@ class LandingScreen extends StatelessWidget {
                           child: Opacity(
                             opacity: 0.8,
                             child: CircleAvatar(
-                              backgroundImage: NetworkImage('https://picsum.photos/200'),
+                              backgroundImage:
+                                  NetworkImage('https://picsum.photos/200'),
                               radius: 50,
                             ),
                           ),
@@ -60,7 +61,8 @@ class LandingScreen extends StatelessWidget {
                           child: Opacity(
                             opacity: 0.8,
                             child: CircleAvatar(
-                              backgroundImage: NetworkImage('https://picsum.photos/200'),
+                              backgroundImage:
+                                  NetworkImage('https://picsum.photos/200'),
                               radius: 50,
                             ),
                           ),
@@ -71,7 +73,8 @@ class LandingScreen extends StatelessWidget {
                           left: 60,
                           child: Label(
                             borderColor: Theme.of(context).colorScheme.primary,
-                            backgroundColor: Theme.of(context).colorScheme.background,
+                            backgroundColor:
+                                Theme.of(context).colorScheme.background,
                             opacity: 0.7,
                             text: "Intermediate",
                             height: 30,
@@ -83,8 +86,10 @@ class LandingScreen extends StatelessWidget {
                           bottom: 120,
                           right: 60,
                           child: Label(
-                            borderColor: Theme.of(context).colorScheme.secondary,
-                            backgroundColor: Theme.of(context).colorScheme.background,
+                            borderColor:
+                                Theme.of(context).colorScheme.secondary,
+                            backgroundColor:
+                                Theme.of(context).colorScheme.background,
                             opacity: 0.7,
                             text: "Proficient",
                             height: 30,
@@ -121,17 +126,21 @@ class LandingScreen extends StatelessWidget {
                             widthFactor: 0.6,
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Theme.of(context).colorScheme.primary,
-                                foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                                backgroundColor:
+                                    Theme.of(context).colorScheme.primary,
+                                foregroundColor:
+                                    Theme.of(context).colorScheme.onPrimary,
                               ),
                               // Continue => Anonymous mode
                               onPressed: () async {
                                 try {
-                                  User? user = await AuthService().signInAnonymously();
+                                  User? user =
+                                      await AuthService().signInAnonymously();
                                   if (user != null) {
                                     context.go("/");
                                   } else {
-                                    toast(context, "Something went wrong (null)");
+                                    toast(
+                                        context, "Something went wrong (null)");
                                   }
                                 } catch (e) {
                                   toast(context, e.toString());
@@ -151,8 +160,10 @@ class LandingScreen extends StatelessWidget {
                             widthFactor: 0.6,
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Theme.of(context).colorScheme.surface,
-                                foregroundColor: Theme.of(context).colorScheme.onSurface,
+                                backgroundColor:
+                                    Theme.of(context).colorScheme.surface,
+                                foregroundColor:
+                                    Theme.of(context).colorScheme.onSurface,
                               ),
                               // Sign in => SignInPage
                               onPressed: () {
