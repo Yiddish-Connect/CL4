@@ -35,13 +35,27 @@ dependencies:
   email_validator: ^3.0.0
   form_validator: ^2.1.1
   firebase_messaging: ^14.9.4
-  flutter_local_notifications: ^17.2.2
   firebase_analytics: ^10.10.7
   awesome_notifications: ^0.9.3+1
+<<<<<<< HEAD
+
+
+  universal_io: ^2.2.2
+  scrollable_positioned_list: ^0.3.8
+  dash_chat_2: ^0.0.21
+  universal_html: ^2.2.4
+  flutter_local_notifications: ^17.2.3
+  http: ^1.2.2
+  geolocator: ^12.0.0
+  geocoding: ^3.0.0
+
+  
+=======
   universal_io: ^2.2.2
   scrollable_positioned_list: ^0.3.8
   dash_chat_2: ^0.0.21
 
+>>>>>>> d8897326d407213b04bf24182ef3ad64d422f415
 dev_dependencies:
   flutter_test:
     sdk: flutter
