@@ -44,7 +44,7 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyCYg35X-5ocVDYFNSZuH5IoR_NVeUIBcuc',
+    apiKey: 'AIzaSyCYg35X-5ocVDYFNSZuH5IoR_NVeUIBcuc', //api key in firebase
     appId: '1:447187951174:web:87f8416583c6a578f9b447',
     messagingSenderId: '447187951174',
     projectId: 'ydapp-830fe',
@@ -53,7 +53,7 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBA6cONKgiSYXLaVSU0pABzO-vPQ5_4zX0',
+    apiKey: 'AIzaSyBA6cONKgiSYXLaVSU0pABzO-vPQ5_4zX0', //api key in firebase
     appId: '1:447187951174:android:61d56137bbc9eb00f9b447',
     messagingSenderId: '447187951174',
     projectId: 'ydapp-830fe',
@@ -61,23 +61,24 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyCxtYC4xI3m5ZCle-HYLbOXrbjNzsfh46I',
+    apiKey: 'AIzaSyCxtYC4xI3m5ZCle-HYLbOXrbjNzsfh46I', //api key in firebase
     appId: '1:447187951174:ios:c1f9145802338ff7f9b447',
     messagingSenderId: '447187951174',
     projectId: 'ydapp-830fe',
     storageBucket: 'ydapp-830fe.appspot.com',
-    iosClientId: '447187951174-isl6gichoftovpct8jcpcahddfdujd00.apps.googleusercontent.com',
+    iosClientId:
+        '447187951174-isl6gichoftovpct8jcpcahddfdujd00.apps.googleusercontent.com',
     iosBundleId: 'com.yiddishland.yiddishconnect',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyCxtYC4xI3m5ZCle-HYLbOXrbjNzsfh46I',
+    apiKey: 'AIzaSyCxtYC4xI3m5ZCle-HYLbOXrbjNzsfh46I', //api key in firebase
     appId: '1:447187951174:ios:c1f9145802338ff7f9b447',
     messagingSenderId: '447187951174',
     projectId: 'ydapp-830fe',
     storageBucket: 'ydapp-830fe.appspot.com',
-    iosClientId: '447187951174-isl6gichoftovpct8jcpcahddfdujd00.apps.googleusercontent.com',
+    iosClientId:
+        '447187951174-isl6gichoftovpct8jcpcahddfdujd00.apps.googleusercontent.com',
     iosBundleId: 'com.yiddishland.yiddishconnect',
   );
-
 }

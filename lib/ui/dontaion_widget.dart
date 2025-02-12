@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 var donationUrl =
-    'https://nowpayments.io/embeds/donation-widget?api_key=YWW7YS9-A114J08-N1A0YG2-AWGQX2P';
+    'https://nowpayments.io/embeds/donation-widget?api_key=YWW7YS9-A114J08-N1A0YG2-AWGQX2P'; //api key in firebase donationUrl_key
 
 //donation screen dosen't work on web
 //see https://pub.dev/packages/webview_flutter form more details
