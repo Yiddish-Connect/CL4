@@ -15,6 +15,7 @@ import 'package:universal_html/js.dart';
 
 import 'package:yiddishconnect/ui/notification/notificationProvider.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:yiddishconnect/utils/firebase_remoteConfig.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -48,6 +49,7 @@ void main() async {
   }
 
   geoLocation();
+  initRemoteConfig();
   runApp(MyApp());
 }
 
@@ -61,10 +63,9 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   FirebaseMessaging messaging = FirebaseMessaging.instance;
   OverlayEntry? entry; // Keep this if it's needed, otherwise remove it.
-  
+
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
-}
 
   @override
   void initState() {
