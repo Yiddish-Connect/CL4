@@ -4,6 +4,8 @@ import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, kIsWeb, TargetPlatform;
 
+import 'package:yiddishconnect/utils/firebase_remote_config.dart';
+
 /// Default [FirebaseOptions] for use with your Firebase apps.
 ///
 /// Example:
@@ -14,6 +16,8 @@ import 'package:flutter/foundation.dart'
 ///   options: DefaultFirebaseOptions.currentPlatform,
 /// );
 /// ```
+///
+
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
@@ -43,8 +47,9 @@ class DefaultFirebaseOptions {
     }
   }
 
-  static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyCYg35X-5ocVDYFNSZuH5IoR_NVeUIBcuc', //api key in firebase
+  static final FirebaseOptions web = FirebaseOptions(
+    apiKey: FirebaseRemoteConfigHelper.instance
+        .getString("apiKey_FirebaseOptions_web"), //api key in firebase
     appId: '1:447187951174:web:87f8416583c6a578f9b447',
     messagingSenderId: '447187951174',
     projectId: 'ydapp-830fe',
@@ -52,16 +57,18 @@ class DefaultFirebaseOptions {
     storageBucket: 'ydapp-830fe.appspot.com',
   );
 
-  static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBA6cONKgiSYXLaVSU0pABzO-vPQ5_4zX0', //api key in firebase
+  static final FirebaseOptions android = FirebaseOptions(
+    apiKey: FirebaseRemoteConfigHelper.instance
+        .getString("apiKey_FirebaseOptions_android"), //api key in firebase
     appId: '1:447187951174:android:61d56137bbc9eb00f9b447',
     messagingSenderId: '447187951174',
     projectId: 'ydapp-830fe',
     storageBucket: 'ydapp-830fe.appspot.com',
   );
 
-  static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyCxtYC4xI3m5ZCle-HYLbOXrbjNzsfh46I', //api key in firebase
+  static final FirebaseOptions ios = FirebaseOptions(
+    apiKey: FirebaseRemoteConfigHelper.instance
+        .getString("apiKey_FirebaseOptions_ios"), //api key in firebase
     appId: '1:447187951174:ios:c1f9145802338ff7f9b447',
     messagingSenderId: '447187951174',
     projectId: 'ydapp-830fe',
@@ -71,8 +78,9 @@ class DefaultFirebaseOptions {
     iosBundleId: 'com.yiddishland.yiddishconnect',
   );
 
-  static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyCxtYC4xI3m5ZCle-HYLbOXrbjNzsfh46I', //api key in firebase
+  static final FirebaseOptions macos = FirebaseOptions(
+    apiKey: FirebaseRemoteConfigHelper.instance
+        .getString("apiKey_FirebaseOptions_mac"), //api key in firebase
     appId: '1:447187951174:ios:c1f9145802338ff7f9b447',
     messagingSenderId: '447187951174',
     projectId: 'ydapp-830fe',

@@ -15,7 +15,7 @@ import 'package:universal_html/js.dart';
 
 import 'package:yiddishconnect/ui/notification/notificationProvider.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:yiddishconnect/utils/firebase_remoteConfig.dart';
+import 'package:yiddishconnect/utils/firebase_remote_config.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

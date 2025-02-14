@@ -30,3 +30,7 @@ initRemoteConfig() async {
 
   remoteConfigIsLoading = true;
 }
+
+class FirebaseRemoteConfigHelper {
+  static final FirebaseRemoteConfig instance = _remoteConfig;
+}
