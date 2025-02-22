@@ -6,7 +6,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:universal_io/io.dart';
@@ -43,6 +45,17 @@ class PreferenceProvider extends ChangeNotifier {
     _selectedInterests.remove(interest);
     notifyListeners();
   }
+
+  DateTime? _dob;
+  DateTime? get dob => _dob;
+  set dob(DateTime? date) {
+    _dob = date;
+  print(_dob);
+  notifyListeners();
+    
+  }
+ 
+
 }
 
 class PreferenceScreen extends StatelessWidget {
@@ -52,21 +65,87 @@ class PreferenceScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (context) => PreferenceProvider(),
-      child: MultiSteps(
-        title: "Preference",
-        hasButton: true,
-        hasProgress: true,
-        onComplete: () {
-          _dialogBuilder(context);
-          // context.go("/");
+      child: Builder(
+        builder: (context) {
+          return MultiSteps(
+            title: "Preference",
+            hasButton: true,
+            hasProgress: true,
+            onComplete: () async {
+              final preferenceProvider = Provider.of<PreferenceProvider>(context, listen: false);
+              final name = preferenceProvider.name.trim();
+              final dob = preferenceProvider.dob;
+              final interests = preferenceProvider.selectedInterests;
+
+             
+              if (name.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("Please enter your name"))
+                );
+                return;
+              }
+
+              
+              if (dob == null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("Please select your Date of Birth"))
+                );
+                return;
+              }
+              if (dob.isAfter(DateTime.now())) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("Date of Birth cannot be in the future"))
+                );
+                return;
+              }
+
+              
+              if (interests.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("Please select at least one interest"))
+                );
+                return;
+              }
+              User? user = FirebaseAuth.instance.currentUser;
+              if (user == null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("User not logged in"))
+                );
+                return;
+              }
+              String userId = user.uid;
+
+              try {
+                await FirebaseFirestore.instance.collection('profiles').doc(userId).set({
+                  'name': name,
+                  'DOB': DateFormat('yyyy-MM-dd').format(dob), 
+                  'Interest': interests,
+                  'uid': userId,
+                  'createdAt': DateTime.now().millisecondsSinceEpoch.toString(),
+                }, SetOptions(merge: true));
+
+                _dialogBuilder(context);
+              } catch (e) {
+                print("Error updating Firestore: $e");
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("Error updating profile"))
+                );
+              }
+            },
+            steps: [
+              OneStep(
+                  title: "What's your name?",builder: (prev, next) => _Step1()),
+              OneStep(
+                  title: "When is your Birthday?",builder: (prev, next) => _Step5()),
+              OneStep(
+                  title: "Location",builder: (prev, next) => _Step2()),
+              OneStep(
+                  title: "Select up to 5 interests",builder: (prev, next) => _Step3()),
+              OneStep(
+                  title: "Upload your photos",builder: (prev, next) => _Step4()),
+            ],
+          );
         },
-        steps: [
-          OneStep(title: "What's your name?", builder: (prev, next) => _Step1()),
-          OneStep(title: "When is your Birthday?", builder: (prev, next) => _Step5()),
-          OneStep(title: "Location", builder: (prev, next) => _Step2()),
-          OneStep(title: "Select up to 5 interests", builder: (prev, next) => _Step3()),
-          OneStep(title: "Upload your photos", builder: (prev, next) => _Step4()),
-        ],
       ),
     );
   }
@@ -79,11 +158,11 @@ class PreferenceScreen extends StatelessWidget {
         child: Container(
           constraints: BoxConstraints(
             maxWidth: 500,
-            maxHeight: 450
+            maxHeight: 450,
           ),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.all(Radius.circular(20)),
-            color: Theme.of(context).colorScheme.background,
+            color: Theme.of(context).colorScheme.surface,
           ),
           padding: EdgeInsets.symmetric(horizontal: 24),
           child: Column(
@@ -118,12 +197,9 @@ class PreferenceScreen extends StatelessWidget {
                       ),
                     ),
                     Align(
-                      alignment: Alignment.center,
-                      child: Icon(
-                        Icons.check,
-                        color: Theme.of(context).colorScheme.surface,
-                      )
-                    )
+                        alignment: Alignment.center,
+                        child: Icon(Icons.check,
+                            color: Theme.of(context).colorScheme.surface))
                   ],
                 ),
               ),
@@ -147,26 +223,26 @@ class PreferenceScreen extends StatelessWidget {
                 child: FractionallySizedBox(
                   widthFactor: 0.8,
                   child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                    ),
-                    onPressed: () => context.go("/"),
-                    child: Text("Get Started")
-                  ),
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                      ),
+                      onPressed: () => context.go("/"),
+                      child: Text("Get Started")),
                 ),
               )
             ],
           ),
-        )
+        ),
       ),
     );
   }
 }
 
+
 // What's your name
 class _Step1 extends StatelessWidget {
-  _Step1 ({super.key});
+  _Step1 ();
   final TextEditingController nameController = TextEditingController();
 
   @override
@@ -186,12 +262,15 @@ class _Step1 extends StatelessWidget {
                 maxHeight: 300,
                 maxWidth: 300
             ),
-            child: TextField(
+            child: TextFormField(
               controller: nameController,
               onChanged: (value) {
-                print("OnChange... value is ${value}");
+                print("OnChange... value is $value");
                 Provider.of<PreferenceProvider>(context, listen: false).name = value;
-              },
+                //Provider.of<PreferenceProvider>(context, listen: false).UploadData(value,'name');
+              },             
+              maxLength: 70,
+              
             )
         );
       },
@@ -201,7 +280,7 @@ class _Step1 extends StatelessWidget {
 
 // Location
 class _Step2 extends StatelessWidget {
-  const _Step2({super.key});
+  const _Step2();
 
   @override
   Widget build(BuildContext context) {
@@ -211,7 +290,7 @@ class _Step2 extends StatelessWidget {
 
 // Select up to 5 interests
 class _Step3 extends StatelessWidget {
-  const _Step3({super.key});
+  const _Step3();
 
   static const List<String> _interests = [
     'Gaming', 'Dancing', 'Language', 'Music', 'Movie',
@@ -255,6 +334,7 @@ class _Step3 extends StatelessWidget {
                       } else if (!selected) {
                         preferenceProvider.removeInterest(_interests[index]);
                       }
+                      //Provider.of<PreferenceProvider>(context, listen: false).//UploadData(_interests[index],'interests');             
                     },
                     backgroundColor: Colors.white,
                     labelStyle: TextStyle(color: isSelected ? Colors.white : Colors.purple),
@@ -282,7 +362,7 @@ class _Step3 extends StatelessWidget {
 
 // Upload your photos
 class _Step4 extends StatefulWidget {
-  const _Step4({super.key});
+  const _Step4();
 
   @override
   State<_Step4> createState() => _Step4State();
@@ -315,7 +395,7 @@ class _Step4State extends State<_Step4> {
                         StaggeredGridTile.count(
                           crossAxisCellCount: index == 0 ? 2 : 1,
                           mainAxisCellCount: index == 0 ? 2 : 1,
-                          child: Container(
+                          child: SizedBox(
                             width: itemSize,
                             height: itemSize,
                             child: ImageTile(
@@ -354,11 +434,11 @@ class ImageTile extends StatelessWidget {
   final ValueChanged<dynamic> onImageSelected;
 
   const ImageTile({
-    Key? key,
+    super.key,
     required this.imageFile,
     required this.webImage,
     required this.onImageSelected,
-  }) : super(key: key);
+  });
 
   Future<void> uploadImage(dynamic file, String userId) async {
     try {
@@ -440,11 +520,13 @@ class ImageTile extends StatelessWidget {
                           if (kIsWeb) {
                             Uint8List fileBytes = await files.first.readAsBytes();
                             onImageSelected(fileBytes);
-                            await uploadImage(fileBytes, userId);
+                            //When you wanna upload images on each try uncomment it
+                            //await uploadImage(fileBytes, userId);
                           } else {
                             File imageFile = File(croppedFile.path);
                             onImageSelected(imageFile);
-                            await uploadImage(imageFile, userId);
+                            //When you wanna upload images on each try uncomment it
+                            //await uploadImage(imageFile, userId);
                           }
                         }
                       }
@@ -463,7 +545,7 @@ class ImageTile extends StatelessWidget {
   }
 }
 
-class _Step5 extends StatefulWidget  {
+class _Step5 extends StatefulWidget {
   @override
   _Step5State createState() => _Step5State();
 }
@@ -483,6 +565,8 @@ class _Step5State extends State<_Step5> {
       setState(() {
         _selectedDate = picked;
       });
+      // Update the DOB in PreferenceProvider
+      Provider.of<PreferenceProvider>(context, listen: false).dob = picked;
     }
   }
 
@@ -497,14 +581,12 @@ class _Step5State extends State<_Step5> {
             onPressed: () => _pickDate(context),
             child: Text(
               _selectedDate == null
-                  ? 'Select Date of Birth '
+                  ? 'Select Date of Birth'
                   : 'Date of Birth: ${DateFormat('yyyy-MM-dd').format(_selectedDate!)}',
             ),
           ),
           SizedBox(height: 20),
-
           // Other widgets can go here
-
         ],
       ),
     );
