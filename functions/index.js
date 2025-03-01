@@ -104,3 +104,6 @@ exports.sendNotificationOnNewFriendRequest = functions.firestore
         console.log("No tokens available for user:", receiverId);
       }
     });
+
+
+

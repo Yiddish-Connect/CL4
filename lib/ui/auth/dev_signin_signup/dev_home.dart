@@ -68,7 +68,8 @@ class DevHomeScreen extends StatelessWidget {
               } else {
                 var url = Uri.http(
                     "nowpayments.io", '/embeds/donation-widget', {
-                  "api_key": "YWW7YS9-A114J08-N1A0YG2-AWGQX2P"
+                  "api_key":
+                      RemoteConfigHelper.remoteConfig.getString("dev_home_Key")
                 }); //api key in firebase dev_home_Key
                 await launchUrl(url);
               }

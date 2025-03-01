@@ -30,3 +30,7 @@ initRemoteConfig() async {
 
   remoteConfigIsLoading = true;
 }
+
+class RemoteConfigHelper {
+  static final remoteConfig = _remoteConfig;
+}

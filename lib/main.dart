@@ -8,24 +8,19 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:yiddishconnect/geo.dart';
 import 'package:yiddishconnect/models/notification_controller.dart';
 import 'package:yiddishconnect/router.dart';
-import 'package:yiddishconnect/utils/web_notification.dart';
 import 'firebase_options.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:universal_html/js.dart';
 
 import 'package:yiddishconnect/ui/notification/notificationProvider.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:yiddishconnect/utils/firebase_remoteConfig.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-
-  //FirebaseMessaging.instance.getToken().then((onValue) => {
-  //print("token $onValue")
-  //}); // The then statement prints the FCM token to the console
+  initRemoteConfig();
 
   await AwesomeNotifications().initialize(null, [
     NotificationChannel(
@@ -49,7 +44,6 @@ void main() async {
   }
 
   geoLocation();
-  initRemoteConfig();
   runApp(MyApp());
 }
 

@@ -2,13 +2,14 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:yiddishconnect/utils/firebase_remoteConfig.dart';
 
 var testEnpoint = 'https://jsonplaceholder.typicode.com/albums/1';
 var testApiEndpoint =
     'https://ip-geo-location.p.rapidapi.com/ip/check?format=json&language=en';
 
-var testKey =
-    "e8be3a5e5cmsh25d7154846f6ff8p11e51bjsna502b14b952b"; //api key in firebase geo_dartKey
+var testKey = RemoteConfigHelper.remoteConfig
+    .getString("geo_dartKey"); //api key in firebase geo_dartKey
 
 var testHost = "ip-geo-location.p.rapidapi.com";
 
@@ -17,8 +18,8 @@ Future<http.Response> getAlbum() {
     Uri.parse(testApiEndpoint),
     headers: {
       "Content-Type": "application/json",
-      "x-rapidapi-key":
-          "d6c743e501msh706663273b9dfc7p190bb9jsnabc77f7cc357", //api key in firebase geo_x_rapidapi_key
+      "x-rapidapi-key": RemoteConfigHelper.remoteConfig.getString(
+          "geo_x_rapidapi_key"), //api key in firebase geo_x_rapidapi_key
       "x-rapidapi-host": "geolocation53.p.rapidapi.com"
     },
   );
