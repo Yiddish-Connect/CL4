@@ -1,9 +1,7 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:yiddishconnect/services/firebaseAuthentication.dart';
-import 'package:yiddishconnect/utils/firebase_remoteConfig.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
 
 class DevHomeScreen extends StatelessWidget {
@@ -66,12 +64,6 @@ class DevHomeScreen extends StatelessWidget {
             onPressed: () async {
               var url = Uri.parse(
                   "https://nowpayments.io/embeds/donation-widget?api_key=YWW7YS9-A114J08-N1A0YG2-AWGQX2P");
-              print("  ");
-              print("  ");
-              print(url.toString());
-              print("  ");
-              print("  ");
-              print("  ");
               await launchUrl(url);
             },
           )
