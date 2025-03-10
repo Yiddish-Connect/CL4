@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -63,13 +62,9 @@ class DevHomeScreen extends StatelessWidget {
           ElevatedButton(
             child: Text("donate"),
             onPressed: () async {
-              if (!kIsWeb) {
-                context.go("/dontaion");
-              } else {
-                var url = Uri.http("nowpayments.io", '/embeds/donation-widget',
-                    {"api_key": "YWW7YS9-A114J08-N1A0YG2-AWGQX2P"});
-                await launchUrl(url);
-              }
+              var url = Uri.parse(
+                  "https://nowpayments.io/embeds/donation-widget?api_key=YWW7YS9-A114J08-N1A0YG2-AWGQX2P");
+              await launchUrl(url);
             },
           )
         ],

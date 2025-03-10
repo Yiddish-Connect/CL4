@@ -23,14 +23,6 @@
   <script src="https://www.gstatic.com/firebasejs/7.14.4/firebase-messaging.js"></script>
 </head>
 <body>
-<<<<<<< HEAD
-  <script src="./firebase-messaging-sw.js"></script>
-  <script src="main.dart.js" type="application/javascript"></script>
-  <script>
-    window.addEventListener('load', function(ev) {
-      // Download main.dart.js
-      _flutter.loader.loadEntrypoint({
-=======
 <script>
   window.addEventListener('load', async function(ev) {
     try {
@@ -38,7 +30,6 @@
       console.log('ServiceWorker registered with scope:', registration.scope);
 
       const engineInitializer = await _flutter.loader.loadEntrypoint({
->>>>>>> d8897326d407213b04bf24182ef3ad64d422f415
         serviceWorker: {
           serviceWorkerVersion: serviceWorkerVersion,
         }
@@ -59,7 +50,7 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-messaging.js"></script>
 <script>
   var firebaseConfig = {
-    apiKey: "AIzaSyCYg35X-5ocVDYFNSZuH5IoR_NVeUIBcuc",
+    apiKey: "AIzaSyCYg35X-5ocVDYFNSZuH5IoR_NVeUIBcuc",//api key in firebase apiKey_FirebaseOptions_indexhtml
     databaseURL: "ydapp-830fe.firebaseio.com",
     authDomain: "ydapp-830fe.firebaseapp.com",
     projectId: "ydapp-830fe",

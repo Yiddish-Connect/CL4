@@ -37,7 +37,6 @@ dependencies:
   firebase_messaging: ^14.9.4
   firebase_analytics: ^10.10.7
   awesome_notifications: ^0.9.3+1
-<<<<<<< HEAD
 
 
   universal_io: ^2.2.2
@@ -48,16 +47,11 @@ dependencies:
   http: ^1.2.2
   geolocator: ^12.0.0
   geocoding: ^3.0.0
+  webview_flutter: ^3.0.3
+  firebase_remote_config: ^4.3.14
+  cloud_functions: ^4.7.6
 
   
-=======
-  universal_io: ^2.2.2
-  scrollable_positioned_list: ^0.3.8
-  dash_chat_2: ^0.0.21
-  http: ^1.2.2
-  webview_flutter: ^3.0.0
-
->>>>>>> d8897326d407213b04bf24182ef3ad64d422f415
 dev_dependencies:
   flutter_test:
     sdk: flutter
