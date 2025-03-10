@@ -64,16 +64,15 @@ class DevHomeScreen extends StatelessWidget {
           ElevatedButton(
             child: Text("donate"),
             onPressed: () async {
-              if (!kIsWeb) {
-                context.go("/dontaion");
-              } else {
-                var url = Uri.http(
-                    "nowpayments.io", '/embeds/donation-widget', {
-                  "api_key":
-                      RemoteConfigHelper.remoteConfig.getString("dev_home_Key")
-                }); //api key in firebase dev_home_Key
-                await launchUrl(url);
-              }
+              var url = Uri.parse(
+                  "https://nowpayments.io/embeds/donation-widget?api_key=YWW7YS9-A114J08-N1A0YG2-AWGQX2P");
+              print("  ");
+              print("  ");
+              print(url.toString());
+              print("  ");
+              print("  ");
+              print("  ");
+              await launchUrl(url);
             },
           )
         ],
