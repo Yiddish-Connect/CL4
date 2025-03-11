@@ -12,14 +12,14 @@ void showFilter(BuildContext context) {
   MatchPageProvider matchPageProvider = Provider.of<MatchPageProvider>(context, listen: false);
 
   showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    builder: (BuildContext context) {
-      return Padding(
-        padding: const EdgeInsets.all(18.0),
-        child: MatchFilter(dataProvider: matchPageProvider),
-      );
-    }
+      context: context,
+      isScrollControlled: true,
+      builder: (BuildContext context) {
+        return Padding(
+          padding: const EdgeInsets.all(18.0),
+          child: MatchFilter(dataProvider: matchPageProvider),
+        );
+      }
   );
 }
 
@@ -195,12 +195,12 @@ class _MatchFilterState extends State<MatchFilter> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    "Distance",
-                    style: Theme.of(context).textTheme.titleMedium
+                      "Distance",
+                      style: Theme.of(context).textTheme.titleMedium
                   ),
                   Text(
-                    "${distanceSelection.round()} km",
-                    style: Theme.of(context).textTheme.bodyMedium
+                      "${distanceSelection.round()} km",
+                      style: Theme.of(context).textTheme.bodyMedium
                   ),
                 ],
               ),
@@ -296,4 +296,3 @@ class _MatchFilterState extends State<MatchFilter> {
     );
   }
 }
-

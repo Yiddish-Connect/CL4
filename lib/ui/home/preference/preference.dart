@@ -50,11 +50,11 @@ class PreferenceProvider extends ChangeNotifier {
   DateTime? get dob => _dob;
   set dob(DateTime? date) {
     _dob = date;
-  print(_dob);
-  notifyListeners();
-    
+    print(_dob);
+    notifyListeners();
+
   }
- 
+
 
 }
 
@@ -77,39 +77,39 @@ class PreferenceScreen extends StatelessWidget {
               final dob = preferenceProvider.dob;
               final interests = preferenceProvider.selectedInterests;
 
-             
+
               if (name.isEmpty) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text("Please enter your name"))
+                    SnackBar(content: Text("Please enter your name"))
                 );
                 return;
               }
 
-              
+
               if (dob == null) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text("Please select your Date of Birth"))
+                    SnackBar(content: Text("Please select your Date of Birth"))
                 );
                 return;
               }
               if (dob.isAfter(DateTime.now())) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text("Date of Birth cannot be in the future"))
+                    SnackBar(content: Text("Date of Birth cannot be in the future"))
                 );
                 return;
               }
 
-              
+
               if (interests.isEmpty) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text("Please select at least one interest"))
+                    SnackBar(content: Text("Please select at least one interest"))
                 );
                 return;
               }
               User? user = FirebaseAuth.instance.currentUser;
               if (user == null) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text("User not logged in"))
+                    SnackBar(content: Text("User not logged in"))
                 );
                 return;
               }
@@ -118,7 +118,7 @@ class PreferenceScreen extends StatelessWidget {
               try {
                 await FirebaseFirestore.instance.collection('profiles').doc(userId).set({
                   'name': name,
-                  'DOB': DateFormat('yyyy-MM-dd').format(dob), 
+                  'DOB': DateFormat('yyyy-MM-dd').format(dob),
                   'Interest': interests,
                   'uid': userId,
                   'createdAt': DateTime.now().millisecondsSinceEpoch.toString(),
@@ -128,7 +128,7 @@ class PreferenceScreen extends StatelessWidget {
               } catch (e) {
                 print("Error updating Firestore: $e");
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text("Error updating profile"))
+                    SnackBar(content: Text("Error updating profile"))
                 );
               }
             },
@@ -268,9 +268,9 @@ class _Step1 extends StatelessWidget {
                 print("OnChange... value is $value");
                 Provider.of<PreferenceProvider>(context, listen: false).name = value;
                 //Provider.of<PreferenceProvider>(context, listen: false).UploadData(value,'name');
-              },             
+              },
               maxLength: 70,
-              
+
             )
         );
       },
@@ -311,7 +311,7 @@ class _Step3 extends StatelessWidget {
     // print("rebuild!!");
     return Container(
       constraints: BoxConstraints(
-        maxWidth: 600
+          maxWidth: 600
       ),
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -334,7 +334,7 @@ class _Step3 extends StatelessWidget {
                       } else if (!selected) {
                         preferenceProvider.removeInterest(_interests[index]);
                       }
-                      //Provider.of<PreferenceProvider>(context, listen: false).//UploadData(_interests[index],'interests');             
+                      //Provider.of<PreferenceProvider>(context, listen: false).//UploadData(_interests[index],'interests');
                     },
                     backgroundColor: Colors.white,
                     labelStyle: TextStyle(color: isSelected ? Colors.white : Colors.purple),
@@ -392,27 +392,31 @@ class _Step4State extends State<_Step4> {
                       mainAxisSpacing: 3,
                       crossAxisSpacing: 3,
                       children: List.generate(6, (index) =>
-                        StaggeredGridTile.count(
-                          crossAxisCellCount: index == 0 ? 2 : 1,
-                          mainAxisCellCount: index == 0 ? 2 : 1,
-                          child: SizedBox(
-                            width: itemSize,
-                            height: itemSize,
-                            child: ImageTile(
-                              imageFile: _images[index],
-                              webImage: _webImages[index],
-                              onImageSelected: (file) {
-                                setState(() {
-                                  if (kIsWeb) {
-                                    _webImages[index] = file;
-                                  } else {
-                                    _images[index] = file;
-                                  }
-                                });
-                              },
+                          StaggeredGridTile.count(
+                            crossAxisCellCount: index == 0 ? 2 : 1,
+                            mainAxisCellCount: index == 0 ? 2 : 1,
+                            child: SizedBox(
+                              width: itemSize,
+                              height: itemSize,
+                              child: ImageTile(
+                                imageFile: _images[index],
+                                webImage: _webImages[index],
+                                onImageSelected: (file) {
+                                  setState(() {
+                                    if (kIsWeb) {
+                                      _webImages[index] = file;
+                                    } else {
+                                      _images[index] = file;
+                                    }
+                                  });
+
+// ✅ Notify provider that an image is added
+                                  Provider.of<PreferenceProvider>(context, listen: false).notifyListeners();
+
+                                },
+                              ),
                             ),
                           ),
-                        ),
                       ),
                     );
                   },
@@ -440,34 +444,40 @@ class ImageTile extends StatelessWidget {
     required this.onImageSelected,
   });
 
-  Future<void> uploadImage(dynamic file, String userId) async {
+  Future<void> uploadImageAndStoreInFirestore(dynamic file, String userId) async {
     try {
       String fileName = DateTime.now().millisecondsSinceEpoch.toString();
-      // get a reference to storage root
       Reference storageRef = FirebaseStorage.instance.ref().child('user_$userId/$fileName');
 
       UploadTask uploadTask;
+      SettableMetadata metadata = SettableMetadata(contentType: "image/jpeg"); // Adjust format if needed
 
       if (kIsWeb) {
-        // For web, handle as Uint8List
+        // ✅ Web Image Upload
         Uint8List fileBytes = file;
-        uploadTask = storageRef.putData(fileBytes);
+        uploadTask = storageRef.putData(fileBytes, metadata);
       } else {
-        // For mobile, handle as File
+        // ✅ Mobile Image Upload
         File mobileFile = file;
-        uploadTask = storageRef.putFile(mobileFile);
+        uploadTask = storageRef.putFile(mobileFile, metadata);
       }
-  
+
       TaskSnapshot taskSnapshot = await uploadTask;
       String downloadUrl = await taskSnapshot.ref.getDownloadURL();
-  
+
+      // ✅ Store Image URL in Firestore under user's profile
       await FirebaseFirestore.instance.collection('profiles').doc(userId).update({
         'imageUrls': FieldValue.arrayUnion([downloadUrl]),
       });
+
+      print("Image uploaded successfully: $downloadUrl");
+
     } catch (e) {
-      print('Error: $e');
+      print('Error uploading image: $e');
     }
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -504,37 +514,37 @@ class ImageTile extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.only(bottom: 20.0),
               child: ElevatedButton(
-                onPressed: () async {
-                  try {
-                    final files = await ImageHelper().pickImage();
-                    if (files.isNotEmpty) {
-                      final croppedFile = await ImageHelper().crop(
-                        file: files.first,
-                        context: context,
-                      );
-                      if (croppedFile != null) {
-                        // to be fixed
-                        User? user = FirebaseAuth.instance.currentUser;
-                        if (user != null) {
-                          String userId = user.uid;
-                          if (kIsWeb) {
-                            Uint8List fileBytes = await files.first.readAsBytes();
-                            onImageSelected(fileBytes);
-                            //When you wanna upload images on each try uncomment it
-                            //await uploadImage(fileBytes, userId);
-                          } else {
-                            File imageFile = File(croppedFile.path);
-                            onImageSelected(imageFile);
-                            //When you wanna upload images on each try uncomment it
-                            //await uploadImage(imageFile, userId);
-                          }
-                        }
-                      }
-                    }
-                  } catch (e) {
-                    print('$e');
-                  }
-                },
+    onPressed: () async {
+    try {
+    final files = await ImageHelper().pickImage();
+    if (files.isNotEmpty) {
+    final croppedFile = await ImageHelper().crop(
+    file: files.first,
+    context: context,
+    );
+    if (croppedFile != null) {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+    String userId = user.uid;
+    if (kIsWeb) {
+    Uint8List fileBytes = await files.first.readAsBytes();
+    onImageSelected(fileBytes);
+    await uploadImageAndStoreInFirestore(fileBytes, userId);  // ✅ Use correct function
+    } else {
+    File imageFile = File(croppedFile.path);
+    onImageSelected(imageFile);
+    await uploadImageAndStoreInFirestore(imageFile, userId);  // ✅ Use correct function
+    }
+    }
+    }
+    }
+    } catch (e) {
+    print('$e');
+    }
+    },
+
+
+
                 child: Text('Add'),
               ),
             ),
