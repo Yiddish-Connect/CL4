@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:io' if (dart.library.html) 'dart:html' as html;
 import 'dart:ui';
 
 import 'package:firebase_auth/firebase_auth.dart';
@@ -16,7 +16,6 @@ import 'package:intl/intl.dart';
 import 'package:yiddishconnect/utils/helpers.dart';
 import 'package:yiddishconnect/widgets/yd_multi_steps.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:provider/provider.dart';
 import 'package:yiddishconnect/utils/image_helper.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -24,7 +23,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'dart:io' if (dart.library.html) 'dart:html' as html;
+
 import 'package:flutter/foundation.dart';
 
 import 'package:flutter_map/flutter_map.dart';
@@ -125,9 +124,16 @@ class PreferenceProvider extends ChangeNotifier {
   }
 
   set practiceOptionsSelection(List<String> value) {
-    _practiceOptionsSelection = value;
-    notifyListeners();
+    if (_practiceOptionsSelection != value) {  // ✅ Check if values changed first
+      _practiceOptionsSelection = value;
+      notifyListeners();
+    } else {
+      debugPrint("❌ No Change: practiceOptionsSelection = $_practiceOptionsSelection");
+    }
   }
+
+
+
 }
 
 
@@ -333,27 +339,50 @@ class PreferenceScreen extends StatelessWidget {
 
 
 // What's your name
-class _Step1 extends StatelessWidget {
-  final TextEditingController nameController = TextEditingController();
+class _Step1 extends StatefulWidget {
+  @override
+  _Step1State createState() => _Step1State();
+}
+
+class _Step1State extends State<_Step1> {
+  late TextEditingController nameController;
+
+  @override
+  void initState() {
+    super.initState();
+    final preferenceProvider = Provider.of<PreferenceProvider>(context, listen: false);
+    nameController = TextEditingController(text: preferenceProvider.name);
+  }
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Consumer<PreferenceProvider>(
       builder: (context, preferenceProvider, child) {
-        nameController.text = preferenceProvider.name;
         return Container(
-            padding: EdgeInsets.all(30),
-            constraints: BoxConstraints(
-                maxHeight: 300,
-                maxWidth: 300
+          padding: const EdgeInsets.all(30),
+          constraints: const BoxConstraints(
+            maxHeight: 300,
+            maxWidth: 300,
+          ),
+          child: TextFormField(
+            controller: nameController,
+            onChanged: (value) {
+              if (preferenceProvider.name != value.trim()) {
+                preferenceProvider.name = value.trim();
+              }
+            },
+            maxLength: 70,
+            decoration: const InputDecoration(
+              labelText: "Enter your name",
+              border: OutlineInputBorder(),
             ),
-            child: TextFormField(
-              controller: nameController,
-              onChanged: (value) {
-                preferenceProvider.name = value;
-              },
-              maxLength: 70,
-            )
+          ),
         );
       },
     );

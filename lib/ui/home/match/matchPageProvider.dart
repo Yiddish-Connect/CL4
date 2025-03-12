@@ -2,48 +2,62 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:math';
+import 'package:flutter/foundation.dart'; // ✅ Import for listEquals
 
 class MatchPageProvider extends ChangeNotifier {
   int _maxDistance = 1000;
-  int _minAge = 18;  // Default min age
-  int _maxAge = 100; // Default max age
+  int _minAge = 18;
+  int _maxAge = 100;
   List<String> _practiceOptionsSelection = [];
-  List<String> _yiddishProficiencySelection = [];
+  String _yiddishProficiencySelection = "None"; // Ensure it's a single string
 
   int get maxDistance => _maxDistance;
   int get minAge => _minAge;
   int get maxAge => _maxAge;
   List<String> get practiceOptionsSelection => _practiceOptionsSelection;
-  List<String> get yiddishProficiencySelection => _yiddishProficiencySelection;
+  String get yiddishProficiencySelection => _yiddishProficiencySelection;
 
   set maxDistance(int value) {
-    _maxDistance = value;
-    notifyListeners();
+    if (_maxDistance != value) {
+      _maxDistance = value;
+      notifyListeners();
+    }
   }
 
   set minAge(int value) {
-    _minAge = value;
-    notifyListeners();
+    if (_minAge != value) {
+      _minAge = value;
+      notifyListeners();
+    }
   }
 
   set maxAge(int value) {
-    _maxAge = value;
-    notifyListeners();
+    if (_maxAge != value) {
+      _maxAge = value;
+      notifyListeners();
+    }
   }
 
-  set practiceOptionsSelection(List<String> value) {
-    _practiceOptionsSelection = value;
-    notifyListeners();
+  void updatePracticeOptions(List<String> newSelection) {
+    if (!listEquals(_practiceOptionsSelection, newSelection)) {
+      _practiceOptionsSelection = List.from(newSelection);
+      notifyListeners();
+      print("✅ Provider Updated Practice Options: $_practiceOptionsSelection");
+    } else {
+      print("❌ No Change Detected in Practice Options");
+    }
   }
 
-  set yiddishProficiencySelection(List<String> value) {
-    _yiddishProficiencySelection = value;
-    notifyListeners();
+  void setYiddishProficiency(String proficiency) {
+    if (_yiddishProficiencySelection != proficiency) {
+      _yiddishProficiencySelection = proficiency;
+      notifyListeners();
+    }
   }
 
-  // Haversine Formula: Calculate distance in miles
+  // 🔥 Haversine Formula: Calculate distance in miles
   double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
-    const double R = 3958.8;
+    const double R = 3958.8; // Radius of Earth in miles
     double dLat = (lat2 - lat1) * pi / 180;
     double dLon = (lon2 - lon1) * pi / 180;
 
@@ -55,7 +69,7 @@ class MatchPageProvider extends ChangeNotifier {
     return R * c;
   }
 
-  // Fetch Nearby Users from Firestore
+  // ✅ Fix: Fetch Nearby Users from Firestore
   Stream<List<Map<String, dynamic>>> getNearbyUsers() async* {
     User? user = FirebaseAuth.instance.currentUser;
     if (user == null) {
@@ -105,17 +119,5 @@ class MatchPageProvider extends ChangeNotifier {
 
     users.sort((a, b) => a['distance'].compareTo(b['distance']));
     yield users;
-  }
-
-  // Calculate Age from DOB
-  int? calculateAge(String? dobString) {
-    if (dobString == null) return null;
-    DateTime dob = DateTime.parse(dobString);
-    DateTime now = DateTime.now();
-    int age = now.year - dob.year;
-    if (now.month < dob.month || (now.month == dob.month && now.day < dob.day)) {
-      age--;
-    }
-    return age;
   }
 }

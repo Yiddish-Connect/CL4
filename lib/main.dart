@@ -1,49 +1,53 @@
 import 'package:awesome_notifications/awesome_notifications.dart';
-import 'package:english_words/english_words.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:provider/provider.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:yiddishconnect/models/notification_controller.dart';
 import 'package:yiddishconnect/router.dart';
-import 'firebase_options.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:yiddishconnect/ui/home/match/matchPageProvider.dart'; // ✅ Correct provider file
 import 'package:yiddishconnect/ui/notification/notificationProvider.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'firebase_options.dart';
+import 'package:english_words/english_words.dart'; // ✅ Fix for `WordPair`
+import 'package:flutter/foundation.dart'; // ✅ Fix for `kIsWeb`
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // ✅ Initialize Firebase
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  //FirebaseMessaging.instance.getToken().then((onValue) => {
-    //print("token $onValue")
-  //}); // The then statement prints the FCM token to the console
-
+  // ✅ Initialize Notifications
   await AwesomeNotifications().initialize(
-      null,
-      [
-        NotificationChannel(
-          channelGroupKey: "Basic",
-          channelKey: "Basic Channel",
-          channelName: "Basic Notifications",
-          channelDescription: "Basic Notifications",
-        )
-      ],
-      channelGroups: [
-        NotificationChannelGroup(
-          channelGroupKey: "Basic",
-          channelGroupName: "Basic Notifications",
-        )
-      ]);
+    null,
+    [
+      NotificationChannel(
+        channelGroupKey: "Basic",
+        channelKey: "Basic Channel",
+        channelName: "Basic Notifications",
+        channelDescription: "Basic Notifications",
+      ),
+    ],
+    channelGroups: [
+      NotificationChannelGroup(
+        channelGroupKey: "Basic",
+        channelGroupName: "Basic Notifications",
+      ),
+    ],
+  );
 
-  if(!kIsWeb) {
+  // ✅ Request notification permissions for non-web platforms
+  if (!kIsWeb) {
     bool isAllowed = await AwesomeNotifications().isNotificationAllowed();
     if (!isAllowed) {
       AwesomeNotifications().requestPermissionToSendNotifications();
     }
   }
-  runApp(MyApp());
+
+  runApp(const MyApp());
 }
 
 class MyApp extends StatefulWidget {
@@ -61,12 +65,7 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     listenToMessages();
-    AwesomeNotifications().setListeners(
-      onActionReceivedMethod: NotificationController.onActionReceivedMethod,
-      onNotificationCreatedMethod: NotificationController.onNotificationCreatedMethod,
-      onNotificationDisplayedMethod: NotificationController.onNotificationDisplayedMethod,
-      onDismissActionReceivedMethod: NotificationController.onDismissActionMethod,
-    );
+    setupNotificationListeners();
   }
 
   void listenToMessages() {
@@ -82,20 +81,30 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+  void setupNotificationListeners() {
+    AwesomeNotifications().setListeners(
+      onActionReceivedMethod: NotificationController.onActionReceivedMethod,
+      onNotificationCreatedMethod: NotificationController.onNotificationCreatedMethod,
+      onNotificationDisplayedMethod: NotificationController.onNotificationDisplayedMethod,
+      onDismissActionReceivedMethod: NotificationController.onDismissActionMethod,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => NotificationProvider()),
         ChangeNotifierProvider(create: (context) => MyAppState()),
+        ChangeNotifierProvider(create: (context) => MatchPageProvider()), // ✅ Corrected Provider
       ],
       child: MaterialApp.router(
         title: 'Yiddish Connect',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(seedColor: Color(0xfff3dbab)),
-          textTheme: TextTheme(
+          colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xfff3dbab)),
+          textTheme: const TextTheme(
             displayLarge: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w900, fontSize: 57.0),
             displayMedium: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w800, fontSize: 45.0),
             displaySmall: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.w700, fontSize: 36.0),
@@ -119,6 +128,7 @@ class _MyAppState extends State<MyApp> {
   }
 }
 
+// ✅ Fix: Corrected missing `WordPair` issue
 class MyAppState extends ChangeNotifier {
-  var current = WordPair.random(); // a random word
+  var current = WordPair.random();
 }

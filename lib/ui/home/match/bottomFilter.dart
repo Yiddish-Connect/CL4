@@ -25,7 +25,7 @@ void showFilter(BuildContext context) {
 class MatchFilter extends StatefulWidget {
   final MatchPageProvider dataProvider;
 
-  MatchFilter({super.key, required this.dataProvider});
+  const MatchFilter({super.key, required this.dataProvider});
 
   @override
   State<MatchFilter> createState() => _MatchFilterState();
@@ -44,7 +44,7 @@ class _MatchFilterState extends State<MatchFilter> {
     distanceSelection = widget.dataProvider.maxDistance.toDouble();
     ageRangeSelection = RangeValues(widget.dataProvider.minAge.toDouble(), widget.dataProvider.maxAge.toDouble());
 
-    // Load Practice Option (Only One)
+    // Load Practice Option
     if (widget.dataProvider.practiceOptionsSelection.isNotEmpty) {
       try {
         selectedPracticeOption = PracticeOption.values.firstWhere(
@@ -56,7 +56,7 @@ class _MatchFilterState extends State<MatchFilter> {
       }
     }
 
-    // Load Yiddish Proficiency (Only One)
+    // Load Yiddish Proficiency
     if (widget.dataProvider.yiddishProficiencySelection.isNotEmpty) {
       try {
         selectedProficiency = YiddishProficiency.values.firstWhere(
@@ -91,13 +91,9 @@ class _MatchFilterState extends State<MatchFilter> {
     );
   }
 
-  // Practice Option Selection (One Choice Only)
+  // ✅ Fixed: Practice Option Selection (Single Choice)
   Widget _buildPracticeOptionSelection() {
-    List<PracticeOption> options = [
-      PracticeOption.online,
-      PracticeOption.inPerson,
-      PracticeOption.hybrid,
-    ];
+    List<String> options = ["Remote", "In-Person", "Hybrid"];
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -108,14 +104,15 @@ class _MatchFilterState extends State<MatchFilter> {
           Wrap(
             spacing: 10,
             children: options.map((option) {
-              bool isSelected = selectedPracticeOption == option;
+              bool isSelected = widget.dataProvider.practiceOptionsSelection.contains(option);
+
               return ChoiceChip(
-                label: Text(option.toString().split('.').last),
+                label: Text(option),
                 selected: isSelected,
                 selectedColor: Colors.green,
                 onSelected: (selected) {
                   setState(() {
-                    selectedPracticeOption = selected ? option : null;
+                    widget.dataProvider.updatePracticeOptions([option]);
                   });
                 },
               );
@@ -126,7 +123,7 @@ class _MatchFilterState extends State<MatchFilter> {
     );
   }
 
-  // Yiddish Proficiency Selection (One Choice Only)
+  // ✅ Fixed: Yiddish Proficiency Selection (Single Choice)
   Widget _buildProficiencySelection() {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -216,23 +213,36 @@ class _MatchFilterState extends State<MatchFilter> {
     );
   }
 
-  // Action Buttons (Apply & Reset)
+  // ✅ Fixed: Apply & Reset Buttons
   Widget _buildActionButtons() {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          IconButton(icon: const Icon(Icons.refresh, size: 48), color: Colors.orange, onPressed: () {
-            setState(() {
-              selectedPracticeOption = null;
-              selectedProficiency = null;
-              distanceSelection = 1000.0;
-              ageRangeSelection = const RangeValues(0.0, 100.0);
-            });
-          }),
+          IconButton(
+            icon: const Icon(Icons.refresh, size: 48),
+            color: Colors.orange,
+            onPressed: () {
+              setState(() {
+                selectedPracticeOption = null;
+                selectedProficiency = null;
+                distanceSelection = 1000.0;
+                ageRangeSelection = const RangeValues(0.0, 100.0);
+              });
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.check, size: 48),
+            color: Colors.green,
+            onPressed: () {
+              widget.dataProvider.setYiddishProficiency(selectedProficiency!.toString().split('.').last);
+              Navigator.pop(context);
+            },
+          ),
         ],
       ),
     );
   }
-} // ✅ Closing bracket for _MatchFilterState
+}
+
