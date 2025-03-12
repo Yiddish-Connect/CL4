@@ -21,42 +21,62 @@ import 'package:yiddishconnect/utils/image_helper.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:io' if (dart.library.html) 'dart:html' as html;
 import 'package:flutter/foundation.dart';
 
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
+
+
+
 class PreferenceProvider extends ChangeNotifier {
   String _name = "";
+  List<String> _selectedInterests = [];
+  DateTime? _dob;
+  double? _latitude;
+  double? _longitude;
+
   String get name => _name;
-  set name (String name) {
+  List<String> get selectedInterests => _selectedInterests;
+  DateTime? get dob => _dob;
+  double? get latitude => _latitude;
+  double? get longitude => _longitude;
+
+  set name(String name) {
     _name = name;
-    print("notifyListeners()");
     notifyListeners();
   }
 
-  List<String> _selectedInterests = [];
-  List<String> get selectedInterests => _selectedInterests;
+  set dob(DateTime? date) {
+    _dob = date;
+    notifyListeners();
+  }
+
   void addInterest(String interest) {
     _selectedInterests.add(interest);
     notifyListeners();
   }
+
   void removeInterest(String interest) {
     _selectedInterests.remove(interest);
     notifyListeners();
   }
 
-  DateTime? _dob;
-  DateTime? get dob => _dob;
-  set dob(DateTime? date) {
-    _dob = date;
-    print(_dob);
+  void updateLocation(double lat, double lng) {
+    _latitude = lat;
+    _longitude = lng;
     notifyListeners();
-
+    print("Updated location: Latitude = $_latitude, Longitude = $_longitude"); // ✅ Debug log
   }
 
-
+  bool get hasValidLocation => _latitude != null && _longitude != null; // ✅ Added check
 }
+
+
+
 
 class PreferenceScreen extends StatelessWidget {
   const PreferenceScreen({super.key});
@@ -76,6 +96,9 @@ class PreferenceScreen extends StatelessWidget {
               final name = preferenceProvider.name.trim();
               final dob = preferenceProvider.dob;
               final interests = preferenceProvider.selectedInterests;
+              final latitude = Provider.of<PreferenceProvider>(context, listen: false).latitude;
+              final longitude = Provider.of<PreferenceProvider>(context, listen: false).longitude;
+
 
 
               if (name.isEmpty) {
@@ -85,20 +108,12 @@ class PreferenceScreen extends StatelessWidget {
                 return;
               }
 
-
               if (dob == null) {
                 ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text("Please select your Date of Birth"))
                 );
                 return;
               }
-              if (dob.isAfter(DateTime.now())) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Date of Birth cannot be in the future"))
-                );
-                return;
-              }
-
 
               if (interests.isEmpty) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -106,6 +121,14 @@ class PreferenceScreen extends StatelessWidget {
                 );
                 return;
               }
+
+              if (latitude == null || longitude == null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Please select a location"))
+                );
+                return;
+              }
+
               User? user = FirebaseAuth.instance.currentUser;
               if (user == null) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -113,6 +136,7 @@ class PreferenceScreen extends StatelessWidget {
                 );
                 return;
               }
+
               String userId = user.uid;
 
               try {
@@ -120,6 +144,9 @@ class PreferenceScreen extends StatelessWidget {
                   'name': name,
                   'DOB': DateFormat('yyyy-MM-dd').format(dob),
                   'Interest': interests,
+                  'location': (latitude != null && longitude != null)
+                      ? {'latitude': latitude, 'longitude': longitude}
+                      : FieldValue.delete(), // ✅ Removes 'location' if lat/lng is missing
                   'uid': userId,
                   'createdAt': DateTime.now().millisecondsSinceEpoch.toString(),
                 }, SetOptions(merge: true));
@@ -279,12 +306,80 @@ class _Step1 extends StatelessWidget {
 }
 
 // Location
-class _Step2 extends StatelessWidget {
+class _Step2 extends StatefulWidget {
   const _Step2();
 
   @override
+  _Step2State createState() => _Step2State();
+}
+
+class _Step2State extends State<_Step2> {
+  LatLng? selectedLocation;
+
+  @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Column(
+      children: [
+        Container(
+          height: 400,  // Set an explicit height
+          child: FlutterMap(
+            options: MapOptions(
+              initialCenter: LatLng(37.7749, -122.4194),
+              initialZoom: 10,
+              onTap: (tapPosition, point) {
+                setState(() {
+                  selectedLocation = point;
+                });
+
+                Provider.of<PreferenceProvider>(context, listen: false)
+                    .updateLocation(point.latitude, point.longitude);
+
+                print("Map tapped: Latitude = ${point.latitude}, Longitude = ${point.longitude}");
+              },
+            ),
+            children: [
+              TileLayer(
+                urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+              ),
+
+              if (selectedLocation != null)
+                MarkerLayer(
+                  markers: [
+                    Marker(
+                      width: 40.0,
+                      height: 40.0,
+                      point: selectedLocation!,
+                      child: Icon(Icons.location_pin, color: Colors.red, size: 40),
+                    ),
+
+                  ],
+                ),
+            ],
+          ),
+        ),
+    ElevatedButton(
+    onPressed: () async {
+    if (selectedLocation != null) {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+    await FirebaseFirestore.instance.collection('profiles').doc(user.uid).update({
+    'location': {
+    'latitude': selectedLocation!.latitude,
+    'longitude': selectedLocation!.longitude,
+    },
+    });
+
+    print("Location saved to Firestore: Latitude = ${selectedLocation!.latitude}, Longitude = ${selectedLocation!.longitude}");
+    }
+    } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text("Please select a location first.")));
+    }
+    },
+    child: Text("Confirm Location"),
+    ),
+      ],
+    );
   }
 }
 
@@ -447,17 +542,16 @@ class ImageTile extends StatelessWidget {
   Future<void> uploadImageAndStoreInFirestore(dynamic file, String userId) async {
     try {
       String fileName = DateTime.now().millisecondsSinceEpoch.toString();
-      Reference storageRef = FirebaseStorage.instance.ref().child('user_$userId/$fileName');
+      Reference storageRef = FirebaseStorage.instance.ref().child('user_uploads/$userId/$fileName');
+
 
       UploadTask uploadTask;
-      SettableMetadata metadata = SettableMetadata(contentType: "image/jpeg"); // Adjust format if needed
+      SettableMetadata metadata = SettableMetadata(contentType: "image/jpeg");
 
       if (kIsWeb) {
-        // ✅ Web Image Upload
         Uint8List fileBytes = file;
         uploadTask = storageRef.putData(fileBytes, metadata);
       } else {
-        // ✅ Mobile Image Upload
         File mobileFile = file;
         uploadTask = storageRef.putFile(mobileFile, metadata);
       }
@@ -465,17 +559,17 @@ class ImageTile extends StatelessWidget {
       TaskSnapshot taskSnapshot = await uploadTask;
       String downloadUrl = await taskSnapshot.ref.getDownloadURL();
 
-      // ✅ Store Image URL in Firestore under user's profile
+      // ✅ Ensure Image URL is stored in Firestore
       await FirebaseFirestore.instance.collection('profiles').doc(userId).update({
         'imageUrls': FieldValue.arrayUnion([downloadUrl]),
       });
 
       print("Image uploaded successfully: $downloadUrl");
-
     } catch (e) {
       print('Error uploading image: $e');
     }
   }
+
 
 
 
