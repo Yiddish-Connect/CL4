@@ -12,9 +12,13 @@ class MatchPageProvider extends ChangeNotifier {
   String _yiddishProficiencySelection = "None"; // Ensure it's a single string
 
   int get maxDistance => _maxDistance;
+
   int get minAge => _minAge;
+
   int get maxAge => _maxAge;
+
   List<String> get practiceOptionsSelection => _practiceOptionsSelection;
+
   String get yiddishProficiencySelection => _yiddishProficiencySelection;
 
   set maxDistance(int value) {
@@ -83,7 +87,12 @@ class MatchPageProvider extends ChangeNotifier {
         .get();
 
     if (!userDoc.exists) {
-      yield [];
+      print("⚠️ User profile missing, showing all users...");
+      yield* FirebaseFirestore.instance.collection('profiles')
+          .snapshots()
+          .map((snapshot) =>
+          snapshot.docs.map((doc) => doc.data() as Map<String, dynamic>)
+              .toList());
       return;
     }
 
@@ -109,7 +118,6 @@ class MatchPageProvider extends ChangeNotifier {
 
       if (lat != null && lon != null) {
         double distance = calculateDistance(userLat, userLon, lat, lon);
-
         if (_maxDistance == 1000 || distance <= _maxDistance) {
           data['distance'] = distance;
           users.add(data);
