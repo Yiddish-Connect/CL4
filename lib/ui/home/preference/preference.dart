@@ -29,8 +29,7 @@ import 'package:flutter/foundation.dart';
 
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
-
-
+import 'dart:math';
 
 class PreferenceProvider extends ChangeNotifier {
   String _name = "";
@@ -38,22 +37,27 @@ class PreferenceProvider extends ChangeNotifier {
   DateTime? _dob;
   double? _latitude;
   double? _longitude;
+  double _maxDistance = 50; // Default distance in miles
+  String _yiddishProficiencySelection = "None"; // Default proficiency level
+  List<String> _practiceOptionsSelection = []; // Default empty practice options
 
   String get name => _name;
   List<String> get selectedInterests => _selectedInterests;
   DateTime? get dob => _dob;
   double? get latitude => _latitude;
   double? get longitude => _longitude;
+  double get maxDistance => _maxDistance;
+  String get yiddishProficiencySelection => _yiddishProficiencySelection;
+  List<String> get practiceOptionsSelection => _practiceOptionsSelection;
 
-  // Constructor - Load existing user data
   PreferenceProvider() {
     _loadUserData();
   }
 
-  // Function to fetch user data from Firestore
+  // 🔥 Fetch user data including new preferences
   Future<void> _loadUserData() async {
     User? user = FirebaseAuth.instance.currentUser;
-    if (user == null) return; // No user logged in
+    if (user == null) return;
 
     String userId = user.uid;
     DocumentSnapshot userDoc =
@@ -67,12 +71,23 @@ class PreferenceProvider extends ChangeNotifier {
       _selectedInterests = List<String>.from(data['Interest'] ?? []);
       _latitude = data['location']?['latitude'];
       _longitude = data['location']?['longitude'];
+      _maxDistance = (data['maxDistance'] ?? 50).toDouble();
 
-      notifyListeners(); // Update UI
+      // ✅ Fix: Ensure yiddishProficiency is stored as a SINGLE String
+      _yiddishProficiencySelection = data['yiddishProficiency'] ?? "None";
+
+      // ✅ Fix: Ensure practiceOptions is still a LIST
+      _practiceOptionsSelection = List<String>.from(data['practiceOptions'] ?? []);
+
+      print("Loaded practiceOptions: $_practiceOptionsSelection");
+      print("Loaded yiddishProficiency: $_yiddishProficiencySelection");
+
+      notifyListeners();
     }
   }
 
-  // Setters that also trigger UI updates
+
+
   set name(String name) {
     _name = name;
     notifyListeners();
@@ -96,12 +111,26 @@ class PreferenceProvider extends ChangeNotifier {
   void updateLocation(double lat, double lng) {
     _latitude = lat;
     _longitude = lng;
-    print("Updated location: Latitude = $_latitude, Longitude = $_longitude"); // ✅ Debug log
     notifyListeners();
   }
 
-  bool get hasValidLocation => _latitude != null && _longitude != null; // ✅ Added check
+  set maxDistance(double value) {
+    _maxDistance = value;
+    notifyListeners();
+  }
+
+  set yiddishProficiencySelection(String value) {
+    _yiddishProficiencySelection = value;
+    notifyListeners();
+  }
+
+  set practiceOptionsSelection(List<String> value) {
+    _practiceOptionsSelection = value;
+    notifyListeners();
+  }
 }
+
+
 
 
 
@@ -124,40 +153,49 @@ class PreferenceScreen extends StatelessWidget {
               final interests = preferenceProvider.selectedInterests;
               final latitude = preferenceProvider.latitude;
               final longitude = preferenceProvider.longitude;
+              final proficiency = preferenceProvider.yiddishProficiencySelection;
+              final practiceOptions = preferenceProvider.practiceOptionsSelection;
 
               if (name.isEmpty) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Please enter your name"))
-                );
+                    SnackBar(content: Text("Please enter your name")));
                 return;
               }
 
               if (dob == null) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Please select your Date of Birth"))
-                );
+                    SnackBar(content: Text("Please select your Date of Birth")));
                 return;
               }
 
               if (interests.isEmpty) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Please select at least one interest"))
-                );
+                    SnackBar(content: Text("Please select at least one interest")));
                 return;
               }
 
               if (latitude == null || longitude == null) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Please select a location"))
-                );
+                    SnackBar(content: Text("Please select a location")));
+                return;
+              }
+
+              if (proficiency.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Please select your proficiency level")));
+                return;
+              }
+
+              if (practiceOptions.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Please select at least one practice option")));
                 return;
               }
 
               User? user = FirebaseAuth.instance.currentUser;
               if (user == null) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("User not logged in"))
-                );
+                    SnackBar(content: Text("User not logged in")));
                 return;
               }
 
@@ -172,6 +210,9 @@ class PreferenceScreen extends StatelessWidget {
                     'latitude': latitude,
                     'longitude': longitude
                   },
+                  'maxDistance': preferenceProvider.maxDistance,
+                  'yiddishProficiency': proficiency,
+                  'practiceOptions': practiceOptions,
                   'uid': userId,
                   'createdAt': DateTime.now().millisecondsSinceEpoch.toString(),
                 }, SetOptions(merge: true));
@@ -180,21 +221,18 @@ class PreferenceScreen extends StatelessWidget {
               } catch (e) {
                 print("Error updating Firestore: $e");
                 ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Error updating profile"))
-                );
+                    SnackBar(content: Text("Error updating profile")));
               }
             },
             steps: [
-              OneStep(
-                  title: "What's your name?", builder: (prev, next) => _Step1()),
-              OneStep(
-                  title: "When is your Birthday?", builder: (prev, next) => _Step5()),
-              OneStep(
-                  title: "Location", builder: (prev, next) => _Step2()),
-              OneStep(
-                  title: "Select up to 5 interests", builder: (prev, next) => _Step3()),
-              OneStep(
-                  title: "Upload your photos", builder: (prev, next) => _Step4()),
+              OneStep(title: "What's your name?", builder: (prev, next) => _Step1()),
+              OneStep(title: "When is your Birthday?", builder: (prev, next) => _Step5()),
+              OneStep(title: "Location", builder: (prev, next) => _Step2()),
+              OneStep(title: "Select up to 5 interests", builder: (prev, next) => _Step3()),
+              OneStep(title: "Upload your photos", builder: (prev, next) => _Step4()),
+              OneStep(title: "Set max distance", builder: (prev, next) => _Step6()),
+              OneStep(title: "Select proficiency level", builder: (prev, next) => _Step7()), // ✅ NEW
+              OneStep(title: "Select practice options", builder: (prev, next) => _Step8()), // ✅ NEW
             ],
           );
         },
@@ -202,6 +240,7 @@ class PreferenceScreen extends StatelessWidget {
     );
   }
 }
+
 
 
   Future<void> _dialogBuilder(BuildContext context) {
@@ -719,3 +758,100 @@ class _Step5State extends State<_Step5> {
     );
   }
 }
+
+class _Step6 extends StatefulWidget {
+  @override
+  _Step6State createState() => _Step6State();
+}
+
+class _Step6State extends State<_Step6> {
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<PreferenceProvider>(
+      builder: (context, preferenceProvider, child) {
+        return Column(
+          children: [
+            Text(
+              "Max Distance: ${preferenceProvider.maxDistance == 1000 ? "No Limit" : "${preferenceProvider.maxDistance.toInt()} miles"}",
+              style: TextStyle(fontSize: 18),
+            ),
+            Slider(
+              value: preferenceProvider.maxDistance,
+              min: 0,
+              max: 1000,
+              divisions: 100,
+              label: preferenceProvider.maxDistance == 1000
+                  ? "No Limit"
+                  : "${preferenceProvider.maxDistance.toInt()} miles",
+              onChanged: (value) {
+                preferenceProvider.maxDistance = value;
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _Step7 extends StatefulWidget {
+  @override
+  State<_Step7> createState() => _Step7State();
+}
+
+class _Step7State extends State<_Step7> {
+  List<String> proficiencyLevels = ["None", "Novice", "Intermediate", "Advanced/Fluent"];
+  String _selectedProficiency = "None";
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text("Select Your Yiddish Proficiency"),
+        Wrap(
+          spacing: 10,
+          children: proficiencyLevels.map((level) {
+            return ChoiceChip(
+              label: Text(level),
+              selected: _selectedProficiency == level,
+              onSelected: (selected) {
+                setState(() {
+                  _selectedProficiency = level;
+                  Provider.of<PreferenceProvider>(context, listen: false).yiddishProficiencySelection = level;
+                });
+              },
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+}
+
+class _Step8 extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text("How Do You Prefer to Practice?"),
+        Wrap(
+          spacing: 10,
+          children: ["Remote", "In-Person", "Hybrid"].map((option) {
+
+            return ChoiceChip(
+              label: Text(option),
+              selected: Provider.of<PreferenceProvider>(context).practiceOptionsSelection.contains(option),
+              onSelected: (selected) {
+                var provider = Provider.of<PreferenceProvider>(context, listen: false);
+                provider.practiceOptionsSelection = selected
+                    ? [...provider.practiceOptionsSelection, option]
+                    : provider.practiceOptionsSelection..remove(option);
+              },
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+}
+

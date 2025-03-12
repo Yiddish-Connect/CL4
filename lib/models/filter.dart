@@ -1,6 +1,7 @@
 enum PracticeOption {
   online,
-  inPerson
+  inPerson,
+  hybrid
 }
 
 enum YiddishProficiency {

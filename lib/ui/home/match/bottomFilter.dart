@@ -1,28 +1,27 @@
-import 'dart:collection';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:yiddishconnect/ui/home/match/matchPageProvider.dart';
 import '../../../models/filter.dart';
 
-/// This function should be called in the match page.
-/// It shows the bottom filter allowing users to select the filters, such as age and distance
-/// *Note: The ModalBottomSheet is created in the root of the ENTIRE widget tree of the App, meaning it's not a child of the match page.
+// Shows the Filter Bottom Sheet
 void showFilter(BuildContext context) {
-  // assert: context contains the matchPageProvider
   MatchPageProvider matchPageProvider = Provider.of<MatchPageProvider>(context, listen: false);
 
   showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (BuildContext context) {
-        return Padding(
-          padding: const EdgeInsets.all(18.0),
-          child: MatchFilter(dataProvider: matchPageProvider),
-        );
-      }
+    context: context,
+    isScrollControlled: true,
+    builder: (BuildContext context) {
+      return Padding(
+        padding: const EdgeInsets.all(18.0),
+        child: MatchFilter(dataProvider: matchPageProvider),
+      );
+    },
   );
 }
 
+// Main Filter Widget
 class MatchFilter extends StatefulWidget {
   final MatchPageProvider dataProvider;
 
@@ -33,18 +32,41 @@ class MatchFilter extends StatefulWidget {
 }
 
 class _MatchFilterState extends State<MatchFilter> {
-  HashSet<PracticeOption> practiceOptionsSelection = HashSet();
-  HashSet<YiddishProficiency> yiddishProficiencySelection = HashSet();
+  PracticeOption? selectedPracticeOption;
+  YiddishProficiency? selectedProficiency;
   double distanceSelection = 1000;
-  RangeValues ageRangeSelection = RangeValues(0, 100);
+  RangeValues ageRangeSelection = const RangeValues(0, 100);
 
   @override
   void initState() {
-    distanceSelection = widget.dataProvider.maxDistance + 0.0;
-    ageRangeSelection = RangeValues(widget.dataProvider.minAge + 0.0, widget.dataProvider.maxAge + 0.0);
-    for (var element in widget.dataProvider.practiceOptionsSelection) { practiceOptionsSelection.add(element);}
-    for (var element in widget.dataProvider.yiddishProficiencySelection) { yiddishProficiencySelection.add(element);}
     super.initState();
+
+    distanceSelection = widget.dataProvider.maxDistance.toDouble();
+    ageRangeSelection = RangeValues(widget.dataProvider.minAge.toDouble(), widget.dataProvider.maxAge.toDouble());
+
+    // Load Practice Option (Only One)
+    if (widget.dataProvider.practiceOptionsSelection.isNotEmpty) {
+      try {
+        selectedPracticeOption = PracticeOption.values.firstWhere(
+              (e) => e.toString().split('.').last == widget.dataProvider.practiceOptionsSelection.first,
+          orElse: () => PracticeOption.online,
+        );
+      } catch (e) {
+        print("Invalid PracticeOption: ${widget.dataProvider.practiceOptionsSelection.first}");
+      }
+    }
+
+    // Load Yiddish Proficiency (Only One)
+    if (widget.dataProvider.yiddishProficiencySelection.isNotEmpty) {
+      try {
+        selectedProficiency = YiddishProficiency.values.firstWhere(
+              (e) => e.toString().split('.').last == widget.dataProvider.yiddishProficiencySelection,
+          orElse: () => YiddishProficiency.beginner,
+        );
+      } catch (e) {
+        print("Invalid YiddishProficiency: ${widget.dataProvider.yiddishProficiencySelection}");
+      }
+    }
   }
 
   @override
@@ -52,247 +74,165 @@ class _MatchFilterState extends State<MatchFilter> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.start,
-
       children: [
-        // "Filters"
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: Align(
             alignment: Alignment.center,
-            child: Text("Filters", style: Theme.of(context).textTheme.headlineMedium,),
+            child: Text("Filters", style: Theme.of(context).textTheme.headlineMedium),
           ),
         ),
-
-        // Practice Option
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Practice Option",
-                style: Theme.of(context).textTheme.titleMedium,
-                textAlign: TextAlign.start,
-              ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  // "Online"
-                  Expanded(
-                    child: CheckboxListTile(
-                      contentPadding: EdgeInsets.all(8.0),
-                      value: practiceOptionsSelection.contains(PracticeOption.online),
-                      onChanged: (bool? value) => setState(() {
-                        if (value == true) {
-                          practiceOptionsSelection.add(PracticeOption.online);
-                        } else {
-                          practiceOptionsSelection.remove(PracticeOption.online);
-                        }
-                        // print( "onchange 1-1!");
-                      }),
-                      title: Text("Online", style: Theme.of(context).textTheme.bodyMedium),
-                    ),
-                  ),
-                  // "In-Person"
-                  Expanded(
-                    child: CheckboxListTile(
-                      contentPadding: EdgeInsets.all(8.0),
-                      value: practiceOptionsSelection.contains(PracticeOption.inPerson),
-                      onChanged: (bool? value) => setState(() {
-                        if (value == true) {
-                          practiceOptionsSelection.add(PracticeOption.inPerson);
-                        } else {
-                          practiceOptionsSelection.remove(PracticeOption.inPerson);
-                        }
-                        // print( "onchange 1-2!");
-                      }),
-                      title: Text("In-Person", style: Theme.of(context).textTheme.bodyMedium),
-                    ),
-                  )
-                ],
-              )
-            ],
-          ),
-        ),
-
-        // Yiddish Proficiency
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Yiddish Proficiency",
-                style: Theme.of(context).textTheme.titleMedium,
-                textAlign: TextAlign.start,
-              ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  // "Beginner"
-                  Expanded(
-                    child: CheckboxListTile(
-                      contentPadding: EdgeInsets.all(8.0),
-                      value: yiddishProficiencySelection.contains(YiddishProficiency.beginner),
-                      onChanged: (bool? value) => setState(() {
-                        if (value == true) {
-                          yiddishProficiencySelection.add(YiddishProficiency.beginner);
-                        } else {
-                          yiddishProficiencySelection.remove(YiddishProficiency.beginner);
-                        }
-                        // print( "onchange 2-1!");
-                      }),
-                      title: Text("Beginner", style: Theme.of(context).textTheme.bodyMedium),
-                    ),
-                  ),
-                  // "Intermediate"
-                  Expanded(
-                    child: CheckboxListTile(
-                      contentPadding: EdgeInsets.all(8.0),
-                      value: yiddishProficiencySelection.contains(YiddishProficiency.intermediate),
-                      onChanged: (bool? value) => setState(() {
-                        if (value == true) {
-                          yiddishProficiencySelection.add(YiddishProficiency.intermediate);
-                        } else {
-                          yiddishProficiencySelection.remove(YiddishProficiency.intermediate);
-                        }
-                        // print( "onchange 2-2!");
-                      }),
-                      title: Text("Intermediate", style: Theme.of(context).textTheme.bodyMedium),
-                    ),
-                  ),
-                  // "Proficient"
-                  Expanded(
-                    child: CheckboxListTile(
-                      contentPadding: EdgeInsets.all(8.0),
-                      value: yiddishProficiencySelection.contains(YiddishProficiency.fluent),
-                      onChanged: (bool? value) => setState(() {
-                        if (value == true) {
-                          yiddishProficiencySelection.add(YiddishProficiency.fluent);
-                        } else {
-                          yiddishProficiencySelection.remove(YiddishProficiency.fluent);
-                        }
-                        // print( "onchange 2-3!");
-                      }),
-                      title: Text("Fluent", style: Theme.of(context).textTheme.bodyMedium),
-                    ),
-                  ),
-                ],
-              )
-            ],
-          ),
-        ),
-
-        // Distance
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                      "Distance",
-                      style: Theme.of(context).textTheme.titleMedium
-                  ),
-                  Text(
-                      "${distanceSelection.round()} km",
-                      style: Theme.of(context).textTheme.bodyMedium
-                  ),
-                ],
-              ),
-              Slider(
-                min: 0,
-                max: 1000,
-                value: distanceSelection,
-                label: "${distanceSelection.round()}",
-                onChanged: (double value) => setState(() {
-                  distanceSelection = value;
-                }),
-              )
-            ],
-          ),
-        ),
-
-        // Age
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                      "Age",
-                      style: Theme.of(context).textTheme.titleMedium
-                  ),
-                  Text(
-                      "${(ageRangeSelection.start).round()} ~ ${(ageRangeSelection.end).round()}",
-                      style: Theme.of(context).textTheme.bodyMedium
-                  ),
-                ],
-              ),
-              RangeSlider(
-                  min: 0,
-                  max: 100,
-                  divisions: 100,
-                  values: ageRangeSelection,
-                  labels: RangeLabels("${ageRangeSelection.start.round()}", "${ageRangeSelection.end.round()}"),
-                  onChanged: (RangeValues value) => setState(() {
-                    ageRangeSelection = value;
-                  })
-              )
-            ],
-          ),
-        ),
-
-        // "Reset" and "Apply"
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              // "Reset"
-              IconButton(
-                icon: Icon(
-                  Icons.refresh,
-                  size: 48,
-                ),
-                color: Colors.orange,
-                onPressed: () => {
-                  setState(() {
-                    practiceOptionsSelection.clear();
-                    yiddishProficiencySelection.clear();
-                    distanceSelection = 1000.0;
-                    ageRangeSelection = RangeValues(0.0, 100.0);
-                  })
-                },
-              ),
-              // "Apply"
-              IconButton(
-                icon: Icon(
-                  Icons.check,
-                  size: 48,
-                ),
-                color: Colors.green,
-                onPressed: () {
-                  widget.dataProvider.yiddishProficiencySelection = yiddishProficiencySelection.toList();
-                  widget.dataProvider.practiceOptionsSelection = practiceOptionsSelection.toList();
-                  widget.dataProvider.maxDistance = distanceSelection.round();
-                  widget.dataProvider.minAge = ageRangeSelection.start.round();
-                  widget.dataProvider.maxAge = ageRangeSelection.end.round();
-                  Navigator.pop(context);
-                },
-              ),
-            ],
-          ),
-        ),
-
+        _buildPracticeOptionSelection(),
+        _buildProficiencySelection(),
+        _buildSlider(title: "Distance", value: distanceSelection, min: 0, max: 1000),
+        _buildAgeSlider(),
+        _buildActionButtons(),
       ],
     );
   }
-}
+
+  // Practice Option Selection (One Choice Only)
+  Widget _buildPracticeOptionSelection() {
+    List<PracticeOption> options = [
+      PracticeOption.online,
+      PracticeOption.inPerson,
+      PracticeOption.hybrid,
+    ];
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text("Practice Option", style: Theme.of(context).textTheme.titleMedium),
+          Wrap(
+            spacing: 10,
+            children: options.map((option) {
+              bool isSelected = selectedPracticeOption == option;
+              return ChoiceChip(
+                label: Text(option.toString().split('.').last),
+                selected: isSelected,
+                selectedColor: Colors.green,
+                onSelected: (selected) {
+                  setState(() {
+                    selectedPracticeOption = selected ? option : null;
+                  });
+                },
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Yiddish Proficiency Selection (One Choice Only)
+  Widget _buildProficiencySelection() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text("Yiddish Proficiency", style: Theme.of(context).textTheme.titleMedium),
+          Wrap(
+            spacing: 10,
+            children: YiddishProficiency.values.map((proficiency) {
+              bool isSelected = selectedProficiency == proficiency;
+              return ChoiceChip(
+                label: Text(proficiency.toString().split('.').last),
+                selected: isSelected,
+                selectedColor: Colors.green,
+                onSelected: (selected) {
+                  setState(() {
+                    selectedProficiency = proficiency;
+                  });
+                },
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Distance Slider
+  Widget _buildSlider({required String title, required double value, required double min, required double max}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(title, style: Theme.of(context).textTheme.titleMedium),
+              Text("${value.round()} km", style: Theme.of(context).textTheme.bodyMedium),
+            ],
+          ),
+          Slider(
+            min: min,
+            max: max,
+            value: value,
+            label: "${value.round()}",
+            onChanged: (val) {
+              setState(() {
+                distanceSelection = val;
+              });
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Age Range Slider
+  Widget _buildAgeSlider() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text("Age", style: Theme.of(context).textTheme.titleMedium),
+              Text("${ageRangeSelection.start.round()} - ${ageRangeSelection.end.round()}",
+                  style: Theme.of(context).textTheme.bodyMedium),
+            ],
+          ),
+          RangeSlider(
+            min: 0,
+            max: 100,
+            values: ageRangeSelection,
+            labels: RangeLabels("${ageRangeSelection.start.round()}", "${ageRangeSelection.end.round()}"),
+            onChanged: (RangeValues val) {
+              setState(() {
+                ageRangeSelection = val;
+              });
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Action Buttons (Apply & Reset)
+  Widget _buildActionButtons() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          IconButton(icon: const Icon(Icons.refresh, size: 48), color: Colors.orange, onPressed: () {
+            setState(() {
+              selectedPracticeOption = null;
+              selectedProficiency = null;
+              distanceSelection = 1000.0;
+              ageRangeSelection = const RangeValues(0.0, 100.0);
+            });
+          }),
+        ],
+      ),
+    );
+  }
+} // ✅ Closing bracket for _MatchFilterState
