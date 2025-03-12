@@ -860,27 +860,57 @@ class _Step7State extends State<_Step7> {
 class _Step8 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text("How Do You Prefer to Practice?"),
-        Wrap(
-          spacing: 10,
-          children: ["Remote", "In-Person", "Hybrid"].map((option) {
+    return Consumer<PreferenceProvider>(
+      builder: (context, provider, child) {
+        return Column(
+          children: [
+            Text("How Do You Prefer to Practice?"),
+            Wrap(
+              spacing: 10,
+              children: ["Remote", "In-Person", "Hybrid"].map((option) {
+                bool isSelected = provider.practiceOptionsSelection.contains(option);
 
-            return ChoiceChip(
-              label: Text(option),
-              selected: Provider.of<PreferenceProvider>(context).practiceOptionsSelection.contains(option),
-              onSelected: (selected) {
-                var provider = Provider.of<PreferenceProvider>(context, listen: false);
-                provider.practiceOptionsSelection = selected
-                    ? [...provider.practiceOptionsSelection, option]
-                    : provider.practiceOptionsSelection..remove(option);
-              },
-            );
-          }).toList(),
-        ),
-      ],
+                return ChoiceChip(
+                  label: Text(option),
+                  selected: isSelected,
+                  selectedColor: Colors.green,
+                  onSelected: (selected) async {
+                    List<String> updatedSelections = List.from(provider.practiceOptionsSelection);
+
+                    if (selected) {
+                      if (!updatedSelections.contains(option)) {
+                        updatedSelections.add(option);
+                      }
+                    } else {
+                      updatedSelections.remove(option);
+                    }
+
+                    // ✅ Only update provider if something actually changed
+                    if (!listEquals(provider.practiceOptionsSelection, updatedSelections)) {
+                      provider.practiceOptionsSelection = updatedSelections;
+
+                      // ✅ Auto-save to Firestore (like how location works)
+                      User? user = FirebaseAuth.instance.currentUser;
+                      if (user != null) {
+                        await FirebaseFirestore.instance
+                            .collection('profiles')
+                            .doc(user.uid)
+                            .set({
+                          'practiceOptions': updatedSelections,
+                        }, SetOptions(merge: true));
+
+                        print("🔥 Auto-saved practiceOptions to Firestore: $updatedSelections");
+                      }
+                    }
+                  },
+                );
+              }).toList(),
+            ),
+          ],
+        );
+      },
     );
   }
 }
+
 
