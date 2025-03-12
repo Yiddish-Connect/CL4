@@ -45,6 +45,34 @@ class PreferenceProvider extends ChangeNotifier {
   double? get latitude => _latitude;
   double? get longitude => _longitude;
 
+  // Constructor - Load existing user data
+  PreferenceProvider() {
+    _loadUserData();
+  }
+
+  // Function to fetch user data from Firestore
+  Future<void> _loadUserData() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) return; // No user logged in
+
+    String userId = user.uid;
+    DocumentSnapshot userDoc =
+    await FirebaseFirestore.instance.collection('profiles').doc(userId).get();
+
+    if (userDoc.exists) {
+      var data = userDoc.data() as Map<String, dynamic>;
+
+      _name = data['name'] ?? "";
+      _dob = data['DOB'] != null ? DateFormat('yyyy-MM-dd').parse(data['DOB']) : null;
+      _selectedInterests = List<String>.from(data['Interest'] ?? []);
+      _latitude = data['location']?['latitude'];
+      _longitude = data['location']?['longitude'];
+
+      notifyListeners(); // Update UI
+    }
+  }
+
+  // Setters that also trigger UI updates
   set name(String name) {
     _name = name;
     notifyListeners();
@@ -68,13 +96,12 @@ class PreferenceProvider extends ChangeNotifier {
   void updateLocation(double lat, double lng) {
     _latitude = lat;
     _longitude = lng;
-    notifyListeners();
     print("Updated location: Latitude = $_latitude, Longitude = $_longitude"); // ✅ Debug log
+    notifyListeners();
   }
 
   bool get hasValidLocation => _latitude != null && _longitude != null; // ✅ Added check
 }
-
 
 
 
@@ -85,21 +112,18 @@ class PreferenceScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (context) => PreferenceProvider(),
-      child: Builder(
-        builder: (context) {
+      child: Consumer<PreferenceProvider>(
+        builder: (context, preferenceProvider, child) {
           return MultiSteps(
             title: "Preference",
             hasButton: true,
             hasProgress: true,
             onComplete: () async {
-              final preferenceProvider = Provider.of<PreferenceProvider>(context, listen: false);
               final name = preferenceProvider.name.trim();
               final dob = preferenceProvider.dob;
               final interests = preferenceProvider.selectedInterests;
-              final latitude = Provider.of<PreferenceProvider>(context, listen: false).latitude;
-              final longitude = Provider.of<PreferenceProvider>(context, listen: false).longitude;
-
-
+              final latitude = preferenceProvider.latitude;
+              final longitude = preferenceProvider.longitude;
 
               if (name.isEmpty) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -144,9 +168,10 @@ class PreferenceScreen extends StatelessWidget {
                   'name': name,
                   'DOB': DateFormat('yyyy-MM-dd').format(dob),
                   'Interest': interests,
-                  'location': (latitude != null && longitude != null)
-                      ? {'latitude': latitude, 'longitude': longitude}
-                      : FieldValue.delete(), // ✅ Removes 'location' if lat/lng is missing
+                  'location': {
+                    'latitude': latitude,
+                    'longitude': longitude
+                  },
                   'uid': userId,
                   'createdAt': DateTime.now().millisecondsSinceEpoch.toString(),
                 }, SetOptions(merge: true));
@@ -161,21 +186,23 @@ class PreferenceScreen extends StatelessWidget {
             },
             steps: [
               OneStep(
-                  title: "What's your name?",builder: (prev, next) => _Step1()),
+                  title: "What's your name?", builder: (prev, next) => _Step1()),
               OneStep(
-                  title: "When is your Birthday?",builder: (prev, next) => _Step5()),
+                  title: "When is your Birthday?", builder: (prev, next) => _Step5()),
               OneStep(
-                  title: "Location",builder: (prev, next) => _Step2()),
+                  title: "Location", builder: (prev, next) => _Step2()),
               OneStep(
-                  title: "Select up to 5 interests",builder: (prev, next) => _Step3()),
+                  title: "Select up to 5 interests", builder: (prev, next) => _Step3()),
               OneStep(
-                  title: "Upload your photos",builder: (prev, next) => _Step4()),
+                  title: "Upload your photos", builder: (prev, next) => _Step4()),
             ],
           );
         },
       ),
     );
   }
+}
+
 
   Future<void> _dialogBuilder(BuildContext context) {
     return showDialog<void>(
@@ -264,25 +291,17 @@ class PreferenceScreen extends StatelessWidget {
       ),
     );
   }
-}
 
 
 // What's your name
 class _Step1 extends StatelessWidget {
-  _Step1 ();
   final TextEditingController nameController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-    // print("rebuild...  the value is ${nameController.value} ");
     return Consumer<PreferenceProvider>(
-      builder: (BuildContext context, PreferenceProvider preferenceProvider, Widget? child) {
-        // print("Assign the name from provider to textfield: ${Provider.of<PreferenceProvider>(context, listen: false).name} => ${nameController.text}");
-        nameController.text = Provider.of<PreferenceProvider>(context, listen: false).name;
-        nameController.selection = TextSelection(
-          baseOffset: nameController.text.length,
-          extentOffset: nameController.text.length,
-        );
+      builder: (context, preferenceProvider, child) {
+        nameController.text = preferenceProvider.name;
         return Container(
             padding: EdgeInsets.all(30),
             constraints: BoxConstraints(
@@ -292,18 +311,16 @@ class _Step1 extends StatelessWidget {
             child: TextFormField(
               controller: nameController,
               onChanged: (value) {
-                print("OnChange... value is $value");
-                Provider.of<PreferenceProvider>(context, listen: false).name = value;
-                //Provider.of<PreferenceProvider>(context, listen: false).UploadData(value,'name');
+                preferenceProvider.name = value;
               },
               maxLength: 70,
-
             )
         );
       },
     );
   }
 }
+
 
 // Location
 class _Step2 extends StatefulWidget {
@@ -317,31 +334,37 @@ class _Step2State extends State<_Step2> {
   LatLng? selectedLocation;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final provider = Provider.of<PreferenceProvider>(context, listen: false);
+      if (provider.latitude != null && provider.longitude != null) {
+        setState(() {
+          selectedLocation = LatLng(provider.latitude!, provider.longitude!);
+        });
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         Container(
-          height: 400,  // Set an explicit height
+          height: 400,
           child: FlutterMap(
             options: MapOptions(
-              initialCenter: LatLng(37.7749, -122.4194),
+              initialCenter: selectedLocation ?? LatLng(37.7749, -122.4194),
               initialZoom: 10,
               onTap: (tapPosition, point) {
                 setState(() {
                   selectedLocation = point;
                 });
-
-                Provider.of<PreferenceProvider>(context, listen: false)
-                    .updateLocation(point.latitude, point.longitude);
-
-                print("Map tapped: Latitude = ${point.latitude}, Longitude = ${point.longitude}");
+                Provider.of<PreferenceProvider>(context, listen: false).updateLocation(point.latitude, point.longitude);
               },
             ),
             children: [
-              TileLayer(
-                urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-              ),
-
+              TileLayer(urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png"),
               if (selectedLocation != null)
                 MarkerLayer(
                   markers: [
@@ -351,12 +374,12 @@ class _Step2State extends State<_Step2> {
                       point: selectedLocation!,
                       child: Icon(Icons.location_pin, color: Colors.red, size: 40),
                     ),
-
                   ],
                 ),
             ],
           ),
         ),
+
     ElevatedButton(
     onPressed: () async {
     if (selectedLocation != null) {
