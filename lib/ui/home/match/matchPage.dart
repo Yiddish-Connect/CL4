@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:provider/provider.dart';
@@ -15,17 +16,15 @@ class MatchPage extends StatefulWidget {
 
 class _MatchPageState extends State<MatchPage> {
   final CardSwiperController _cardSwiperController = CardSwiperController();
-
   final Map<String, String> _imageUrlCache = {};
 
   Future<String> getFirebaseImageUrl(String path) async {
     try {
       final ref = FirebaseStorage.instance.ref().child(path);
       final url = await ref.getDownloadURL();
-      print("✅ Image URL fetched: $url");
       return url;
     } catch (e) {
-      print("❌ Firebase Storage Error: $e");
+      print("❌ Error fetching image: \$e");
       return "";
     }
   }
@@ -44,7 +43,6 @@ class _MatchPageState extends State<MatchPage> {
     );
   }
 
-  /// 🧠 Store like/dislike in Firestore
   Future<void> handleSwipeAction({
     required bool isLike,
     required String swipedUserId,
@@ -54,13 +52,8 @@ class _MatchPageState extends State<MatchPage> {
     if (currentUser == null) return;
 
     final currentUserId = currentUser.uid;
+    final status = isLike ? 0 : -1;
 
-    if (!isLike) {
-      print("👎 Disliked ${swipedUser['name']}");
-      return;
-    }
-
-    // Check if swiped user already liked current user
     final mutualMatch = await FirebaseFirestore.instance
         .collection('matches')
         .where('user1', isEqualTo: swipedUserId)
@@ -68,24 +61,24 @@ class _MatchPageState extends State<MatchPage> {
         .where('status', isEqualTo: 0)
         .get();
 
-    if (mutualMatch.docs.isNotEmpty) {
-      // Update both match docs to status = 1
+    if (isLike && mutualMatch.docs.isNotEmpty) {
       await FirebaseFirestore.instance.collection('matches').add({
         'user1': currentUserId,
         'user2': swipedUserId,
         'status': 1,
         'matchedAt': Timestamp.now(),
       });
-      print("🎉 It's a MATCH with ${swipedUser['name']}!");
+      print("🎉 MATCHED with \${swipedUser['name']}");
     } else {
-      // Record one-sided like
       await FirebaseFirestore.instance.collection('matches').add({
         'user1': currentUserId,
         'user2': swipedUserId,
-        'status': 0,
+        'status': status,
         'matchedAt': Timestamp.now(),
       });
-      print("👍 Liked ${swipedUser['name']}");
+      print(isLike
+          ? "👍 Liked \${swipedUser['name']}"
+          : "👎 Disliked \${swipedUser['name']}");
     }
   }
 
@@ -105,26 +98,42 @@ class _MatchPageState extends State<MatchPage> {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(child: CircularProgressIndicator());
                     }
-                    if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return const Center(child: Text("No matches found"));
+
+                    final matchList = snapshot.data ?? [];
+
+                    if (matchList.isEmpty) {
+                      return const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(24),
+                          child: Text(
+                            "You have no more matches.\nTry adjusting your preferences.",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontSize: 18),
+                          ),
+                        ),
+                      );
                     }
 
                     return CardSwiper(
                       controller: _cardSwiperController,
-                      cardsCount: snapshot.data!.length,
-                      numberOfCardsDisplayed: snapshot.data!.length,
+                      cardsCount: matchList.length,
+                      numberOfCardsDisplayed: matchList.length,
                       onSwipe: (previousIndex, currentIndex, direction) async {
-                        final user = snapshot.data![previousIndex];
-                        final isLike = direction == CardSwiperDirection.right;
+                        final user = matchList[previousIndex];
+                        final isLike =
+                            direction == CardSwiperDirection.right;
+
                         await handleSwipeAction(
                           isLike: isLike,
                           swipedUserId: user['uid'],
                           swipedUser: user,
                         );
+
+                        setState(() {}); // Force refresh
                         return true;
                       },
                       cardBuilder: (context, index, _, __) {
-                        final user = snapshot.data![index];
+                        final user = matchList[index];
                         String imagePath = "";
 
                         if (user['imageUrls'] is List &&
@@ -146,27 +155,27 @@ class _MatchPageState extends State<MatchPage> {
                                   vertical: 10, horizontal: 20),
                               child: Column(
                                 children: [
-                                  // 🔹 IMAGE SECTION
                                   Expanded(
                                     child: ClipRRect(
                                       borderRadius: const BorderRadius.vertical(
-                                          top: Radius.circular(16)),
+                                        top: Radius.circular(16),
+                                      ),
                                       child: imagePath.isNotEmpty
                                           ? _imageUrlCache
                                           .containsKey(imagePath)
                                           ? _buildImage(
                                           _imageUrlCache[imagePath]!)
                                           : FutureBuilder<String>(
-                                        future: getFirebaseImageUrl(
+                                        future:
+                                        getFirebaseImageUrl(
                                             imagePath),
                                         builder: (context, snap) {
                                           if (snap.connectionState ==
                                               ConnectionState
                                                   .waiting) {
                                             return const Center(
-                                              child:
-                                              CircularProgressIndicator(),
-                                            );
+                                                child:
+                                                CircularProgressIndicator());
                                           }
                                           if (!snap.hasData ||
                                               snap.data!.isEmpty) {
@@ -175,6 +184,7 @@ class _MatchPageState extends State<MatchPage> {
                                                 size: 100,
                                                 color: Colors.red);
                                           }
+
                                           _imageUrlCache[imagePath] =
                                           snap.data!;
                                           return _buildImage(
@@ -185,8 +195,6 @@ class _MatchPageState extends State<MatchPage> {
                                           size: 100),
                                     ),
                                   ),
-
-                                  // 🔹 PROFILE INFO
                                   Padding(
                                     padding: const EdgeInsets.all(10),
                                     child: Column(
@@ -222,3 +230,5 @@ class _MatchPageState extends State<MatchPage> {
     );
   }
 }
+
+

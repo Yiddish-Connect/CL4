@@ -49,8 +49,10 @@ class MatchPageProvider extends ChangeNotifier {
     double dLat = (lat2 - lat1) * pi / 180;
     double dLon = (lon2 - lon1) * pi / 180;
     double a = sin(dLat / 2) * sin(dLat / 2) +
-        cos(lat1 * pi / 180) * cos(lat2 * pi / 180) *
-            sin(dLon / 2) * sin(dLon / 2);
+        cos(lat1 * pi / 180) *
+            cos(lat2 * pi / 180) *
+            sin(dLon / 2) *
+            sin(dLon / 2);
     double c = 2 * atan2(sqrt(a), sqrt(1 - a));
     return R * c;
   }
@@ -98,7 +100,6 @@ class MatchPageProvider extends ChangeNotifier {
     final userLat = userDoc['location']?['latitude'];
     final userLon = userDoc['location']?['longitude'];
 
-    // ✅ Parse DOB regardless of format
     DateTime? userDOB;
     var rawUserDOB = userDoc['DOB'];
     if (rawUserDOB is Timestamp) {
@@ -121,29 +122,16 @@ class MatchPageProvider extends ChangeNotifier {
       final data = doc.data() as Map<String, dynamic>;
       final uid = data['uid'];
 
-      print("\n🧪 Checking: ${data['name']} ($uid)");
-
-      if (uid == userId) {
-        print("❌ Skipped self");
-        continue;
-      }
-
-      if (alreadySwiped.contains(uid)) {
-        print("❌ Already swiped");
-        continue;
-      }
+      if (uid == userId || alreadySwiped.contains(uid)) continue;
 
       final image = data['profilePhoto'] ??
-          ((data['imageUrls'] is List && data['imageUrls'].isNotEmpty) ? data['imageUrls'][0] : null);
+          ((data['imageUrls'] is List && data['imageUrls'].isNotEmpty)
+              ? data['imageUrls'][0]
+              : null);
+      if (image == null) continue;
 
-      if (image == null) {
-        print("❌ No image");
-        continue;
-      }
-
-      // ✅ Robust DOB parsing
-      final rawDOB = data['DOB'];
       DateTime? dob;
+      final rawDOB = data['DOB'];
       if (rawDOB is Timestamp) {
         dob = rawDOB.toDate();
       } else if (rawDOB is String) {
@@ -151,24 +139,15 @@ class MatchPageProvider extends ChangeNotifier {
       }
 
       final age = dob != null ? now.difference(dob).inDays ~/ 365 : null;
-      if (age == null || age < _minAge || age > _maxAge) {
-        print("❌ Age $age not in range ($_minAge–$_maxAge)");
-        continue;
-      }
+      if (age == null || age < _minAge || age > _maxAge) continue;
 
       final prof = data['yiddishProficiency'] ?? '';
       if (_yiddishProficiencySelection != "None" &&
-          prof.toLowerCase() != _yiddishProficiencySelection.toLowerCase()) {
-        print("❌ Proficiency mismatch: user=$prof, filter=$_yiddishProficiencySelection");
-        continue;
-      }
+          prof.toLowerCase() != _yiddishProficiencySelection.toLowerCase()) continue;
 
       final practice = data['practiceOptions'] ?? [];
       if (_practiceOptionsSelection.isNotEmpty &&
-          !_practiceOptionsSelection.any((opt) => practice.contains(opt))) {
-        print("❌ Practice options don't match: $practice vs $_practiceOptionsSelection");
-        continue;
-      }
+          !_practiceOptionsSelection.any((opt) => practice.contains(opt))) continue;
 
       final lat = data['location']?['latitude'];
       final lon = data['location']?['longitude'];
@@ -177,20 +156,12 @@ class MatchPageProvider extends ChangeNotifier {
           ? calculateDistance(userLat ?? 0, userLon ?? 0, lat, lon)
           : double.infinity;
 
-      if (hasLocation && distance > _maxDistance) {
-        print("❌ Distance $distance exceeds max $_maxDistance");
-        continue;
-      }
+      if (hasLocation && distance > _maxDistance) continue;
 
       data['distance'] = hasLocation ? distance : null;
-      print("✅ Added ${data['name']} - ${data['distance']?.toStringAsFixed(1) ?? 'No Location'} miles");
       users.add(data);
     }
 
-    print("🎯 Final match list: ${users.length} users");
     yield users;
   }
 }
-
-
-

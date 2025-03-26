@@ -249,93 +249,93 @@ class PreferenceScreen extends StatelessWidget {
 
 
 
-  Future<void> _dialogBuilder(BuildContext context) {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) => Dialog(
-        child: Container(
-          constraints: BoxConstraints(
-            maxWidth: 500,
-            maxHeight: 450,
-          ),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.all(Radius.circular(20)),
-            color: Theme.of(context).colorScheme.surface,
-          ),
-          padding: EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              SizedBox(
-                width: 120,
-                height: 120,
-                child: Stack(
-                  children: [
-                    Align(
-                      alignment: Alignment.center,
-                      child: Container(
-                        width: 120,
-                        height: 120,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
+Future<void> _dialogBuilder(BuildContext context) {
+  return showDialog<void>(
+    context: context,
+    barrierDismissible: false,
+    builder: (BuildContext context) => Dialog(
+      child: Container(
+        constraints: BoxConstraints(
+          maxWidth: 500,
+          maxHeight: 450,
+        ),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(20)),
+          color: Theme.of(context).colorScheme.surface,
+        ),
+        padding: EdgeInsets.symmetric(horizontal: 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            SizedBox(
+              width: 120,
+              height: 120,
+              child: Stack(
+                children: [
+                  Align(
+                    alignment: Alignment.center,
+                    child: Container(
+                      width: 120,
+                      height: 120,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                     ),
-                    Align(
-                      alignment: Alignment.center,
-                      child: Container(
-                        width: 80,
-                        height: 80,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Theme.of(context).colorScheme.secondary,
-                        ),
+                  ),
+                  Align(
+                    alignment: Alignment.center,
+                    child: Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Theme.of(context).colorScheme.secondary,
                       ),
                     ),
-                    Align(
-                        alignment: Alignment.center,
-                        child: Icon(Icons.check,
-                            color: Theme.of(context).colorScheme.surface))
-                  ],
-                ),
+                  ),
+                  Align(
+                      alignment: Alignment.center,
+                      child: Icon(Icons.check,
+                          color: Theme.of(context).colorScheme.surface))
+                ],
               ),
-              Text(
-                "You're Verified",
-                style: Theme.of(context).textTheme.titleLarge,
+            ),
+            Text(
+              "You're Verified",
+              style: Theme.of(context).textTheme.titleLarge,
+              textAlign: TextAlign.center,
+            ),
+            Container(
+              constraints: BoxConstraints(
+                maxWidth: 250,
+              ),
+              child: Text(
+                "Your account is verified. Let's start to make friends!",
+                style: Theme.of(context).textTheme.bodyMedium,
                 textAlign: TextAlign.center,
               ),
-              Container(
-                constraints: BoxConstraints(
-                  maxWidth: 250,
-                ),
-                child: Text(
-                  "Your account is verified. Let's start to make friends!",
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  textAlign: TextAlign.center,
-                ),
+            ),
+            SizedBox(
+              height: 50,
+              child: FractionallySizedBox(
+                widthFactor: 0.8,
+                child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                    ),
+                    onPressed: () => context.go("/"),
+                    child: Text("Get Started")),
               ),
-              SizedBox(
-                height: 50,
-                child: FractionallySizedBox(
-                  widthFactor: 0.8,
-                  child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                        backgroundColor: Theme.of(context).colorScheme.primary,
-                      ),
-                      onPressed: () => context.go("/"),
-                      child: Text("Get Started")),
-                ),
-              )
-            ],
-          ),
+            )
+          ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
 
 // What's your name
@@ -448,27 +448,27 @@ class _Step2State extends State<_Step2> {
           ),
         ),
 
-    ElevatedButton(
-    onPressed: () async {
-    if (selectedLocation != null) {
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-    await FirebaseFirestore.instance.collection('profiles').doc(user.uid).update({
-    'location': {
-    'latitude': selectedLocation!.latitude,
-    'longitude': selectedLocation!.longitude,
-    },
-    });
+        ElevatedButton(
+          onPressed: () async {
+            if (selectedLocation != null) {
+              User? user = FirebaseAuth.instance.currentUser;
+              if (user != null) {
+                await FirebaseFirestore.instance.collection('profiles').doc(user.uid).update({
+                  'location': {
+                    'latitude': selectedLocation!.latitude,
+                    'longitude': selectedLocation!.longitude,
+                  },
+                });
 
-    print("Location saved to Firestore: Latitude = ${selectedLocation!.latitude}, Longitude = ${selectedLocation!.longitude}");
-    }
-    } else {
-    ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text("Please select a location first.")));
-    }
-    },
-    child: Text("Confirm Location"),
-    ),
+                print("Location saved to Firestore: Latitude = ${selectedLocation!.latitude}, Longitude = ${selectedLocation!.longitude}");
+              }
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("Please select a location first.")));
+            }
+          },
+          child: Text("Confirm Location"),
+        ),
       ],
     );
   }
@@ -917,5 +917,7 @@ class _Step8 extends StatelessWidget {
     );
   }
 }
+
+
 
 
