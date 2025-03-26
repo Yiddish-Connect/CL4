@@ -37,10 +37,12 @@ class _UserScreenState extends State<UserScreen> {
   @override
   Widget build(BuildContext context) {
     final extraData = GoRouterState.of(context).extra;
-    Map<String, String> userData = extraData != null && extraData is Map<String, String>
-        ? extraData as Map<String, String>
-        : {'profileImage': 'https://www.example.com/default-image.jpg'};
-    final profileImage = userData['profileImage'] ?? 'https://www.example.com/default-image.jpg';
+    Map<String, dynamic> userData = extraData != null && extraData is Map<String, dynamic>
+        ? extraData as Map<String, dynamic>
+        : {'imageUrls': ['https://www.example.com/default-image.jpg']};
+    final profileImage = userData['imageUrls'] != null && userData['imageUrls']!.isNotEmpty
+        ? userData['imageUrls']![0]
+        : 'https://www.example.com/default-image.jpg';
 
     return Scaffold(
       backgroundColor: lightGrayColor,
@@ -201,4 +203,5 @@ class _UserScreenState extends State<UserScreen> {
     );
   }
 }
+
 

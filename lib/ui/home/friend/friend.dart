@@ -1,16 +1,9 @@
-import 'package:flutter/material.dart';
-import 'friendTitle.dart';
-import '../chat/chat.dart';
-import 'package:yiddishconnect/services/firebaseAuthentication.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:go_router/go_router.dart';
-import 'friendFunction.dart';
 
-/// A page to display the user's friends.
-/// This page displays a list of the user's friends and allows the user to search for friends.
-/// The user can also delete friends from their friends list.
-/// If the user is not signed in, they will be prompted to sign in.
-/// If the user has no friends, a message will be displayed.
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+
 class FriendPage extends StatefulWidget {
   const FriendPage({super.key});
 
@@ -19,159 +12,118 @@ class FriendPage extends StatefulWidget {
 }
 
 class _FriendPageState extends State<FriendPage> {
-  TextEditingController _searchController = TextEditingController();
-  FocusNode _searchFocusNode = FocusNode();
-  String _searchText = "";
-  late Stream<DocumentSnapshot> _userStream;
-  late Stream<QuerySnapshot> _friendsStream;
+  List<Map<String, dynamic>> friends = [];
+  bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    final userId = AuthService.getCurrentUserId();
-    _userStream = FirebaseFirestore.instance.collection('users').doc(userId).snapshots();
-    _searchController.addListener(() {
+    loadFriends();
+  }
+
+  Future<void> loadFriends() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final userId = user.uid;
+    final firestore = FirebaseFirestore.instance;
+
+    final matchSnapshot = await firestore
+        .collection('matches')
+        .where('status', isEqualTo: 1)
+        .get();
+
+    final matchedUserIds = matchSnapshot.docs.map((doc) {
+      final data = doc.data();
+      if (data['user1'] == userId) return data['user2'];
+      if (data['user2'] == userId) return data['user1'];
+      return null;
+    }).whereType<String>().toSet();
+
+    if (matchedUserIds.isEmpty) {
       setState(() {
-        _searchText = _searchController.text;
+        friends = [];
+        isLoading = false;
       });
+      return;
+    }
+
+    final profileSnapshot = await firestore.collection('profiles').get();
+    final allProfiles = profileSnapshot.docs.map((doc) => doc.data()).toList();
+
+    final matchedProfiles = allProfiles
+        .where((profile) => matchedUserIds.contains(profile['uid']))
+        .toList();
+
+    setState(() {
+      friends = matchedProfiles;
+      isLoading = false;
     });
   }
 
-  @override
-  void dispose() {
-    _searchController.dispose();
-    _searchFocusNode.dispose();
-    super.dispose();
+  Widget _buildFriendTile(Map<String, dynamic> friend) {
+    final String name = friend['name'] ?? 'Unnamed';
+    final String? photo = (friend['imageUrls'] is List && friend['imageUrls'].isNotEmpty)
+        ? friend['imageUrls'][0]
+        : null;
+
+    return ExpansionTile(
+      leading: photo != null
+          ? FutureBuilder<String>(
+        future: FirebaseStorage.instance.ref(photo).getDownloadURL(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const CircleAvatar(child: CircularProgressIndicator());
+          }
+          if (!snapshot.hasData) {
+            return const CircleAvatar(child: Icon(Icons.error));
+          }
+          return CircleAvatar(
+            backgroundImage: NetworkImage(snapshot.data!),
+          );
+        },
+      )
+          : const CircleAvatar(child: Icon(Icons.person)),
+      title: Text(name),
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (friend['yiddishProficiency'] != null)
+                Text("Yiddish Proficiency: ${friend['yiddishProficiency']}"),
+              if (friend['practiceOptions'] != null)
+                Text("Practice Options: ${friend['practiceOptions'].join(', ')}"),
+              if (friend['Interest'] != null)
+                Text("Interests: ${friend['Interest'].join(', ')}"),
+              const SizedBox(height: 10),
+              ElevatedButton(
+                onPressed: () {
+                  // TODO: Navigate to chat or profile action
+                },
+                child: const Text("Message"),
+              )
+            ],
+          ),
+        )
+      ],
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    bool isAnonymous = AuthService().isAnonymous();
-    final userId = AuthService.getCurrentUserId();
-
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Friends'),
-      ),
-      body: GestureDetector(
-        onTap: () {
-          FocusScope.of(context).unfocus();
+      appBar: AppBar(title: const Text('Friends')),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : friends.isEmpty
+          ? const Center(child: Text("No friends found."))
+          : ListView.builder(
+        itemCount: friends.length,
+        itemBuilder: (context, index) {
+          return _buildFriendTile(friends[index]);
         },
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: !isAnonymous
-              ? Column(
-            children: [
-              TextField(
-                controller: _searchController,
-                decoration: InputDecoration(
-                  labelText: 'Search',
-                  hintText: 'Search friends...',
-                  prefixIcon: Icon(Icons.search),
-                ),
-              ),
-              SizedBox(height: 10),
-              Expanded(
-                child: StreamBuilder<DocumentSnapshot>(
-                  stream: _userStream,
-                  builder: (context, userSnapshot) {
-                    if (!userSnapshot.hasData) {
-                      return Center(child: CircularProgressIndicator());
-                    }
-
-                    final friendIds = List<String>.from(userSnapshot.data!['friends'] ?? []);
-
-                    if (friendIds.isEmpty) {
-                      return Center(
-                        child: Text('You have no friends.'),
-                      );
-                    }
-
-                    _friendsStream = FirebaseFirestore.instance
-                        .collection('users')
-                        .where(FieldPath.documentId, whereIn: friendIds)
-                        .snapshots();
-
-                    return StreamBuilder<QuerySnapshot>(
-                      stream: _friendsStream,
-                      builder: (context, friendsSnapshot) {
-                        if (!friendsSnapshot.hasData) {
-                          return Center(child: CircularProgressIndicator());
-                        }
-
-                        final friends = friendsSnapshot.data!.docs.map((doc) {
-                          final friendData = doc.data() as Map<String, dynamic>;
-                          return {
-                            'id': doc.id,
-                            'name': friendData['displayName'] ?? 'Unknown',
-                            'imageUrl': friendData['imageUrl'] ?? '',
-                          };
-                        }).toList();
-
-                        final filteredFriends = friends.where((friend) {
-                          return friend['name']!.toLowerCase().contains(_searchText.toLowerCase());
-                        }).toList();
-
-                        return GridView.builder(
-                          gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                            maxCrossAxisExtent: 200,
-                            crossAxisSpacing: 10,
-                            mainAxisSpacing: 10,
-                            childAspectRatio: 1,
-                          ),
-                          itemCount: filteredFriends.length,
-                          itemBuilder: (context, index) {
-                            return FriendTile(
-                              name: filteredFriends[index]['name']!,
-                              imageUrl: filteredFriends[index]['imageUrl']!,
-                              onTap: () {
-                                _navigateToChat(
-                                  filteredFriends[index]['id']!,
-                                  filteredFriends[index]['name']!,
-                                );
-                              },
-                              onDelete: () async {
-                                await FriendService().deleteFriend(userId, filteredFriends[index]['id']!);
-                              },
-                            );
-                          },
-                        );
-                      },
-                    );
-                  },
-                ),
-              ),
-            ],
-          )
-              : Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('You need to sign in to view friends'),
-                SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () {
-                    context.go("/auth");
-                  },
-                  child: Text('Sign in'),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// Navigates to the chat page with the given friend ID and name.
-  ///
-  /// \param friendId The unique identifier of the friend.
-  /// \param friendName The name of the friend.
-  void _navigateToChat(String friendId, String friendName) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ChatPage(userId: friendId, chatUser: friendName),
       ),
     );
   }

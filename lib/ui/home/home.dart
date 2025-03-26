@@ -1,3 +1,4 @@
+
 import 'dart:collection';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -14,10 +15,9 @@ import 'package:yiddishconnect/ui/notification/notificationPage.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:yiddishconnect/ui/notification/notificationProvider.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:yiddishconnect/services/firestoreService.dart';
-/// The home-screen.
-/// It contains 5 tabs: home, events, match, friends, chat
-/// Route: '/home'
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -40,12 +40,12 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _soundPlayed = false;
   int _previousNotificationCount = 0;
   FirestoreService _firestoreService = FirestoreService();
+
   @override
   void initState() {
     _loaded.add(0);
     _pages[0] = HomePage();
     super.initState();
-    //get token
     FirebaseMessaging.instance.getToken().then((String? onValue) {
       if (onValue != null) {
         print("token $onValue");
@@ -56,7 +56,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print("Home-Screen build()...");
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => MatchPageProvider()),
@@ -139,7 +138,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       selectedItemColor: Theme.of(context).colorScheme.primary,
                       unselectedItemColor: Theme.of(context).colorScheme.secondary,
                       elevation: 0,
-                      type: BottomNavigationBarType.shifting, // default
+                      type: BottomNavigationBarType.shifting,
                     ),
                   ),
                 ),
@@ -220,21 +219,42 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _createLeading(BuildContext context, int index) {
-    return Padding(
-      padding: const EdgeInsets.all(0.0),
-      child: InkWell(
-        onTap: () => context.push(
-          "/user",
-          extra: {'profileImage': "https://picsum.photos/250"},
-        ),
-        child: Padding(
+    return FutureBuilder<DocumentSnapshot>(
+      future: FirebaseFirestore.instance
+          .collection('profiles')
+          .doc(FirebaseAuth.instance.currentUser?.uid)
+          .get(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done || !snapshot.hasData) {
+          return const CircleAvatar(
+            backgroundImage: NetworkImage("https://www.example.com/default-image.jpg"),
+          );
+        }
+
+        final data = snapshot.data!.data() as Map<String, dynamic>;
+        final imageUrl = (data['imageUrls'] != null &&
+            data['imageUrls'] is List &&
+            data['imageUrls'].isNotEmpty)
+            ? data['imageUrls'][0]
+            : "https://www.example.com/default-image.jpg";
+
+        return Padding(
           padding: const EdgeInsets.all(12),
-          child: CircleAvatar(
-            backgroundImage: NetworkImage("https://picsum.photos/250"),
-            radius: 50,
+          child: InkWell(
+            onTap: () => context.push(
+              "/user",
+              extra: {
+                'imageUrls': data['imageUrls'],
+                'name': data['name'] ?? 'Profile',
+              },
+            ),
+            child: CircleAvatar(
+              backgroundImage: NetworkImage(imageUrl),
+              radius: 24,
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
@@ -242,8 +262,6 @@ class _HomeScreenState extends State<HomeScreen> {
 class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    print("HomePage build()");
-
     return Container(
       color: Colors.orangeAccent,
       child: Opacity(

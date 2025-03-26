@@ -21,10 +21,9 @@ class _MatchPageState extends State<MatchPage> {
   Future<String> getFirebaseImageUrl(String path) async {
     try {
       final ref = FirebaseStorage.instance.ref().child(path);
-      final url = await ref.getDownloadURL();
-      return url;
+      return await ref.getDownloadURL();
     } catch (e) {
-      print("❌ Error fetching image: \$e");
+      print("❌ Error fetching image: $e");
       return "";
     }
   }
@@ -50,36 +49,52 @@ class _MatchPageState extends State<MatchPage> {
   }) async {
     final currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser == null) return;
-
+    final matchCollection = FirebaseFirestore.instance.collection('matches');
     final currentUserId = currentUser.uid;
     final status = isLike ? 0 : -1;
 
-    final mutualMatch = await FirebaseFirestore.instance
-        .collection('matches')
+    final existing1 = await matchCollection
+        .where('user1', isEqualTo: currentUserId)
+        .where('user2', isEqualTo: swipedUserId)
+        .get();
+    final existing2 = await matchCollection
         .where('user1', isEqualTo: swipedUserId)
         .where('user2', isEqualTo: currentUserId)
-        .where('status', isEqualTo: 0)
         .get();
 
-    if (isLike && mutualMatch.docs.isNotEmpty) {
-      await FirebaseFirestore.instance.collection('matches').add({
-        'user1': currentUserId,
-        'user2': swipedUserId,
-        'status': 1,
-        'matchedAt': Timestamp.now(),
-      });
-      print("🎉 MATCHED with \${swipedUser['name']}");
-    } else {
-      await FirebaseFirestore.instance.collection('matches').add({
-        'user1': currentUserId,
-        'user2': swipedUserId,
-        'status': status,
-        'matchedAt': Timestamp.now(),
-      });
-      print(isLike
-          ? "👍 Liked \${swipedUser['name']}"
-          : "👎 Disliked \${swipedUser['name']}");
+    int? existingStatus;
+    if (existing1.docs.isNotEmpty) {
+      existingStatus = existing1.docs.first['status'];
     }
+    if (existing2.docs.isNotEmpty) {
+      existingStatus = existing2.docs.first['status'];
+    }
+
+    if (existing1.docs.isNotEmpty || existing2.docs.isNotEmpty) {
+      final doc = (existing1.docs + existing2.docs).first;
+      if (isLike && existingStatus == 0 && existing2.docs.isNotEmpty) {
+        await matchCollection.doc(doc.id).update({
+          'status': 1,
+          'matchedAt': Timestamp.now(),
+        });
+        print("🎉 MATCHED with ${swipedUser['name']}");
+      } else {
+        await matchCollection.doc(doc.id).update({
+          'status': status,
+          'matchedAt': Timestamp.now(),
+        });
+        print(isLike ? "👍 Updated like" : "👎 Updated dislike");
+      }
+      return;
+    }
+
+    await matchCollection.add({
+      'user1': currentUserId,
+      'user2': swipedUserId,
+      'status': status,
+      'matchedAt': Timestamp.now(),
+    });
+    print(isLike ? "👍 Liked ${swipedUser['name']}" : "👎 Disliked ${swipedUser['name']}");
   }
 
   @override
@@ -100,7 +115,6 @@ class _MatchPageState extends State<MatchPage> {
                     }
 
                     final matchList = snapshot.data ?? [];
-
                     if (matchList.isEmpty) {
                       return const Center(
                         child: Padding(
@@ -120,29 +134,23 @@ class _MatchPageState extends State<MatchPage> {
                       numberOfCardsDisplayed: matchList.length,
                       onSwipe: (previousIndex, currentIndex, direction) async {
                         final user = matchList[previousIndex];
-                        final isLike =
-                            direction == CardSwiperDirection.right;
-
+                        final isLike = direction == CardSwiperDirection.right;
                         await handleSwipeAction(
                           isLike: isLike,
                           swipedUserId: user['uid'],
                           swipedUser: user,
                         );
-
-                        setState(() {}); // Force refresh
+                        setState(() {});
                         return true;
                       },
                       cardBuilder: (context, index, _, __) {
                         final user = matchList[index];
                         String imagePath = "";
-
-                        if (user['imageUrls'] is List &&
-                            user['imageUrls'].isNotEmpty) {
+                        if (user['imageUrls'] is List && user['imageUrls'].isNotEmpty) {
                           imagePath = user['imageUrls'][0];
                         } else if (user['profilePhoto'] != null) {
                           imagePath = user['profilePhoto'];
                         }
-
                         return Center(
                           child: SizedBox(
                             height: MediaQuery.of(context).size.height * 0.8,
@@ -151,48 +159,29 @@ class _MatchPageState extends State<MatchPage> {
                                 borderRadius: BorderRadius.circular(16),
                               ),
                               elevation: 5,
-                              margin: const EdgeInsets.symmetric(
-                                  vertical: 10, horizontal: 20),
+                              margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                               child: Column(
                                 children: [
                                   Expanded(
                                     child: ClipRRect(
-                                      borderRadius: const BorderRadius.vertical(
-                                        top: Radius.circular(16),
-                                      ),
+                                      borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
                                       child: imagePath.isNotEmpty
-                                          ? _imageUrlCache
-                                          .containsKey(imagePath)
-                                          ? _buildImage(
-                                          _imageUrlCache[imagePath]!)
+                                          ? _imageUrlCache.containsKey(imagePath)
+                                          ? _buildImage(_imageUrlCache[imagePath]!)
                                           : FutureBuilder<String>(
-                                        future:
-                                        getFirebaseImageUrl(
-                                            imagePath),
+                                        future: getFirebaseImageUrl(imagePath),
                                         builder: (context, snap) {
-                                          if (snap.connectionState ==
-                                              ConnectionState
-                                                  .waiting) {
-                                            return const Center(
-                                                child:
-                                                CircularProgressIndicator());
+                                          if (snap.connectionState == ConnectionState.waiting) {
+                                            return const Center(child: CircularProgressIndicator());
                                           }
-                                          if (!snap.hasData ||
-                                              snap.data!.isEmpty) {
-                                            return const Icon(
-                                                Icons.broken_image,
-                                                size: 100,
-                                                color: Colors.red);
+                                          if (!snap.hasData || snap.data!.isEmpty) {
+                                            return const Icon(Icons.broken_image, size: 100, color: Colors.red);
                                           }
-
-                                          _imageUrlCache[imagePath] =
-                                          snap.data!;
-                                          return _buildImage(
-                                              snap.data!);
+                                          _imageUrlCache[imagePath] = snap.data!;
+                                          return _buildImage(snap.data!);
                                         },
                                       )
-                                          : const Icon(Icons.account_circle,
-                                          size: 100),
+                                          : const Icon(Icons.account_circle, size: 100),
                                     ),
                                   ),
                                   Padding(
@@ -202,10 +191,7 @@ class _MatchPageState extends State<MatchPage> {
                                       children: [
                                         Text(
                                           user['name'] ?? "Unknown",
-                                          style: const TextStyle(
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.bold,
-                                          ),
+                                          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                                         ),
                                         Text(
                                           "Distance: ${user['distance']?.toStringAsFixed(1) ?? 'Unknown'} miles",
@@ -230,5 +216,6 @@ class _MatchPageState extends State<MatchPage> {
     );
   }
 }
+
 
 

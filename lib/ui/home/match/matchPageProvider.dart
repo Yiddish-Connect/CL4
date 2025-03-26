@@ -124,11 +124,10 @@ class MatchPageProvider extends ChangeNotifier {
 
       if (uid == userId || alreadySwiped.contains(uid)) continue;
 
-      final image = data['profilePhoto'] ??
-          ((data['imageUrls'] is List && data['imageUrls'].isNotEmpty)
-              ? data['imageUrls'][0]
-              : null);
-      if (image == null) continue;
+      final image = (data['imageUrls'] is List && data['imageUrls'].isNotEmpty)
+          ? data['imageUrls'][0]
+          : data['profilePhoto']; // fallback if list empty
+
 
       DateTime? dob;
       final rawDOB = data['DOB'];
