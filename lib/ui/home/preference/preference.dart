@@ -555,24 +555,24 @@ class _Step4 extends StatefulWidget {
 }
 
 class _Step4State extends State<_Step4> {
-  List<File?> _images = List<File?>.filled(6, null); // List for app images
-  List<Uint8List?> _webImages = List<Uint8List?>.filled(6, null); // List for web images
+  List<File?> _images = List<File?>.filled(6, null);
+  List<Uint8List?> _webImages = List<Uint8List?>.filled(6, null);
 
   @override
   Widget build(BuildContext context) {
     return Container(
       child: SingleChildScrollView(
-        padding: EdgeInsets.all(16), // Add padding to avoid edge issues
+        padding: EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: 400), // Set max width for the grid
+              constraints: BoxConstraints(maxWidth: 400),
               child: Padding(
                 padding: EdgeInsets.all(10.0),
                 child: LayoutBuilder(
                   builder: (context, constraints) {
-                    final itemSize = (constraints.maxWidth - 3 * 3) / 3; // Calculate item size
+                    final itemSize = (constraints.maxWidth - 3 * 3) / 3;
                     return StaggeredGrid.count(
                       crossAxisCount: 3,
                       mainAxisSpacing: 3,
@@ -596,10 +596,10 @@ class _Step4State extends State<_Step4> {
                                     }
                                   });
 
-// ✅ Notify provider that an image is added
+                                  // ✅ Notify provider that an image is added
                                   Provider.of<PreferenceProvider>(context, listen: false).notifyListeners();
-
                                 },
+                                isProfilePhoto: index == 0, // ✅ First image is the profile photo
                               ),
                             ),
                           ),
@@ -609,7 +609,7 @@ class _Step4State extends State<_Step4> {
                 ),
               ),
             ),
-            SizedBox(height: 20), // Add spacing at the bottom
+            SizedBox(height: 20),
           ],
         ),
       ),
@@ -617,24 +617,26 @@ class _Step4State extends State<_Step4> {
   }
 }
 
+
 // Image upload helper widget
 class ImageTile extends StatelessWidget {
   final File? imageFile;
-  final Uint8List? webImage; // Add a field for web image
+  final Uint8List? webImage;
   final ValueChanged<dynamic> onImageSelected;
+  final bool isProfilePhoto; // ✅ Add flag for profile picture
 
   const ImageTile({
     super.key,
     required this.imageFile,
     required this.webImage,
     required this.onImageSelected,
+    required this.isProfilePhoto, // ✅ Mark if this is the profile image
   });
 
   Future<void> uploadImageAndStoreInFirestore(dynamic file, String userId) async {
     try {
       String fileName = DateTime.now().millisecondsSinceEpoch.toString();
       Reference storageRef = FirebaseStorage.instance.ref().child('user_uploads/$userId/$fileName');
-
 
       UploadTask uploadTask;
       SettableMetadata metadata = SettableMetadata(contentType: "image/jpeg");
@@ -647,21 +649,26 @@ class ImageTile extends StatelessWidget {
         uploadTask = storageRef.putFile(mobileFile, metadata);
       }
 
-      TaskSnapshot taskSnapshot = await uploadTask;
-      String downloadUrl = await taskSnapshot.ref.getDownloadURL();
+      await uploadTask; // Wait for upload to complete
 
-      // ✅ Ensure Image URL is stored in Firestore
-      await FirebaseFirestore.instance.collection('profiles').doc(userId).update({
-        'imageUrls': FieldValue.arrayUnion([downloadUrl]),
-      });
+      String filePath = storageRef.fullPath; // ✅ Store only file path (Fix)
 
-      print("Image uploaded successfully: $downloadUrl");
+      if (isProfilePhoto) {
+        await FirebaseFirestore.instance.collection('profiles').doc(userId).set({
+          'profilePhoto': filePath, // ✅ Store file path instead of full URL
+        }, SetOptions(merge: true));
+      } else {
+        await FirebaseFirestore.instance.collection('profiles').doc(userId).update({
+          'imageUrls': FieldValue.arrayUnion([filePath]), // ✅ Store file path
+        });
+      }
+
+      print("✅ Image uploaded successfully: $filePath");
+
     } catch (e) {
-      print('Error uploading image: $e');
+      print('❌ Error uploading image: $e');
     }
   }
-
-
 
 
   @override
@@ -674,7 +681,7 @@ class ImageTile extends StatelessWidget {
       ),
       child: Stack(
         children: [
-          if (kIsWeb && webImage != null)  // Check if it's web and web image is available
+          if (kIsWeb && webImage != null)
             ClipRRect(
               borderRadius: BorderRadius.circular(20),
               child: Image.memory(
@@ -695,42 +702,39 @@ class ImageTile extends StatelessWidget {
               ),
             ),
           Align(
-            alignment: Alignment.bottomCenter, // Position at the bottom center
+            alignment: Alignment.bottomCenter,
             child: Padding(
               padding: const EdgeInsets.only(bottom: 20.0),
               child: ElevatedButton(
-    onPressed: () async {
-    try {
-    final files = await ImageHelper().pickImage();
-    if (files.isNotEmpty) {
-    final croppedFile = await ImageHelper().crop(
-    file: files.first,
-    context: context,
-    );
-    if (croppedFile != null) {
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-    String userId = user.uid;
-    if (kIsWeb) {
-    Uint8List fileBytes = await files.first.readAsBytes();
-    onImageSelected(fileBytes);
-    await uploadImageAndStoreInFirestore(fileBytes, userId);  // ✅ Use correct function
-    } else {
-    File imageFile = File(croppedFile.path);
-    onImageSelected(imageFile);
-    await uploadImageAndStoreInFirestore(imageFile, userId);  // ✅ Use correct function
-    }
-    }
-    }
-    }
-    } catch (e) {
-    print('$e');
-    }
-    },
-
-
-
-                child: Text('Add'),
+                onPressed: () async {
+                  try {
+                    final files = await ImageHelper().pickImage();
+                    if (files.isNotEmpty) {
+                      final croppedFile = await ImageHelper().crop(
+                        file: files.first,
+                        context: context,
+                      );
+                      if (croppedFile != null) {
+                        User? user = FirebaseAuth.instance.currentUser;
+                        if (user != null) {
+                          String userId = user.uid;
+                          if (kIsWeb) {
+                            Uint8List fileBytes = await files.first.readAsBytes();
+                            onImageSelected(fileBytes);
+                            await uploadImageAndStoreInFirestore(fileBytes, userId);
+                          } else {
+                            File imageFile = File(croppedFile.path);
+                            onImageSelected(imageFile);
+                            await uploadImageAndStoreInFirestore(imageFile, userId);
+                          }
+                        }
+                      }
+                    }
+                  } catch (e) {
+                    print('$e');
+                  }
+                },
+                child: Text(isProfilePhoto ? 'Set as Profile Photo' : 'Add'),
               ),
             ),
           ),
@@ -739,6 +743,7 @@ class ImageTile extends StatelessWidget {
     );
   }
 }
+
 
 class _Step5 extends StatefulWidget {
   @override

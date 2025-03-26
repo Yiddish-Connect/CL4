@@ -229,16 +229,32 @@ class _MatchFilterState extends State<MatchFilter> {
                 selectedProficiency = null;
                 distanceSelection = 1000.0;
                 ageRangeSelection = const RangeValues(0.0, 100.0);
+
+                widget.dataProvider.updatePracticeOptions([]);
+                widget.dataProvider.setYiddishProficiency("None");
+                widget.dataProvider.maxDistance = 1000;
+                widget.dataProvider.minAge = 0;
+                widget.dataProvider.maxAge = 100;
               });
             },
+
           ),
           IconButton(
             icon: const Icon(Icons.check, size: 48),
             color: Colors.green,
             onPressed: () {
-              widget.dataProvider.setYiddishProficiency(selectedProficiency!.toString().split('.').last);
+              // Save all filters to the provider
+              widget.dataProvider.setYiddishProficiency(
+                  selectedProficiency?.toString().split('.').last ?? "None"
+              );
+
+              widget.dataProvider.maxDistance = distanceSelection.round();
+              widget.dataProvider.minAge = ageRangeSelection.start.round();
+              widget.dataProvider.maxAge = ageRangeSelection.end.round();
+
               Navigator.pop(context);
             },
+
           ),
         ],
       ),
