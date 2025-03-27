@@ -10,10 +10,10 @@ import 'package:yiddishconnect/ui/home/match/matchPageProvider.dart';
 import 'package:yiddishconnect/ui/home/chat/chat_homepage.dart';
 import 'package:yiddishconnect/ui/home/friend/friend.dart';
 import 'package:yiddishconnect/ui/notification/notificationPage.dart';
-import 'package:yiddishconnect/utils/helpers.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:yiddishconnect/ui/notification/notificationProvider.dart';
-import 'package:yiddishconnect/services/firestoreService.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:video_player/video_player.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -26,19 +26,37 @@ class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   final AudioPlayer _audioPlayer = AudioPlayer();
   final List<Widget> _pages = [];
+  VideoPlayerController? _videoController;
 
   @override
   void initState() {
     super.initState();
+
     _pages.addAll([
       const HomePage(),
-      EventPage(),               // ✅ no const
+      EventPage(),
       const MatchPage(),
       const FriendsPage(),
-      ChatHomepage(),           // ✅ no const + correct name
+      ChatHomepage(),
     ]);
+
+    _videoController = VideoPlayerController.asset('assets/videos/stockvideo_02677k.mov')
+      ..initialize().then((_) {
+        _videoController!
+          ..setLooping(true)
+          ..setVolume(0)
+          ..play();
+        setState(() {});
+      });
+
   }
 
+  @override
+  void dispose() {
+    _videoController?.dispose();
+    _audioPlayer.dispose();
+    super.dispose();
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -57,46 +75,70 @@ class _HomeScreenState extends State<HomeScreen> {
         appBar: AppBar(
           title: const Text('Yiddish Connect'),
           actions: [
-            FutureBuilder<DocumentSnapshot>(
-              future: FirebaseFirestore.instance
-                  .collection('profiles')
-                  .doc(FirebaseAuth.instance.currentUser?.uid)
-                  .get(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState != ConnectionState.done || !snapshot.hasData || !snapshot.data!.exists) {
-                  return const Padding(
-                    padding: EdgeInsets.all(12),
-                    child: CircleAvatar(child: Icon(Icons.person)),
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: StreamBuilder<DocumentSnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('profiles')
+                    .doc(FirebaseAuth.instance.currentUser?.uid)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  final data = snapshot.data?.data() as Map<String, dynamic>?;
+
+                  if (data == null) {
+                    return const CircleAvatar(child: Icon(Icons.person));
+                  }
+
+                  final imageUrls = data['imageUrls'];
+                  if (imageUrls is! List || imageUrls.isEmpty) {
+                    return const CircleAvatar(child: Icon(Icons.person));
+                  }
+
+                  final firebasePath = imageUrls[0];
+
+                  return FutureBuilder<String>(
+                    future: FirebaseStorage.instance
+                        .ref(firebasePath)
+                        .getDownloadURL(),
+                    builder: (context, snap) {
+                      if (!snap.hasData) {
+                        return const CircleAvatar(child: Icon(Icons.person));
+                      }
+
+                      return GestureDetector(
+                        onTap: () => GoRouter.of(context).push('/profile'),
+                        child: CircleAvatar(
+                          backgroundImage: NetworkImage(snap.data!),
+                        ),
+                      );
+                    },
                   );
-                }
-
-                final data = snapshot.data!.data() as Map<String, dynamic>;
-                final imageUrls = data['imageUrls'] as List<dynamic>?;
-                final profileImage = (imageUrls != null && imageUrls.isNotEmpty)
-                    ? imageUrls[0]
-                    : null;
-
-                return GestureDetector(
-                  onTap: () {
-                    GoRouter.of(context).push('/profile'); // 🔥 Update this to your actual route
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: CircleAvatar(
-                      backgroundImage: profileImage != null ? NetworkImage(profileImage) : null,
-                      child: profileImage == null ? const Icon(Icons.person) : null,
-                    ),
-                  ),
-                );
-              },
+                },
+              ),
             ),
           ],
         ),
-
-        body: _pages[_selectedIndex],
+        body: Stack(
+          children: [
+            if (_videoController != null &&
+                _videoController!.value.isInitialized)
+              SizedBox.expand(
+                child: FittedBox(
+                  fit: BoxFit.cover,
+                  child: SizedBox(
+                    width: _videoController!.value.size.width,
+                    height: _videoController!.value.size.height,
+                    child: VideoPlayer(_videoController!),
+                  ),
+                ),
+              ),
+            Container(color: Colors.black.withOpacity(0.3)),
+            _pages[_selectedIndex],
+          ],
+        ),
         bottomNavigationBar: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
-          items: const <BottomNavigationBarItem>[
+          items: const [
             BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
             BottomNavigationBarItem(icon: Icon(Icons.event), label: 'Events'),
             BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'Match'),
@@ -118,7 +160,14 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Center(
-      child: Text('Welcome to Yiddish Connect!'),
+      child: Text(
+        'Welcome to Yiddish Connect!',
+        style: TextStyle(
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
+      ),
     );
   }
 }
