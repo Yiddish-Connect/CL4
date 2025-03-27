@@ -1,128 +1,144 @@
 
+import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
-class FriendPage extends StatefulWidget {
-  const FriendPage({super.key});
+class FriendsPage extends StatefulWidget {
+  const FriendsPage({super.key});
 
   @override
-  State<FriendPage> createState() => _FriendPageState();
+  State<FriendsPage> createState() => _FriendsPageState();
 }
 
-class _FriendPageState extends State<FriendPage> {
-  List<Map<String, dynamic>> friends = [];
-  bool isLoading = true;
+class _FriendsPageState extends State<FriendsPage> {
+  late Future<List<Map<String, dynamic>>> _friendsFuture;
 
   @override
   void initState() {
     super.initState();
-    loadFriends();
+    _friendsFuture = _loadFriends();
   }
 
-  Future<void> loadFriends() async {
+  Future<String> _getImageUrl(String path) async {
+    try {
+      final ref = FirebaseStorage.instance.ref().child(path);
+      return await ref.getDownloadURL();
+    } catch (e) {
+      return "";
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> _loadFriends() async {
     final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
+    if (user == null) return [];
 
     final userId = user.uid;
-    final firestore = FirebaseFirestore.instance;
 
-    final matchSnapshot = await firestore
+    final matchesSnapshot = await FirebaseFirestore.instance
         .collection('matches')
         .where('status', isEqualTo: 1)
         .get();
 
-    final matchedUserIds = matchSnapshot.docs.map((doc) {
+    final matchedUserIds = <String>{};
+    for (var doc in matchesSnapshot.docs) {
       final data = doc.data();
-      if (data['user1'] == userId) return data['user2'];
-      if (data['user2'] == userId) return data['user1'];
-      return null;
-    }).whereType<String>().toSet();
-
-    if (matchedUserIds.isEmpty) {
-      setState(() {
-        friends = [];
-        isLoading = false;
-      });
-      return;
+      if (data['user1'] == userId) {
+        matchedUserIds.add(data['user2']);
+      } else if (data['user2'] == userId) {
+        matchedUserIds.add(data['user1']);
+      }
     }
 
-    final profileSnapshot = await firestore.collection('profiles').get();
-    final allProfiles = profileSnapshot.docs.map((doc) => doc.data()).toList();
+    if (matchedUserIds.isEmpty) return [];
 
-    final matchedProfiles = allProfiles
-        .where((profile) => matchedUserIds.contains(profile['uid']))
-        .toList();
+    final profilesSnapshot =
+    await FirebaseFirestore.instance.collection('profiles').get();
 
-    setState(() {
-      friends = matchedProfiles;
-      isLoading = false;
-    });
+    List<Map<String, dynamic>> matchedProfiles = [];
+    for (var doc in profilesSnapshot.docs) {
+      final data = doc.data();
+      if (matchedUserIds.contains(data['uid'])) {
+        matchedProfiles.add(data);
+      }
+    }
+
+    return matchedProfiles;
   }
 
-  Widget _buildFriendTile(Map<String, dynamic> friend) {
-    final String name = friend['name'] ?? 'Unnamed';
-    final String? photo = (friend['imageUrls'] is List && friend['imageUrls'].isNotEmpty)
-        ? friend['imageUrls'][0]
-        : null;
+  Widget _buildFriendTile(Map<String, dynamic> profile) {
+    final name = profile['name'] ?? 'Unknown';
+    final dobRaw = profile['DOB'];
+    DateTime? dob = dobRaw is Timestamp
+        ? dobRaw.toDate()
+        : (dobRaw is String ? DateTime.tryParse(dobRaw) : null);
+    final age = dob != null
+        ? (DateTime.now().difference(dob).inDays ~/ 365).toString()
+        : 'N/A';
 
-    return ExpansionTile(
-      leading: photo != null
-          ? FutureBuilder<String>(
-        future: FirebaseStorage.instance.ref(photo).getDownloadURL(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const CircleAvatar(child: CircularProgressIndicator());
-          }
-          if (!snapshot.hasData) {
-            return const CircleAvatar(child: Icon(Icons.error));
-          }
-          return CircleAvatar(
-            backgroundImage: NetworkImage(snapshot.data!),
-          );
-        },
-      )
-          : const CircleAvatar(child: Icon(Icons.person)),
-      title: Text(name),
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (friend['yiddishProficiency'] != null)
-                Text("Yiddish Proficiency: ${friend['yiddishProficiency']}"),
-              if (friend['practiceOptions'] != null)
-                Text("Practice Options: ${friend['practiceOptions'].join(', ')}"),
-              if (friend['Interest'] != null)
-                Text("Interests: ${friend['Interest'].join(', ')}"),
-              const SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: () {
-                  // TODO: Navigate to chat or profile action
-                },
-                child: const Text("Message"),
-              )
-            ],
+    final uid = profile['uid'] ?? '';
+    final imageUrls = profile['imageUrls'] ?? [];
+    final imagePath = (imageUrls is List && imageUrls.isNotEmpty)
+        ? imageUrls[0]
+        : profile['profilePhoto'] ?? '';
+    final distance = profile['distance']?.toStringAsFixed(1) ?? 'N/A';
+    final yiddish = profile['yiddishProficiency'] ?? 'Unknown';
+    final practiceOptions =
+        (profile['practiceOptions'] as List?)?.join(', ') ?? 'None listed';
+    final interests =
+        (profile['Interest'] as List?)?.join(', ') ?? 'None listed';
+    final bio = profile['bio'] ?? 'No bio available';
+
+    return FutureBuilder<String>(
+      future: _getImageUrl(imagePath),
+      builder: (context, snapshot) {
+        final imageUrl = snapshot.data ?? "";
+
+        return ExpansionTile(
+          leading: CircleAvatar(
+            backgroundImage:
+            imageUrl.isNotEmpty ? NetworkImage(imageUrl) : null,
+            child: imageUrl.isEmpty ? Icon(Icons.person) : null,
           ),
-        )
-      ],
+          title: Text(name),
+          subtitle: Text('Distance: $distance miles'),
+          children: [
+            ListTile(title: Text("Age: $age")),
+            ListTile(title: Text("Fluency: $yiddish")),
+            ListTile(title: Text("Practice: $practiceOptions")),
+            ListTile(title: Text("Interests: $interests")),
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Text("Bio: $bio"),
+            ),
+          ],
+        );
+      },
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Friends')),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : friends.isEmpty
-          ? const Center(child: Text("No friends found."))
-          : ListView.builder(
-        itemCount: friends.length,
-        itemBuilder: (context, index) {
-          return _buildFriendTile(friends[index]);
+      appBar: AppBar(title: const Text('Your Friends')),
+      body: FutureBuilder<List<Map<String, dynamic>>>(
+        future: _friendsFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final friends = snapshot.data ?? [];
+          if (friends.isEmpty) {
+            return const Center(child: Text("No friends found."));
+          }
+
+          return ListView.builder(
+            itemCount: friends.length,
+            itemBuilder: (context, index) {
+              return _buildFriendTile(friends[index]);
+            },
+          );
         },
       ),
     );

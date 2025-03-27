@@ -39,21 +39,26 @@ final ydRouter = GoRouter(
         ]
     ),
     GoRoute(
-        name: "homeScreen",
-        path: '/',
-        builder: (context, state) => HomeScreen(),
-        routes: [
-          GoRoute(
-            name: "preferenceScreen",
-            path: "preference",
-            builder: (context, state) => PreferenceScreen(),
-          ),
-          GoRoute(
-            name: "userScreen",
-            path: "user",
-            builder: (context, state) => UserScreen(),
-          ),
-        ],
+      name: "homeScreen",
+      path: '/',
+      builder: (context, state) => HomeScreen(),
+      routes: [
+        GoRoute(
+          name: "preferenceScreen",
+          path: "preference",
+          builder: (context, state) => PreferenceScreen(),
+        ),
+        GoRoute(
+          name: "userScreen",
+          path: "user",
+          builder: (context, state) => UserScreen(),
+        ),
+        GoRoute(
+          name: "profileScreen",
+          path: "profile", // 👈 this is what allows /profile
+          builder: (context, state) => UserScreen(),
+        ),
+      ],
     ),
   ],
 

@@ -1,22 +1,18 @@
-
-import 'dart:collection';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:yiddishconnect/ui/auth/dev_signin_signup/dev_home.dart';
 import 'package:yiddishconnect/ui/home/event/eventPage.dart';
 import 'package:yiddishconnect/ui/home/match/bottomFilter.dart';
 import 'package:yiddishconnect/ui/home/match/matchPage.dart';
 import 'package:yiddishconnect/ui/home/match/matchPageProvider.dart';
-import 'package:yiddishconnect/utils/helpers.dart';
-import 'chat/chat_homepage.dart';
-import 'friend/friend.dart';
+import 'package:yiddishconnect/ui/home/chat/chat_homepage.dart';
+import 'package:yiddishconnect/ui/home/friend/friend.dart';
 import 'package:yiddishconnect/ui/notification/notificationPage.dart';
+import 'package:yiddishconnect/utils/helpers.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:yiddishconnect/ui/notification/notificationProvider.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:yiddishconnect/services/firestoreService.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -27,30 +23,26 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _drawerIndex = 0;
-  int _index = 0;
-  List<Widget> _pages = [
-    Placeholder(),
-    Placeholder(),
-    Placeholder(),
-    Placeholder(),
-    Placeholder(),
-  ];
-  HashSet<int> _loaded = HashSet();
-  bool _soundPlayed = false;
-  int _previousNotificationCount = 0;
-  FirestoreService _firestoreService = FirestoreService();
+  int _selectedIndex = 0;
+  final AudioPlayer _audioPlayer = AudioPlayer();
+  final List<Widget> _pages = [];
 
   @override
   void initState() {
-    _loaded.add(0);
-    _pages[0] = HomePage();
     super.initState();
-    FirebaseMessaging.instance.getToken().then((String? onValue) {
-      if (onValue != null) {
-        print("token $onValue");
-        _firestoreService.addToken(onValue);
-      }
+    _pages.addAll([
+      const HomePage(),
+      EventPage(),               // ✅ no const
+      const MatchPage(),
+      const FriendsPage(),
+      ChatHomepage(),           // ✅ no const + correct name
+    ]);
+  }
+
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
     });
   }
 
@@ -58,218 +50,75 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => MatchPageProvider()),
+        ChangeNotifierProvider(create: (_) => MatchPageProvider()),
+        ChangeNotifierProvider(create: (_) => NotificationProvider()),
       ],
-      child: Builder(
-        builder: (context) {
-          return Scaffold(
-            appBar: AppBar(
-              actions: _createActions(context, _index),
-              leading: _createLeading(context, _index),
-              toolbarHeight: 70,
-              leadingWidth: 90,
-            ),
-            body: IndexedStack(
-              index: _index,
-              children: _pages,
-            ),
-            bottomNavigationBar: FractionallySizedBox(
-              widthFactor: 0.9,
-              child: Container(
-                margin: EdgeInsets.only(top: 10, bottom: 20, left: 10, right: 10),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(30)),
-                  boxShadow: [
-                    BoxShadow(color: Colors.black38, spreadRadius: 0, blurRadius: 10),
-                  ],
-                  color: Theme.of(context).colorScheme.surface,
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.all(Radius.circular(30)),
-                  child: SizedBox(
-                    height: 60,
-                    child: BottomNavigationBar(
-                      items: [
-                        BottomNavigationBarItem(
-                          icon: Icon(Icons.home_outlined),
-                          label: "Home",
-                          backgroundColor: Theme.of(context).colorScheme.surface,
-                        ),
-                        BottomNavigationBarItem(
-                          icon: Icon(Icons.explore_outlined),
-                          label: "Explore",
-                          backgroundColor: Theme.of(context).colorScheme.surface,
-                        ),
-                        BottomNavigationBarItem(
-                          icon: Icon(Icons.add),
-                          label: "Match",
-                          backgroundColor: Theme.of(context).colorScheme.surface,
-                        ),
-                        BottomNavigationBarItem(
-                          icon: Icon(Icons.people_outline),
-                          label: "Friends",
-                          backgroundColor: Theme.of(context).colorScheme.surface,
-                        ),
-                        BottomNavigationBarItem(
-                          icon: Icon(Icons.chat_bubble_outline),
-                          label: "Chat",
-                          backgroundColor: Theme.of(context).colorScheme.surface,
-                        ),
-                      ],
-                      currentIndex: _index,
-                      onTap: (int selectedIndex) {
-                        setState(() {
-                          if (_loaded.contains(selectedIndex)) {
-                            _index = selectedIndex;
-                          } else {
-                            _index = selectedIndex;
-                            _loaded.add(_index);
-                            _pages[_index] = switch (_index) {
-                              0 => HomePage(),
-                              1 => EventPage(),
-                              2 => MatchPage(),
-                              3 => FriendPage(),
-                              4 => ChatHomepage(),
-                              _ => Placeholder(),
-                            };
-                          }
-                        });
-                      },
-                      selectedItemColor: Theme.of(context).colorScheme.primary,
-                      unselectedItemColor: Theme.of(context).colorScheme.secondary,
-                      elevation: 0,
-                      type: BottomNavigationBarType.shifting,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Yiddish Connect'),
+          actions: [
+            FutureBuilder<DocumentSnapshot>(
+              future: FirebaseFirestore.instance
+                  .collection('profiles')
+                  .doc(FirebaseAuth.instance.currentUser?.uid)
+                  .get(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState != ConnectionState.done || !snapshot.hasData || !snapshot.data!.exists) {
+                  return const Padding(
+                    padding: EdgeInsets.all(12),
+                    child: CircleAvatar(child: Icon(Icons.person)),
+                  );
+                }
+
+                final data = snapshot.data!.data() as Map<String, dynamic>;
+                final imageUrls = data['imageUrls'] as List<dynamic>?;
+                final profileImage = (imageUrls != null && imageUrls.isNotEmpty)
+                    ? imageUrls[0]
+                    : null;
+
+                return GestureDetector(
+                  onTap: () {
+                    GoRouter.of(context).push('/profile'); // 🔥 Update this to your actual route
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: CircleAvatar(
+                      backgroundImage: profileImage != null ? NetworkImage(profileImage) : null,
+                      child: profileImage == null ? const Icon(Icons.person) : null,
                     ),
                   ),
-                ),
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  List<Widget> _createActions(BuildContext context, int index) {
-    List<Widget> matchPageActions = [
-      Padding(
-        padding: const EdgeInsets.all(8),
-        child: IconButton(
-          onPressed: () => toast(context, "TODO: search"),
-          icon: Icon(Icons.search, size: 28.0),
-          iconSize: 28.0,
-        ),
-      ),
-      Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: IconButton(
-          onPressed: () => showFilter(context),
-          icon: Icon(Icons.filter_list, size: 28.0),
-          iconSize: 28.0,
-        ),
-      ),
-    ];
-
-    Future<void> _playNotificationSound() async {
-      AudioCache.instance = AudioCache(prefix: '');
-      final audioPlayer = AudioPlayer();
-      await audioPlayer.play(AssetSource('notification_sound.mp3'));
-    }
-
-    List<Widget> otherPageActions = [
-      Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Consumer<NotificationProvider>(
-          builder: (context, notificationProvider, child) {
-            int currentNotificationCount = notificationProvider.notifications.length;
-            if (currentNotificationCount > _previousNotificationCount) {
-              _soundPlayed = false;
-            }
-            _previousNotificationCount = currentNotificationCount;
-
-            if (currentNotificationCount > 0 && !_soundPlayed) {
-              _playNotificationSound();
-              _soundPlayed = true;
-            }
-
-            return IconButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => NotificationPage()),
                 );
               },
-              icon: Icon(
-                currentNotificationCount > 0
-                    ? Icons.notifications_active_outlined
-                    : Icons.notifications_outlined,
-                size: 28.0,
-              ),
-              color: currentNotificationCount > 0 ? Colors.red : null,
-              iconSize: 28.0,
-            );
-          },
+            ),
+          ],
+        ),
+
+        body: _pages[_selectedIndex],
+        bottomNavigationBar: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+            BottomNavigationBarItem(icon: Icon(Icons.event), label: 'Events'),
+            BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'Match'),
+            BottomNavigationBarItem(icon: Icon(Icons.people), label: 'Friends'),
+            BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'Chat'),
+          ],
+          currentIndex: _selectedIndex,
+          selectedItemColor: Colors.amber[800],
+          onTap: _onItemTapped,
         ),
       ),
-    ];
-
-    return (index == 0 || index == 1 || index == 3 || index == 4)
-        ? otherPageActions
-        : matchPageActions;
-  }
-
-  Widget _createLeading(BuildContext context, int index) {
-    return FutureBuilder<DocumentSnapshot>(
-      future: FirebaseFirestore.instance
-          .collection('profiles')
-          .doc(FirebaseAuth.instance.currentUser?.uid)
-          .get(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState != ConnectionState.done || !snapshot.hasData) {
-          return const CircleAvatar(
-            backgroundImage: NetworkImage("https://www.example.com/default-image.jpg"),
-          );
-        }
-
-        final data = snapshot.data!.data() as Map<String, dynamic>;
-        final imageUrl = (data['imageUrls'] != null &&
-            data['imageUrls'] is List &&
-            data['imageUrls'].isNotEmpty)
-            ? data['imageUrls'][0]
-            : "https://www.example.com/default-image.jpg";
-
-        return Padding(
-          padding: const EdgeInsets.all(12),
-          child: InkWell(
-            onTap: () => context.push(
-              "/user",
-              extra: {
-                'imageUrls': data['imageUrls'],
-                'name': data['name'] ?? 'Profile',
-              },
-            ),
-            child: CircleAvatar(
-              backgroundImage: NetworkImage(imageUrl),
-              radius: 24,
-            ),
-          ),
-        );
-      },
     );
   }
 }
 
 class HomePage extends StatelessWidget {
+  const HomePage({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.orangeAccent,
-      child: Opacity(
-        opacity: 0.5,
-        child: Center(
-          child: DevHomeScreen(),
-        ),
-      ),
+    return const Center(
+      child: Text('Welcome to Yiddish Connect!'),
     );
   }
 }
