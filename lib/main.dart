@@ -1,51 +1,33 @@
-import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:provider/provider.dart';
-import 'package:yiddishconnect/models/notification_controller.dart';
 import 'package:yiddishconnect/router.dart';
-import 'package:yiddishconnect/ui/home/match/matchPageProvider.dart'; // ✅ Correct provider file
+import 'package:yiddishconnect/ui/home/match/matchPageProvider.dart';
 import 'package:yiddishconnect/ui/notification/notificationProvider.dart';
 import 'firebase_options.dart';
-import 'package:english_words/english_words.dart'; // ✅ Fix for `WordPair`
-import 'package:flutter/foundation.dart'; // ✅ Fix for `kIsWeb`
+import 'package:english_words/english_words.dart';
+import 'package:flutter/foundation.dart';
+
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // ✅ Initialize Firebase
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // ✅ Initialize Notifications
-  await AwesomeNotifications().initialize(
-    null,
-    [
-      NotificationChannel(
-        channelGroupKey: "Basic",
-        channelKey: "Basic Channel",
-        channelName: "Basic Notifications",
-        channelDescription: "Basic Notifications",
-      ),
-    ],
-    channelGroups: [
-      NotificationChannelGroup(
-        channelGroupKey: "Basic",
-        channelGroupName: "Basic Notifications",
-      ),
-    ],
+  // Setup local notification settings
+  const AndroidInitializationSettings initializationSettingsAndroid =
+  AndroidInitializationSettings('@mipmap/ic_launcher');
+
+  const InitializationSettings initializationSettings = InitializationSettings(
+    android: initializationSettingsAndroid,
   );
 
-  // ✅ Request notification permissions for non-web platforms
-  if (!kIsWeb) {
-    bool isAllowed = await AwesomeNotifications().isNotificationAllowed();
-    if (!isAllowed) {
-      AwesomeNotifications().requestPermissionToSendNotifications();
-    }
-  }
+  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
 
   runApp(const MyApp());
 }
@@ -59,35 +41,40 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   FirebaseMessaging messaging = FirebaseMessaging.instance;
-  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
   @override
   void initState() {
     super.initState();
-    listenToMessages();
-    setupNotificationListeners();
+    _setupPushNotifications();
   }
 
-  void listenToMessages() {
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      AwesomeNotifications().createNotification(
-        content: NotificationContent(
-          id: 1,
-          channelKey: "Basic Channel",
-          title: message.notification?.title,
-          body: message.notification?.body,
-        ),
-      );
-    });
-  }
+  void _setupPushNotifications() async {
+    // Request permission (only required on iOS & Android 13+)
+    NotificationSettings settings = await messaging.requestPermission();
 
-  void setupNotificationListeners() {
-    AwesomeNotifications().setListeners(
-      onActionReceivedMethod: NotificationController.onActionReceivedMethod,
-      onNotificationCreatedMethod: NotificationController.onNotificationCreatedMethod,
-      onNotificationDisplayedMethod: NotificationController.onNotificationDisplayedMethod,
-      onDismissActionReceivedMethod: NotificationController.onDismissActionMethod,
-    );
+    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+      FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+        RemoteNotification? notification = message.notification;
+        AndroidNotification? android = message.notification?.android;
+
+        if (notification != null && android != null) {
+          flutterLocalNotificationsPlugin.show(
+            notification.hashCode,
+            notification.title,
+            notification.body,
+            NotificationDetails(
+              android: AndroidNotificationDetails(
+                'default_channel',
+                'App Notifications',
+                channelDescription: 'YiddishConnect Notifications',
+                importance: Importance.high,
+                priority: Priority.high,
+              ),
+            ),
+          );
+        }
+      });
+    }
   }
 
   @override
@@ -96,7 +83,7 @@ class _MyAppState extends State<MyApp> {
       providers: [
         ChangeNotifierProvider(create: (context) => NotificationProvider()),
         ChangeNotifierProvider(create: (context) => MyAppState()),
-        ChangeNotifierProvider(create: (context) => MatchPageProvider()), // ✅ Corrected Provider
+        ChangeNotifierProvider(create: (context) => MatchPageProvider()),
       ],
       child: MaterialApp.router(
         title: 'Yiddish Connect',
@@ -128,7 +115,7 @@ class _MyAppState extends State<MyApp> {
   }
 }
 
-// ✅ Fix: Corrected missing `WordPair` issue
 class MyAppState extends ChangeNotifier {
   var current = WordPair.random();
 }
+

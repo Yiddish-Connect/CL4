@@ -1,0 +1,2 @@
+C:/Users/blair/Desktop/YDConnect/CL4/android/app/.cxx/Debug/i2u6s702/x86_64/CMakeFiles/edit_cache.dir
+C:/Users/blair/Desktop/YDConnect/CL4/android/app/.cxx/Debug/i2u6s702/x86_64/CMakeFiles/rebuild_cache.dir

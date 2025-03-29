@@ -1,50 +1,88 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:yiddishconnect/services/firebaseAuthentication.dart';
-import 'package:intl/intl.dart';
-import 'dart:async';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class NotificationProvider extends ChangeNotifier {
-  List<FriendRequest> notifications = [];
-  final String currentUserId = AuthService.getCurrentUserId();
-  late StreamSubscription<QuerySnapshot> _notificationSubscription;
+  final FirebaseMessaging _messaging = FirebaseMessaging.instance;
+  final FlutterLocalNotificationsPlugin _localNotificationsPlugin = FlutterLocalNotificationsPlugin();
+
+  String? _fcmToken;
+  final List<RemoteMessage> _messages = [];
+
+  List<RemoteMessage> get messages => List.unmodifiable(_messages);
+  String? get fcmToken => _fcmToken;
 
   NotificationProvider() {
-    _notificationSubscription = FirebaseFirestore.instance
-        .collection('friendRequests')
-        .where('receiverID', isEqualTo: currentUserId)
-        .snapshots()
-        .listen((snapshot) {
-      notifications = snapshot.docs.map((doc) {
-        return FriendRequest(
-          senderId: doc['senderID'],
-          receiverId: doc['receiverID'],
-          time: _formatTimestamp(doc['timestamp'].toDate()),
-        );
-      }).toList();
+    _initialize();
+  }
+
+  Future<void> _initialize() async {
+    await _requestPermissions();
+    await _initLocalNotifications();
+    await _setupFCMListeners();
+  }
+
+  Future<void> _requestPermissions() async {
+    await _messaging.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+  }
+
+  Future<void> _initLocalNotifications() async {
+    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const initSettings = InitializationSettings(android: androidSettings);
+
+    await _localNotificationsPlugin.initialize(initSettings);
+  }
+
+  Future<void> _setupFCMListeners() async {
+    _fcmToken = await _messaging.getToken();
+    debugPrint("✅ FCM Token: $_fcmToken");
+
+    // Foreground message
+    FirebaseMessaging.onMessage.listen((message) {
+      _messages.add(message);
+      _showLocalNotification(message);
       notifyListeners();
     });
+
+    // Background tap
+    FirebaseMessaging.onMessageOpenedApp.listen((message) {
+      _messages.add(message);
+      notifyListeners();
+    });
+
+    // App opened from terminated
+    final initialMessage = await _messaging.getInitialMessage();
+    if (initialMessage != null) {
+      _messages.add(initialMessage);
+      notifyListeners();
+    }
   }
 
-  @override
-  void dispose() {
-    _notificationSubscription.cancel();
-    super.dispose();
-  }
+  Future<void> _showLocalNotification(RemoteMessage message) async {
+    final notification = message.notification;
+    if (notification == null) return;
 
-  String _formatTimestamp(DateTime timestamp) {
-    return DateFormat('MM/dd/yyyy HH:mm').format(timestamp);
+    const androidDetails = AndroidNotificationDetails(
+      'main_channel',
+      'Main Channel',
+      channelDescription: 'Default notification channel',
+      importance: Importance.max,
+      priority: Priority.high,
+      playSound: true,
+    );
+
+    const platformDetails = NotificationDetails(android: androidDetails);
+
+    await _localNotificationsPlugin.show(
+      notification.hashCode,
+      notification.title,
+      notification.body,
+      platformDetails,
+    );
   }
 }
 
-class FriendRequest {
-  final String senderId;
-  final String receiverId;
-  final String time;
-
-  FriendRequest({required this.senderId, required this.receiverId, required this.time});
-
-  String toString() {
-    return 'FriendRequest(senderId: $senderId, receiverId: $receiverId, time: $time)';
-  }
-}

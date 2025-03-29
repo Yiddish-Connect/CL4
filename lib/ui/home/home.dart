@@ -3,17 +3,17 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:audioplayers/audioplayers.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:video_player/video_player.dart';
+
 import 'package:yiddishconnect/ui/home/event/eventPage.dart';
-import 'package:yiddishconnect/ui/home/match/bottomFilter.dart';
 import 'package:yiddishconnect/ui/home/match/matchPage.dart';
 import 'package:yiddishconnect/ui/home/match/matchPageProvider.dart';
 import 'package:yiddishconnect/ui/home/chat/chat_homepage.dart';
 import 'package:yiddishconnect/ui/home/friend/friend.dart';
 import 'package:yiddishconnect/ui/notification/notificationPage.dart';
-import 'package:audioplayers/audioplayers.dart';
 import 'package:yiddishconnect/ui/notification/notificationProvider.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:video_player/video_player.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -25,35 +25,37 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   final AudioPlayer _audioPlayer = AudioPlayer();
-  final List<Widget> _pages = [];
-  VideoPlayerController? _videoController;
+  late final List<Widget> _pages;
+  late final VideoPlayerController _videoController;
 
   @override
   void initState() {
     super.initState();
 
-    _pages.addAll([
+    _pages = [
       const HomePage(),
       EventPage(),
       const MatchPage(),
       const FriendsPage(),
       ChatHomepage(),
-    ]);
+    ];
 
-    _videoController = VideoPlayerController.asset('assets/videos/stockvideo_02677k.mov')
+    _videoController = VideoPlayerController.asset(
+      'assets/videos/200203Abparticle001.mp4',
+    )
       ..initialize().then((_) {
-        _videoController!
+        _videoController
           ..setLooping(true)
           ..setVolume(0)
           ..play();
         setState(() {});
       });
-
   }
+
 
   @override
   void dispose() {
-    _videoController?.dispose();
+    _videoController.dispose();
     _audioPlayer.dispose();
     super.dispose();
   }
@@ -85,7 +87,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 builder: (context, snapshot) {
                   final data = snapshot.data?.data() as Map<String, dynamic>?;
 
-                  if (data == null) {
+                  if (data == null || data['imageUrls'] == null) {
                     return const CircleAvatar(child: Icon(Icons.person));
                   }
 
@@ -95,7 +97,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   }
 
                   final firebasePath = imageUrls[0];
-
                   return FutureBuilder<String>(
                     future: FirebaseStorage.instance
                         .ref(firebasePath)
@@ -118,20 +119,20 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ),
-        body: Stack(
+        body: !_videoController.value.isInitialized
+            ? const Center(child: CircularProgressIndicator())
+            : Stack(
           children: [
-            if (_videoController != null &&
-                _videoController!.value.isInitialized)
-              SizedBox.expand(
-                child: FittedBox(
-                  fit: BoxFit.cover,
-                  child: SizedBox(
-                    width: _videoController!.value.size.width,
-                    height: _videoController!.value.size.height,
-                    child: VideoPlayer(_videoController!),
-                  ),
+            SizedBox.expand(
+              child: FittedBox(
+                fit: BoxFit.cover,
+                child: SizedBox(
+                  width: _videoController.value.size.width,
+                  height: _videoController.value.size.height,
+                  child: VideoPlayer(_videoController),
                 ),
               ),
+            ),
             Container(color: Colors.black.withOpacity(0.3)),
             _pages[_selectedIndex],
           ],
