@@ -40,9 +40,11 @@ class _HomeScreenState extends State<HomeScreen> {
       ChatHomepage(),
     ];
 
-    _videoController = VideoPlayerController.asset(
-      'assets/videos/200203Abparticle001.mp4',
+    _videoController = VideoPlayerController.network(
+      'https://firebasestorage.googleapis.com/v0/b/ydapp-830fe.appspot.com/o/200203Abparticle001.mp4?alt=media',
     )
+
+
       ..initialize().then((_) {
         _videoController
           ..setLooping(true)
