@@ -6,17 +6,17 @@ import 'chat.dart';
 import 'package:yiddishconnect/services/firebaseAuthentication.dart';
 import 'package:go_router/go_router.dart';
 
-/// A page to display the user's chats.
-/// This page displays a list of the user's chats.
 class ChatHomepage extends StatefulWidget {
+  const ChatHomepage({super.key}); // ✅ Required fix
+
   @override
   _ChatHomepageState createState() => _ChatHomepageState();
 }
 
 class _ChatHomepageState extends State<ChatHomepage> {
   final String currentUserId = AuthService.getCurrentUserId();
-  late Stream<QuerySnapshot> _chatRoomsStream;
-  Map<String, String> userNames = {};
+  late final Stream<QuerySnapshot> _chatRoomsStream;
+  final Map<String, String> userNames = {};
 
   @override
   void initState() {
@@ -27,6 +27,7 @@ class _ChatHomepageState extends State<ChatHomepage> {
 
   Future<void> _fetchUserNames() async {
     final chatRoomsSnapshot = await FirebaseFirestore.instance.collection('chat_rooms').get();
+
     final userIds = chatRoomsSnapshot.docs
         .expand((doc) => doc.id.split('_'))
         .where((id) => id != currentUserId)
@@ -34,7 +35,13 @@ class _ChatHomepageState extends State<ChatHomepage> {
 
     for (var userId in userIds) {
       final userSnapshot = await FirebaseFirestore.instance.collection('users').doc(userId).get();
-      userNames[userId] = userSnapshot['displayName'] ?? 'Unknown';
+
+      if (userSnapshot.exists && userSnapshot.data() != null) {
+        final data = userSnapshot.data() as Map<String, dynamic>;
+        userNames[userId] = data['displayName'] ?? 'Unknown';
+      } else {
+        userNames[userId] = 'Unknown';
+      }
     }
 
     setState(() {});
@@ -42,24 +49,22 @@ class _ChatHomepageState extends State<ChatHomepage> {
 
   @override
   Widget build(BuildContext context) {
-    bool isAnonymous = AuthService().isAnonymous();
+    final isAnonymous = AuthService().isAnonymous();
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Chats'),
+        title: const Text('Chats'),
       ),
       body: isAnonymous
           ? Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('You need to sign in to view chats'),
-            SizedBox(height: 20),
+            const Text('You need to sign in to view chats'),
+            const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () {
-                context.go('/auth');
-              },
-              child: Text('Sign in'),
+              onPressed: () => context.go('/auth'),
+              child: const Text('Sign in'),
             ),
           ],
         ),
@@ -68,43 +73,56 @@ class _ChatHomepageState extends State<ChatHomepage> {
         stream: _chatRoomsStream,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          }
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return Center(child: Text('No chats available'));
+            return const Center(child: CircularProgressIndicator());
           }
 
-          final chatRooms = snapshot.data!.docs.where((doc) => doc.id.split('_').contains(currentUserId)).toList();
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            return const Center(child: Text('No chats available'));
+          }
+
+          final chatRooms = snapshot.data!.docs
+              .where((doc) => doc.id.split('_').contains(currentUserId))
+              .toList();
 
           if (chatRooms.isEmpty) {
-            return Center(child: Text('No chats available'));
+            return const Center(child: Text('No chats available'));
           }
 
           return AnimationLimiter(
             child: ListView.builder(
               itemCount: chatRooms.length,
               itemBuilder: (context, index) {
-                var chatRoom = chatRooms[index];
-                var receiverId = chatRoom.id.split('_').firstWhere((id) => id != currentUserId);
-                var receiverName = userNames[receiverId] ?? 'Unknown';
+                final chatRoom = chatRooms[index];
+                final receiverId = chatRoom.id.split('_').firstWhere((id) => id != currentUserId);
+                final receiverName = userNames[receiverId] ?? 'Unknown';
 
                 return StreamBuilder<QuerySnapshot>(
-                  stream: chatRoom.reference.collection('chats').orderBy('timestamp', descending: true).limit(1).snapshots(),
+                  stream: chatRoom.reference
+                      .collection('chats')
+                      .orderBy('timestamp', descending: true)
+                      .limit(1)
+                      .snapshots(),
                   builder: (context, messageSnapshot) {
                     if (!messageSnapshot.hasData || messageSnapshot.data!.docs.isEmpty) {
                       return ListTile(
+                        leading: CircleAvatar(child: Text(receiverName[0])), // ✅ optional enhancement
                         title: Text(receiverName),
-                        subtitle: Text('No messages yet'),
+                        subtitle: const Text('No messages yet'),
                       );
                     }
 
-                    var lastMessage = messageSnapshot.data!.docs.first.data() as Map<String, dynamic>;
-                    var lastMessageTimestamp = lastMessage['timestamp'] as Timestamp;
+                    final docData = messageSnapshot.data!.docs.first.data();
+                    if (docData is! Map<String, dynamic>) return const SizedBox();
 
-                    bool isNewMessage = lastMessage['senderID'] != currentUserId &&
+                    final lastMessage = docData;
+                    final lastMessageTimestamp = lastMessage['timestamp'] as Timestamp;
+
+                    final isNewMessage = lastMessage['senderID'] != currentUserId &&
                         (chatRoom['lastReadTimestamps'] == null ||
                             chatRoom['lastReadTimestamps'][currentUserId] == null ||
-                            lastMessageTimestamp.compareTo(chatRoom['lastReadTimestamps'][currentUserId]) > 0);
+                            lastMessageTimestamp.compareTo(
+                                chatRoom['lastReadTimestamps'][currentUserId]) >
+                                0);
 
                     return AnimationConfiguration.staggeredList(
                       position: index,
@@ -125,18 +143,23 @@ class _ChatHomepageState extends State<ChatHomepage> {
                               );
                             },
                             child: Card(
-                              margin: EdgeInsets.all(8.0),
+                              margin: const EdgeInsets.all(8.0),
                               child: ListTile(
+                                leading: CircleAvatar(child: Text(receiverName[0])), // ✅ enhancement
                                 title: Text(
                                   receiverName,
                                   style: TextStyle(
-                                    fontWeight: isNewMessage ? FontWeight.bold : FontWeight.normal,
+                                    fontWeight: isNewMessage
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
                                   ),
                                 ),
                                 subtitle: Text(
-                                  lastMessage['message'],
+                                  lastMessage['message'] ?? '',
                                   style: TextStyle(
-                                    fontWeight: isNewMessage ? FontWeight.bold : FontWeight.normal,
+                                    fontWeight: isNewMessage
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
                                   ),
                                 ),
                               ),

@@ -109,7 +109,7 @@ flutter:
     - assets/apple_icon@2x.png
     - assets/yiddishland.png
     - assets/notification_sound.mp3
-    - assets/videos/200203Abparticle001.mp4
+
 
 # Supported platforms
 platforms:
