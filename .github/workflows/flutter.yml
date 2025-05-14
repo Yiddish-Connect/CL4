@@ -2,19 +2,29 @@ name: Flutter CI
 
 on:
   push:
-    branches: [main]
+    branches: [old-fix]     # Change this if you rename the branch
   pull_request:
-    branches: [main]
+    branches: [old-fix]
 
 jobs:
   build:
+    name: Build and Test Flutter App
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
-      - uses: subosito/flutter-action@v2
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.19.0' # Replace with your Flutter version
-      - run: flutter pub get
-      - run: flutter analyze
-      - run: flutter test
+          flutter-version: '3.19.0'  # Replace with your actual Flutter version
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Analyze Dart code
+        run: flutter analyze
+
+      - name: Run unit tests
+        run: flutter test
