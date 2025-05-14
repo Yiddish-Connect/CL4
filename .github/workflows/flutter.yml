@@ -15,10 +15,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Download official Flutter 3.19.0 with Dart 3.7.0
+      - name: Download Flutter 3.22.1 (includes Dart 3.7.0)
         run: |
-          curl -O https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.19.0-stable.tar.xz
-          tar xf flutter_linux_3.19.0-stable.tar.xz
+          curl -O https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.22.1-stable.tar.xz
+          tar xf flutter_linux_3.22.1-stable.tar.xz
           export PATH="$GITHUB_WORKSPACE/flutter/bin:$PATH"
           flutter --version
           dart --version
@@ -26,4 +26,3 @@ jobs:
           flutter analyze
           flutter test
         shell: bash
-
