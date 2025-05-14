@@ -15,13 +15,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Install Flutter 3.19.0
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.19.0'
-          channel: 'stable'
+      - name: Install Flutter 3.19.0 manually
+        run: |
+          git clone https://github.com/flutter/flutter.git --branch 3.19.0 --depth 1
+          echo "$GITHUB_WORKSPACE/flutter/bin" >> $GITHUB_PATH
 
-      - name: Verify Flutter and Dart version
+      - name: Confirm Flutter and Dart version
         run: |
           flutter --version
           dart --version
