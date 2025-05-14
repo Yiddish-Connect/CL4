@@ -2,9 +2,9 @@ name: Flutter CI
 
 on:
   push:
-    branches: [old-fix]     # Change this if you rename the branch
+    branches: [main]
   pull_request:
-    branches: [old-fix]
+    branches: [main]
 
 jobs:
   build:
@@ -15,10 +15,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Install Flutter
+      - name: Install Flutter 3.19.0
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.19.0'  # Replace with your actual Flutter version
+          flutter-version: '3.19.0'
+          channel: 'stable'
+
+      - name: Verify Flutter and Dart version
+        run: |
+          flutter --version
+          dart --version
 
       - name: Get dependencies
         run: flutter pub get
