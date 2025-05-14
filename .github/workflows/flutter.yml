@@ -8,14 +8,14 @@ on:
 
 jobs:
   build:
-    name: Build Without Blocking
+    name: Build & Check (Relaxed)
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: Set up Flutter (3.16.9 with Dart 3.3.3)
+      - name: Set up Flutter (3.16.9)
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.16.9'
@@ -23,8 +23,10 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
-      - name: Analyze Dart code (non-blocking)
-        run: flutter analyze || true  # <- won't fail pipeline
+      - name: Analyze (show issues, don’t fail)
+        run: flutter analyze
+        continue-on-error: true
 
-      - name: Run tests (non-blocking)
-        run: flutter test || true     # <- also won’t fail pipeline
+      - name: Test (show failures, don’t block)
+        run: flutter test
+        continue-on-error: true
