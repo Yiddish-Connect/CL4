@@ -15,23 +15,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Download official Flutter 3.19.0 SDK with Dart 3.7.0
+      - name: Download official Flutter 3.19.0 with Dart 3.7.0
         run: |
-          wget https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.19.0-stable.tar.xz
+          curl -O https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.19.0-stable.tar.xz
           tar xf flutter_linux_3.19.0-stable.tar.xz
-          echo "$GITHUB_WORKSPACE/flutter/bin" >> $GITHUB_PATH
-        shell: bash
-
-      - name: Use and confirm Flutter + Dart versions
-        run: |
+          export PATH="$GITHUB_WORKSPACE/flutter/bin:$PATH"
           flutter --version
           dart --version
+          flutter pub get
+          flutter analyze
+          flutter test
+        shell: bash
 
-      - name: Get dependencies
-        run: flutter pub get
-
-      - name: Analyze Dart code
-        run: flutter analyze
-
-      - name: Run unit tests
-        run: flutter test
