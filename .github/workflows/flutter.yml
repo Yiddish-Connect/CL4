@@ -19,17 +19,15 @@ jobs:
         run: |
           git clone https://github.com/flutter/flutter.git --branch 3.19.0 --depth 1
           echo "$GITHUB_WORKSPACE/flutter/bin" >> $GITHUB_PATH
+        shell: bash
 
-      - name: Confirm Flutter and Dart version
+      - name: Use local Flutter explicitly
         run: |
+          export PATH="$GITHUB_WORKSPACE/flutter/bin:$PATH"
+          flutter doctor
           flutter --version
           dart --version
-
-      - name: Get dependencies
-        run: flutter pub get
-
-      - name: Analyze Dart code
-        run: flutter analyze
-
-      - name: Run unit tests
-        run: flutter test
+          flutter pub get
+          flutter analyze
+          flutter test
+        shell: bash
