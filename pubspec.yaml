@@ -44,7 +44,7 @@ dependencies:
   universal_io: ^2.2.2
   scrollable_positioned_list: ^0.3.8
   dash_chat_2: ^0.0.21
-  flutter_map: ^8.1.1
+  flutter_map: ^7.0.2
   latlong2: ^0.9.1
   flutter_card_swiper: ^7.0.2
   video_player: ^2.7.2  # Or latest version
