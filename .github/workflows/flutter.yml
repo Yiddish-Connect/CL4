@@ -24,12 +24,9 @@ jobs:
 
       - name: Get dependencies
         run: flutter pub get
-        working-directory: ./cl4
 
       - name: Analyze Dart code
         run: flutter analyze
-        working-directory: ./cl4
 
       - name: Run tests
         run: flutter test
-        working-directory: ./cl4
